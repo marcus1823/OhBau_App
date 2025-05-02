@@ -1,0 +1,20 @@
+export const Colors = {
+    primary: '#D09F9E', // Light Pink, background primary, title
+    textBlack: '#070707', // Black, text primary
+    textGray: '#E8E8E8', // Gray, text secondary
+    textWhite: '#FFFFFF', // White, text white
+    textTimeDay: '#9F5554', // Dark Pink, text for time day primary,
+    textTimeMonth :'#848484', // Gray, text for time month secondary 
+    // Home Background Linar Gradient from '#FFFFFF' to #E1D4D4'
+    backgroundHome: 'linear-gradient(180deg, #FFFFFF 0%, #E1D4D4 100%)',
+    border: '#7A7A7A', // Gray, border
+    cardHome1: '#DBB5B4', // Light Pink, card home 1
+    textCardHome1: '#AD0000', // Dark Pink, text card home 1
+    cardHome2: '#BFBFE3', // Light Purpose, card home 2
+    textCardHome2: '#000064', // Dark Purpose  , text card home 2
+    cardHome3: '#95C1DC', // Light Blue, card home 3
+    textCardHome3: '#104768', // Dark Blue, text card home 3
+    cardHome4: '##F5CAA0', // Light Yellow, card home 4
+    textCardHome4: '#673400', // Dark Yellow, text card home 4
+    
+}
