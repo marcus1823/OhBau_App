@@ -1,39 +1,42 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import TabNavigation from './src/navigation/TabNavigation';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
+import { RootStackParamList } from './src/types/Navigation/navigation';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StyleSheet } from 'react-native';
+import AuthStack from './src/navigation/stacks/AuthStack';
+import { Provider } from 'react-redux';
+import { store } from './src/stores/store';
+
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+
 
 const App = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Bạn là</Text>
-      <Text style={styles.sectionTitleNoFont}>Section Title No use Font</Text>
-      <Text style={styles.sectionDescription}>
-        This is a description with League Spartan font.
-      </Text>
-    </View>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.safeArea}>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="TabNavigation" component={TabNavigation} />
+              <Stack.Screen name="AuthStack" component={AuthStack} />
+            </Stack.Navigator>
+            <Toast />
+          </NavigationContainer>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </Provider>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sectionTitle: {
-    fontSize: 54,
-    fontWeight: '600',
-    fontFamily: 'LeagueSpartan-Bold', // Đảm bảo khớp với tên tệp
-  },
-  sectionTitleNoFont: {
-    fontSize: 54,
-    fontWeight: '600',
-    color: 'red', // Thêm màu để dễ phân biệt
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    fontFamily: 'LeagueSpartan-Regular', // Đảm bảo khớp với tên tệp
-  },
-});
 export default App;
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+})  
