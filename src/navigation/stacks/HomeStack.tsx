@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '../../types/navigation/navigation';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
-const HomStack = () => {
+const HomeStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
@@ -12,4 +12,4 @@ const HomStack = () => {
   )
 }
 
-export default HomStack
+export default HomeStack

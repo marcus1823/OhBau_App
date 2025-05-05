@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import React from 'react'
+import { Gradients } from '../../../assets/styles/colorStyle'
+import LinearGradient from 'react-native-linear-gradient'
 
 const HomeScreen = () => {
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
       <Text style={styles.text}>HomeScreen</Text>
-    </View>
+    </LinearGradient>
   )
 }
 
@@ -16,7 +18,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
   },
   text: {
     fontSize: 24,

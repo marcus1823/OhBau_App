@@ -28,12 +28,12 @@ const useSplashAnimation = (): SplashAnimation => {
   });
 
   useEffect(() => {
-    logoTranslateY.value = withTiming(-40, {
+    logoTranslateY.value = withTiming(-10, {
       duration: 1000,
       easing: Easing.out(Easing.exp),
     });
 
-    contentTranslateY.value = withTiming(80, {
+    contentTranslateY.value = withTiming(60, {
       duration: 1000,
       easing: Easing.out(Easing.exp),
     });

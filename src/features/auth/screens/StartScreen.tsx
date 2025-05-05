@@ -2,14 +2,31 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { Colors } from '../../../assets/styles/colorStyle'
 import Button from '../../splash/components/Button'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../stores/store'
 
 const StartScreen = ({navigation}: any) => {
     const logoNoText = require('../../../assets/images/logo/logoNoText.png')
     const logoWithText = require('../../../assets/images/logo/OHBAU_Logo_Text1.png')
 
-    const title = `Mẹ ơi, Con là bé yêu trong bụng mẹ nè! 💕
-Mẹ đã sẵn sàng cùng con trải qua hành trình tuyệt diệu này chưa? Hãy vào đây để con thì thầm với mẹ những điều hay ho mỗi ngày nha!`
+    // lấy role từ redux 
+    const selectedRole = useSelector((state: RootState) => state.auth.role);
+    console.log('selectedRole', selectedRole);
 
+    // nếu role là FATHER thì hiển thị Bố, ngược lại hiển thị Mẹ
+    const parentTitle = selectedRole === 'FATHER' ? 'Bố' : 'Mẹ';
+
+
+    const title = `${parentTitle} ơi, Con là bé yêu trong bụng mẹ nè! 💕
+${parentTitle} đã sẵn sàng cùng con trải qua hành trình tuyệt diệu này chưa? Hãy vào đây để con thì thầm với ${parentTitle} những điều hay ho mỗi ngày nha!`
+
+    const handleNavLogin = () => {
+        navigation.navigate('AuthStack', { screen: 'LoginScreen' });   
+    }
+
+    const handleNavRegister = () => {
+        navigation.navigate('AuthStack', { screen: 'RegisterScreen' });   
+    }
     return (
         <View style={styles.container}>
             <View style={styles.logoContainer}>
@@ -22,12 +39,12 @@ Mẹ đã sẵn sàng cùng con trải qua hành trình tuyệt diệu này chư
                 </View>
                 <View style={styles.buttonContainer} >
                     <Button title="Đăng nhập" 
-                    onPress={() => navigation.navigate('LoginScreen')} 
+                    onPress={handleNavLogin} 
                     color={Colors.textWhite} 
                     backgroundColor={Colors.primaryDark} />
 
                     <Button title="Đăng ký" 
-                    onPress={() => navigation.navigate('RegisterScreen')} 
+                    onPress={handleNavRegister} 
                     color={Colors.primary} 
                     backgroundColor={Colors.textWhite} />
                 </View>

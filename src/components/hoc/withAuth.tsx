@@ -31,7 +31,8 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
 
     const handleLogin = () => {
       setModalVisible(false);
-      navigation.replace('AuthStack');
+      // navigation.replace('AuthStack');
+      navigation.replace('SplashScreen');
     };
 
     if (!isLoggedIn && modalVisible && isFocused) {

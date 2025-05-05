@@ -3,10 +3,13 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 // Kiểu cho AuthStack
 export type AuthStackParamList = {
-    'SplashAuth': undefined;
-    'StartScreen': undefined;
+    // 'SplashAuth': undefined;
+    // 'StartScreen': undefined;
     'LoginScreen': undefined;
     'RegisterScreen': undefined;
+    'ForgotPasswordScreen': undefined;
+    'VerifyCodeScreen': undefined;
+    'ChangePasswordScreen': undefined;
 };
 
 // kiểu cho HomeStack
@@ -45,6 +48,8 @@ export type TabParamList = {
 
 // Kiểu cho RootStack
 export type RootStackParamList = {
+    SplashScreen: undefined;
+    StartScreen: undefined;
     AuthStack: undefined;
     TabNavigation: { screen?: keyof TabParamList }; // Cho phép truyền screen vào TabNavigation
   };
