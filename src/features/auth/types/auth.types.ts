@@ -21,7 +21,7 @@ export interface RegisterRequest {
     password: string; // nullable: true
     email: string; // nullable: true
     role: role; 
-    registerParent: RegisterParentRequest; // nullable: true
+    registerParentRequest: RegisterParentRequest; // nullable: true
 }
 
 export interface RegisterResponse {
@@ -29,13 +29,14 @@ export interface RegisterResponse {
     password: string; // nullable: true
     email: string; // nullable: true
     role: role; // nullable: true
-    registerParent: RegisterParentResponse; // nullable: true
+    registerParentRequest: RegisterParentResponse; // nullable: true
 }
 
 export interface RegisterResponseBaseResponse {
+    role: any;
     status: string; // nullable: true
     message: string; // nullable: true
-    data: RegisterResponse; // nullable: true
+    data?: RegisterResponse; // nullable: true // có thể là null trong trường hợp không có dữ liệu, lỗi
 }
 
 // Authenticate

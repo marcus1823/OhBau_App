@@ -7,11 +7,12 @@ interface ButtonActionProps {
         onPress: () => void
         color?: string
         backgroundColor?: string
+        disabled?: boolean
 }
 
-const ButtonAction: React.FC<ButtonActionProps>  = ({ title, onPress, color, backgroundColor }) => {
+const ButtonAction: React.FC<ButtonActionProps>  = ({ title, onPress, color, backgroundColor, disabled }) => {
   return (
-       <TouchableOpacity style={[styles.button, { backgroundColor }]} onPress={onPress}>
+       <TouchableOpacity style={[styles.button, { backgroundColor }]} onPress={onPress} disabled={disabled}>
          <Text style={[styles.buttonText, { color }]}>{title}</Text>
        </TouchableOpacity>
   )

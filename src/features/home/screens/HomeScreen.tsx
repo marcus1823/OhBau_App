@@ -1,27 +1,64 @@
-import { StyleSheet, Text } from 'react-native'
-import React from 'react'
-import { Gradients } from '../../../assets/styles/colorStyle'
-import LinearGradient from 'react-native-linear-gradient'
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { clearAuthData } from '../../auth/slices/auth.slices';
+import { clearData } from '../../../utils/asyncStorage/authStorage';
+import { useToast } from '../../../utils/toasts/useToast';
+import ButtonAction from '../../auth/components/ButtonAction';
+import { Colors } from '../../../assets/styles/colorStyle';
 
-const HomeScreen = () => {
-  return (
-    <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-      <Text style={styles.text}>HomeScreen</Text>
-    </LinearGradient>
-  )
-}
+const HomeScreen = ({ navigation }: any) => {
+    const dispatch = useDispatch();
+    const { showSuccess } = useToast();
 
-export default HomeScreen
+    const handleLogout = async () => {
+        try {
+            dispatch(clearAuthData());
+            console.log('dispatch clearAuthData');
+            await clearData();
+            console.log('clearData');
+            showSuccess('Đăng xuất thành công!');
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'SplashScreen' }],
+            });
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>Welcome to Home Screen!</Text>
+            <ButtonAction 
+                title= "Đăng xuất"
+                onPress={handleLogout}
+                color = {Colors.textWhite}
+                backgroundColor = {Colors.primary}
+            /> 
+        </View>
+    );
+};
+
+export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-})
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 24,
+        marginBottom: 20,
+    },
+    logoutButton: {
+        backgroundColor: '#ff4444',
+        padding: 10,
+        borderRadius: 5,
+    },
+    logoutText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+});

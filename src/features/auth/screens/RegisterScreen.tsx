@@ -3,24 +3,138 @@ import React, { useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../stores/store';
 import FormInput from '../components/FormInput';
 import ButtonAction from '../components/ButtonAction';
 import DatePickerComponent from '../components/DatePicker';
-
+import { useLoading } from '../../../utils/loading/useLoading';
+import { useToast } from '../../../utils/toasts/useToast';
+import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
+import { useRegister } from '../hooks/useRegister.hook';
+import {
+    validatePhone,
+    validateEmail,
+    validateRequired,
+    validateDateRequired,
+    validatePasswordMatch,
+    validateRole,
+    formatDateToString,
+} from '../../../utils/validations/validations'
+import { useAuthSync } from '../../../utils/asyncStorage/useAuthSync';
+import { setRole } from '../slices/auth.slices';
 const RegisterScreen = ({ navigation }: any) => {
+    const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    // const [role, setRole] = useState('');
     const [dob, setDob] = useState<Date | null>(null);
+
+    const { showError, showSuccess } = useToast();
+    const { mutate: registerUser, isPending } = useRegister();
+    const { syncRole } = useAuthSync();
+    const { showContextLoading, hideContextLoading, isContextLoading } = useLoading();
+    const dispatch = useDispatch();
 
     // lấy role từ redux 
     const selectedRole = useSelector((state: RootState) => state.auth.role);
+    console.log('Selected role from Redux:', selectedRole);
 
     // nếu role là FATHER thì hiển thị Bố, ngược lại hiển thị Mẹ
     const parentTitle = selectedRole === 'FATHER' ? 'Bố' : 'Mẹ';
 
     const handleRegister = () => {
-        console.log('Register button pressed');
-        navigation.navigate('LoginScreen');
+        let errorMessage: string | null;
+        errorMessage = validateRequired(fullName, 'họ và tên');
+        // Kiểm tra các trường thông tin
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+        errorMessage = validateRequired(phone, 'số điện thoại');
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+        if (!validatePhone(phone)) {
+            showError('Số điện thoại không hợp lệ');
+            return;
+        }
+        errorMessage = validateRequired(email, 'email');
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+        if (!validateEmail(email)) {
+            showError('Email không hợp lệ');
+            return;
+        }
+        errorMessage = validateRequired(password, 'mật khẩu');
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+        errorMessage = validateRequired(confirmPassword, 'xác nhận mật khẩu');
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+        errorMessage = validatePasswordMatch(password, confirmPassword);
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+        errorMessage = validateDateRequired(dob, 'ngày sinh');
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+        errorMessage = validateRole(selectedRole, 'vai trò');
+        if (errorMessage) {
+            showError(errorMessage);
+            return;
+        }
+
+        // Định dạng payload theo api
+        if (!selectedRole) {
+            showError('Vui lòng chọn vai trò');
+            return;
+        }
+        
+        const payload = {
+            phone,
+            email,
+            password,
+            role: selectedRole, // Sử dụng role từ Redux (đã được kiểm tra không null)
+            registerParentRequest: {
+                fullName,
+                dob: formatDateToString(dob!), // Sử dụng formatDateToString từ validation.ts
+            },
+        };
+
+        showContextLoading('register');
+        registerUser(payload, {
+            onSuccess: async (data) => {
+                console.log('Register success, data:', data);
+                // Đồng bộ role với Redux và AsyncStorage
+                if (data?.data?.role && data?.data?.role !== selectedRole) {
+                    await syncRole(data.data.role);
+                    dispatch(setRole(data.data.role));
+                }
+                showSuccess(`Chúc mừng ${parentTitle} đã đăng ký thành công`);
+                // Điều hướng về LoginScreen
+                navigation.navigate('LoginScreen');
+            },
+            onError: (error: any) => {
+                showError(error.message || 'Đã xảy ra lỗi khi đăng ký tài khoản');
+            },
+            onSettled: () => {
+                hideContextLoading('register');
+            },
+        });
+
     };
 
     return (
@@ -39,25 +153,32 @@ const RegisterScreen = ({ navigation }: any) => {
                             title="Họ và tên"
                             placeholder={`Nhập họ và tên của ${parentTitle}`}
                             keyboardType="default"
+                            onChangeText={(text) => setFullName(text)}
+                            value={fullName}
                         />
 
                         <FormInput
                             title="Số điện thoại"
                             placeholder={`Nhập số điện thoại của ${parentTitle}`}
                             keyboardType="phone-pad"
+                            onChangeText={(text) => setPhone(text)}
+                            value={phone}
                         />
 
                         <FormInput
                             title="Email"
                             placeholder={`Nhập email của ${parentTitle}`}
                             keyboardType="email-address"
+                            onChangeText={(text) => setEmail(text)}
+                            value={email}
                         />
 
                         <DatePickerComponent
                             selectedDate={dob || new Date()} // Mặc định là ngày hiện tại nếu chưa chọn
                             onDateChange={(date) => setDob(date)}
                             title="Ngày sinh"
-                            placeholder={`Chọn ngày sinh của ${parentTitle}`}  
+                            placeholder={`Chọn ngày sinh của ${parentTitle}`}
+
                         />
 
                         <FormInput
@@ -65,6 +186,8 @@ const RegisterScreen = ({ navigation }: any) => {
                             placeholder={`Nhập mật khẩu của ${parentTitle}`}
                             secureTextEntry={true}
                             keyboardType="default"
+                            onChangeText={(text) => setPassword(text)}
+                            value={password}
                         />
 
                         <FormInput
@@ -72,6 +195,8 @@ const RegisterScreen = ({ navigation }: any) => {
                             placeholder={`Nhập lại mật khẩu của ${parentTitle}`}
                             secureTextEntry={true}
                             keyboardType="default"
+                            onChangeText={(text) => setConfirmPassword(text)}
+                            value={confirmPassword}
                         />
                     </View>
 
@@ -86,13 +211,15 @@ const RegisterScreen = ({ navigation }: any) => {
 
                         <TouchableOpacity style={styles.loginOptionContainer} onPress={() => navigation.navigate('LoginScreen')} >
                             <Text style={styles.loginText}>{parentTitle} đã có tài khoản sao? </Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+                            <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} disabled={isPending}>
                                 <Text style={styles.loginLink}>Đăng nhập ngay</Text>
                             </TouchableOpacity>
                         </TouchableOpacity>
                     </View>
                 </View>
             </ScrollView>
+            <LoadingOverlay visible={isContextLoading('register')} fullScreen={false} />
+
         </LinearGradient>
     );
 };
