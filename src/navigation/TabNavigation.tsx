@@ -8,17 +8,19 @@ import { ifTablet } from '../utils/responsives/responsive';
 import HomeStack from './stacks/HomeStack';
 import DoctorStack from './stacks/DoctorStack';
 import CourseStack from './stacks/CourseStack';
-import ShopStack from './stacks/ShopStack';
+// import ShopStack from './stacks/ShopStack';
 import CommunityStack from './stacks/CommunityStack';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
+import ProfileStack from './stacks/ProfileStack';
 
 // Import PNG icons
 const homeIcon = require('../assets/icons/homeIcon.png');
 const doctorIcon = require('../assets/icons/doctorIcon.png');
 const courseIcon = require('../assets/icons/courseIcon.png');
-const shopIcon = require('../assets/icons/shopIcon.png');
+// const shopIcon = require('../assets/icons/shopIcon.png');
 const communityIcon = require('../assets/icons/communityIcon.png');
+const someProfileIcon = require('../assets/icons/icons8-maternity-48.png');
 
 const Tab = createBottomTabNavigator();
 
@@ -55,70 +57,78 @@ const TabNavigation: React.FC = () => {
     <SafeAreaProvider>
       <LinearGradient colors={Gradients.backgroundPrimary} style={styles.safeArea}>
 
-      <SafeAreaView style={styles.safeArea}>
-      
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false, // Ẩn header
-            tabBarShowLabel: false, // Ẩn label
-            tabBarStyle: {
-              backgroundColor: Colors.primary,
-              height: Platform.OS === 'android' ? 60 : 55,
-              paddingBottom: Platform.OS === 'android' ? 0 : 0,
-              borderRadius: 30,
-              marginHorizontal: ifTablet(50, 30),
-              marginBottom: ifTablet(20, 10),
-              position: 'absolute',
+        <SafeAreaView style={styles.safeArea}>
 
-            },
-            tabBarActiveTintColor: Colors.primary,
-            tabBarInactiveTintColor: Colors.textWhite,
-            tabBarItemStyle: {
-              alignSelf: 'center',
-              padding: Platform.OS === 'android' ? 10 : 10,
-              justifyContent: 'center',
-              alignItems: 'center',
-              flex: 1,
-            },
-          }}
-        >
-          <Tab.Screen
-            name="Trang Chủ"
-            component={HomeStack}
-            options={{
-              tabBarIcon: getTabBarIcon(homeIcon),
+          <Tab.Navigator
+            screenOptions={{
+              headerShown: false, // Ẩn header
+              tabBarShowLabel: false, // Ẩn label
+              tabBarStyle: {
+                backgroundColor: Colors.primary,
+                height: Platform.OS === 'android' ? 60 : 55,
+                paddingBottom: Platform.OS === 'android' ? 0 : 0,
+                borderRadius: 30,
+                marginHorizontal: ifTablet(50, 30),
+                marginBottom: ifTablet(20, 10),
+                position: 'absolute',
+
+              },
+              tabBarActiveTintColor: Colors.primary,
+              tabBarInactiveTintColor: Colors.textWhite,
+              tabBarItemStyle: {
+                alignSelf: 'center',
+                padding: Platform.OS === 'android' ? 10 : 10,
+                justifyContent: 'center',
+                alignItems: 'center',
+                flex: 1,
+              },
             }}
-          />
-          <Tab.Screen
-            name="Bác sĩ"
-            component={DoctorStack}
-            options={{
-              tabBarIcon: getTabBarIcon(doctorIcon),
-            }}
-          />
-          <Tab.Screen
-            name="Khóa học"
-            component={CourseStack}
-            options={{
-              tabBarIcon: getTabBarIcon(courseIcon),
-            }}
-          />
-          <Tab.Screen
+          >
+            <Tab.Screen
+              name="Trang Chủ"
+              component={HomeStack}
+              options={{
+                tabBarIcon: getTabBarIcon(homeIcon),
+              }}
+            />
+            <Tab.Screen
+              name="Bác sĩ"
+              component={DoctorStack}
+              options={{
+                tabBarIcon: getTabBarIcon(doctorIcon),
+              }}
+            />
+            <Tab.Screen
+              name="Cộng đồng"
+              component={CommunityStack}
+              options={{
+                tabBarIcon: getTabBarIcon(communityIcon),
+              }}
+            />
+            <Tab.Screen
+              name="Khóa học"
+              component={CourseStack}
+              options={{
+                tabBarIcon: getTabBarIcon(courseIcon),
+              }}
+            />
+            {/* <Tab.Screen
             name="Cửa hàng"
             component={ShopStack}
             options={{
               tabBarIcon: getTabBarIcon(shopIcon),
             }}
-          />
-          <Tab.Screen
-            name="Cộng đồng"
-            component={CommunityStack}
-            options={{
-              tabBarIcon: getTabBarIcon(communityIcon),
-            }}
-          />
-        </Tab.Navigator>
-      </SafeAreaView>
+          /> */}
+            <Tab.Screen
+              name="Cá nhân"
+              component={ProfileStack}
+              options={{
+                tabBarIcon: getTabBarIcon(someProfileIcon),
+              }}
+            />
+
+          </Tab.Navigator>
+        </SafeAreaView>
       </LinearGradient>
     </SafeAreaProvider>
 

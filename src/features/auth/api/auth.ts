@@ -4,11 +4,18 @@ import { AuthenticationRequest, AuthenticationResponse, RegisterRequest, Registe
 export const loginApi = async (request: AuthenticationRequest): Promise<AuthenticationResponse> => {
     try {
         const response = await rootApi.post('/auth', request);
+
+        // Thêm độ trễ 1 giây trước khi xử lý kết quả
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         if (!response.data?.data) {
             throw new Error('Invalid response structure');
         }
         return response.data.data;
     } catch (error: any) {
+        // Thêm độ trễ 2 giây trước khi ném lỗi
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         const errorData = error.response?.data || {};
         throw new Error(errorData.message || error.response?.data || 'Đã xảy ra lỗi khi kết nối đến server');
     }

@@ -26,7 +26,11 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
 
     const handleCloseModal = () => {
       setModalVisible(false);
-      navigation.navigate('TabNavigation', { screen: 'Trang Chủ' });
+      // navigation.replace('TabNavigation', { screen: 'Trang Chủ' });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'TabNavigation' }],
+      });
     };
 
     const handleLogin = () => {

@@ -15,6 +15,9 @@ export type AuthStackParamList = {
 // kiểu cho HomeStack
 export type HomeStackParamList = {
     'HomeScreen': undefined;
+
+    'ChatScreen': undefined;
+
 }
 
 //  kiểu cho DoctorStack
@@ -37,13 +40,28 @@ export type CommunityStackParamList = {
     'CommunityScreen': undefined;
 }
 
+// kiểu cho ProfileStack
+export type ProfileStackParamList = {
+    'ProfileScreen': undefined;
+    'PersonalScreen': undefined;
+    'FavoriteScreen': undefined;
+    'MyFamilyScreen': undefined;
+    'MyAppointmentScreen': undefined;
+    'PaymentAndDeliveryScreen': undefined;
+    'LoginAndSecurityScreen': undefined;
+    'HistoryAppointmentScreen': undefined;
+    'HistoryPurchaseScreen': undefined;
+    'RequestSupportScreen': undefined;
+}
+
 // kiểu cho TabNavigation
 export type TabParamList = {
     'Trang Chủ': undefined;
     'Bác sĩ': undefined;
-    'Khoá Học': undefined;
-    'Cửa Hàng': undefined;
     'Cộng Đồng': undefined;
+    'Khoá Học': undefined;
+    'Cá nhân': undefined;
+    // 'Cửa Hàng': undefined;
 }
 
 // Kiểu cho RootStack
@@ -52,7 +70,7 @@ export type RootStackParamList = {
     StartScreen: undefined;
     AuthStack: undefined;
     TabNavigation: { screen?: keyof TabParamList }; // Cho phép truyền screen vào TabNavigation
-  };
+};
 
 // Kiểu cho navigation prop 
 export type AuthStackNavigationProp = NativeStackNavigationProp<AuthStackParamList>;
@@ -61,5 +79,6 @@ export type DoctorStackNavigationProp = NativeStackNavigationProp<DoctorStackPar
 export type CourseStackNavigationProp = NativeStackNavigationProp<CourseStackParamList>;
 export type ShopStackNavigationProp = NativeStackNavigationProp<ShopStackParamList>;
 export type CommunityStackNavigationProp = NativeStackNavigationProp<CommunityStackParamList>;
+export type ProfileStackNavigationProp = NativeStackNavigationProp<ProfileStackParamList>;
 export type TabNavigationProp = BottomTabNavigationProp<TabParamList>;
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

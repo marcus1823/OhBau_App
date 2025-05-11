@@ -72,7 +72,11 @@ const LoginScreen = ({ navigation }: any) => {
                     const newParentTitle = data.role === role.FATHER ? 'Bố' : data.role === role.MOTHER ? 'Mẹ' : 'Mẹ';
                     setParentTitle(newParentTitle);
                     showSuccess(`Chúc mừng ${newParentTitle} đăng nhập thành công`);
-                    navigation.navigate('TabNavigation');
+                    // navigation.navigate('TabNavigation');
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'TabNavigation' }],
+                    });
                 },
                 onError: (error: any) => {
                     console.log('Login error:', error);
