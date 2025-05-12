@@ -5,18 +5,18 @@ import { Colors } from '../../../assets/styles/colorStyle';
 import ModalViewMore from '../Modal/ModalViewMore';
 
 interface PrimaryHeaderProps {
-  roleTitle?: string;
-  title?: string;
-  disableBackButton?: boolean;
-  onBackButtonPress?: () => void;
-  searchButton?: boolean;
-  onSearchButtonPress?: () => void;
-  filterButton?: boolean;
-  onFilterButtonPress?: () => void;
-  moreButton?: boolean;
-  modalTitle?: string;
-  modalButtons?: { text: string; onPress: () => void }[];
-  onModalClose?: () => void;
+  roleTitle?: string; // Chức danh hoặc lời xưng hô (ví dụ: "Bác sĩ", "Anh", "Chị", ...)
+  title?: string; // Tiêu đề chính của header
+  disableBackButton?: boolean; // Có ẩn nút quay lại hay không
+  onBackButtonPress?: () => void; // Xử lý khi bấm nút quay lại
+  searchButton?: boolean; // Có hiển thị nút tìm kiếm hay không
+  onSearchButtonPress?: () => void; // Xử lý khi bấm nút tìm kiếm
+  filterButton?: boolean; // Có hiển thị nút lọc hay không
+  onFilterButtonPress?: () => void; // Xử lý khi bấm nút lọc
+  moreButton?: boolean; // Có hiển thị nút "thêm" (3 chấm) hay không
+  modalTitle?: string; // Tiêu đề modal khi bấm nút "more"
+  modalButtons?: { text: string; onPress: () => void }[]; // Các button bên trong modal
+  onModalClose?: () => void; // Callback khi đóng modal
 }
 
 const PrimaryHeader: React.FC<PrimaryHeaderProps> = ({
@@ -33,35 +33,39 @@ const PrimaryHeader: React.FC<PrimaryHeaderProps> = ({
   modalButtons,
   onModalClose,
 }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false); // Quản lý trạng thái hiển thị của Modal
 
+  // Khi nhấn vào nút "more" (3 chấm), mở modal
   const handleMoreButtonPress = () => {
     setIsModalVisible(true);
   };
 
+  // Khi đóng modal, cập nhật trạng thái và gọi callback nếu có
   const handleCloseModal = () => {
     setIsModalVisible(false);
-    if (onModalClose) onModalClose();
+    if (onModalClose) {
+      onModalClose();
+    }
   };
 
-  // Dynamic title construction
+  // Tạo tiêu đề hiển thị: nếu có `roleTitle` thì hiển thị theo kiểu: "roleTitle ơi, title"
   const displayTitle = roleTitle ? `${roleTitle} ơi, ${title}` : title;
 
   return (
     <View style={styles.headerContainer}>
-      {/* Back Button */}
+      {/* Nút quay lại nếu không bị disable */}
       {!disableBackButton && (
         <TouchableOpacity onPress={onBackButtonPress} style={styles.backButton}>
           <Icon name="arrow-left" size={42} color={Colors.primary} />
         </TouchableOpacity>
       )}
 
-      {/* Title */}
+      {/* Tiêu đề được đặt chính giữa header, có padding để không bị che bởi các nút hai bên */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{displayTitle}</Text>
       </View>
 
-      {/* Right-side Buttons (Search, Filter, More) */}
+      {/* Nhóm nút bên phải: Search, Filter, More */}
       <View style={styles.rightButtons}>
         {searchButton && (
           <TouchableOpacity onPress={onSearchButtonPress} style={styles.iconButton}>
@@ -80,7 +84,7 @@ const PrimaryHeader: React.FC<PrimaryHeaderProps> = ({
         )}
       </View>
 
-      {/* ModalViewMore */}
+      {/* Modal hiển thị khi bấm nút "more", chỉ hiển thị nếu có đủ dữ liệu truyền vào */}
       {moreButton && modalTitle && modalButtons && (
         <ModalViewMore
           visible={isModalVisible}
@@ -92,6 +96,7 @@ const PrimaryHeader: React.FC<PrimaryHeaderProps> = ({
     </View>
   );
 };
+
 
 export default PrimaryHeader;
 

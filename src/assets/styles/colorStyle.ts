@@ -4,6 +4,7 @@ export const Colors = {
     textBlack: '#070707', // Black, text primary
     textDarkGray: '#B7B7B7', // Gray, text light gray
     textGray: '#E8E8E8', // Gray, text secondary
+    textLightGray: '#DBDBDB', // Light Gray, text light gray
     textWhite: '#FFFFFF', // White, text white
     textTimeDay: '#9F5554', // Dark Pink, text for time day primary,
     textTimeMonth :'#848484', // Gray, text for time month secondary 
