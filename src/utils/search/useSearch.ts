@@ -1,73 +1,60 @@
-import { useCallback, useState } from "react";
-import { debounce } from 'lodash';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+// Định nghĩa kiểu dữ liệu kết quả tìm kiếm chung chung
 type SearchResult = {
-    id: string; // Thay đổi kiểu dữ liệu của id thành string
-    [key: string]: any; // Linh hoạt cho các loại thuộc tính khác nhau
+  id: string;                 // Mỗi kết quả phải có một ID duy nhất
+  [key: string]: any;        // Các thuộc tính khác không giới hạn
 };
 
-
-
-// SearchFn là kiểu cho một hàm tìm kiếm:
-// - Nhận đầu vào là một chuỗi query (người dùng nhập)
-// - Trả về một Promise chứa object có mảng items kiểu T (kết quả tìm được)
+// Định nghĩa kiểu hàm tìm kiếm
 type SearchFn<T> = (query: string) => Promise<{ items: T[] }>;
 
-
-
-// Interface mô tả kết quả trả về từ custom hook dùng cho tính năng search
+// Kết quả trả về từ hook useSearch
 interface UseSearchResult<T> {
-    // Chuỗi truy vấn hiện tại (query mà người dùng nhập)
-    searchQuery: string;
-  
-    // Hàm để cập nhật chuỗi truy vấn mới (dùng khi người dùng gõ)
-    setSearchQuery: (query: string) => void;
-  
-    // Mảng kết quả tìm kiếm, kiểu T là kiểu dữ liệu cụ thể (ví dụ: Doctor, Course, ...)
-    results: T[];
-  
-    // Cờ boolean cho biết đang trong quá trình tìm kiếm hay không (dùng để hiển thị loading UI)
-    isLoading: boolean;
-  }
-  
+  searchQuery: string;                 // Từ khóa người dùng đang tìm
+  setSearchQuery: (query: string) => void; // Hàm cập nhật từ khóa tìm kiếm
+  results: T[];                        // Danh sách kết quả tìm kiếm
+  isLoading: boolean;                 // Trạng thái đang loading kết quả
+}
 
-  export const useSearch = <T extends SearchResult>(searchFn: SearchFn<T>, enabled: boolean): UseSearchResult<T> => {
-    // State để lưu trữ chuỗi truy vấn hiện tại
-    const [searchQuery, setSearchQuery] = useState('');
+/**
+ * Custom hook để thực hiện tìm kiếm có debounce và caching bằng React Query.
+ *
+ * @param searchFn - Hàm async nhận query string và trả về danh sách item
+ * @param enabled - Cờ boolean cho phép kích hoạt query
+ * @returns searchQuery, setSearchQuery, results, isLoading
+ */
+export const useSearch = <T extends SearchResult>(
+  searchFn: SearchFn<T>,
+  enabled: boolean
+): UseSearchResult<T> => {
+  // State để lưu từ khóa tìm kiếm hiện tại
+  const [searchQuery, setSearchQuery] = useState("");
 
-    // Debounce tìm kiếm 
-    const debouncedSearch = useCallback(
-        (query: string) => {
-          debounce((q: string) => {
-            setSearchQuery(q);
-          }, 300)(query);
-        },
-        []
-      );
-
-
-      const handleSearchInput = (text: string) => {
-        debouncedSearch(text);
+  // Dùng useQuery để xử lý fetch và cache dữ liệu tìm kiếm
+  const { data, isLoading } = useQuery({
+    queryKey: ['search', searchQuery],      // Cache theo từ khóa tìm kiếm
+    queryFn: async () => {
+      // Nếu query rỗng thì trả về mảng rỗng, tránh gọi API không cần thiết
+      if (!searchQuery) {
+        return { items: [] };
       }
 
-      // Sử dụng useQuery để thực hiện tìm kiếm
-      const { data, isLoading } = useQuery({
-        queryKey: ['search', searchQuery],
-        queryFn: async () => {
-            if (!searchQuery) {return { items: [] };}
-            return searchFn(searchQuery);
-        },
-        enabled: enabled && !!searchQuery, // Chỉ gọi API khi có searchQuery
-        // refetchOnWindowFocus: false, // Không gọi lại khi chuyển tab
-        // retry: false, // Không thử lại khi có lỗi
-      });
+      // Gọi hàm tìm kiếm được truyền vào
+      return searchFn(searchQuery);
+    },
+    enabled: enabled && !!searchQuery,       // Chỉ chạy query khi `enabled` là true và có từ khóa tìm
+  });
 
-      const results = data?.items || []; // Kết quả tìm kiếm, mặc định là mảng rỗng nếu không có dữ liệu
+  // Lấy danh sách kết quả từ data trả về
+  const results = data?.items || [];
 
-        return {
-            searchQuery,
-            setSearchQuery: handleSearchInput, // Trả về hàm để cập nhật chuỗi truy vấn
-            results,
-            isLoading,
-        };
-  }
+  // Trả về dữ liệu và setter cho component sử dụng hook này
+  return {
+    searchQuery,
+    setSearchQuery,
+    results,
+    isLoading,
+  };
+};

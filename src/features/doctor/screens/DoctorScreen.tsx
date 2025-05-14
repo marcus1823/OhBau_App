@@ -1,47 +1,75 @@
-import { FlatList, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
-import React, { useState, useCallback } from 'react';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+} from 'react-native';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+} from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Gradients } from '../../../assets/styles/colorStyle';
 import LinearGradient from 'react-native-linear-gradient';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import SortBy from '../components/SortBy';
 import DoctorCard from '../components/DoctorCard';
-import { useDoctor } from '../hooks/useDoctor.hook';
+import SearchModal from '../components/SearchModal';
+// import { useDoctor } from '../hooks/useDoctor.hook';
 import { useLoading } from '../../../utils/loading/useLoading';
-import { GetDoctorResponse, GetDoctorResponsePaginate } from '../types/doctor.type';
+import {
+  GetDoctorResponse,
+  GetDoctorResponsePaginate,
+} from '../types/doctor.type';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { debounce } from 'lodash';
+import { getDoctorApi } from '../api/doctorApi';
 
-const DoctorScreen = () => {
-  const { getDoctors } = useDoctor();
-  const { isContextLoading, showContextLoading, hideContextLoading } = useLoading();
+const DoctorScreen = ({ navigation }: any) => {
+  // const { getDoctors } = useDoctor();
+  const {  showContextLoading, hideContextLoading } =
+    useLoading();
   const [sortType, setSortType] = useState('Tăng');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [isFilterLoading, setIsFilterLoading] = useState(false); // Trạng thái loading khi thay đổi bộ lọc
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
+  const [isSearchModalVisible, setIsSearchModalVisible] = useState(false); // Modal tìm kiếm
 
-  // Debounce để hạn chế gọi API liên tục
-  const debouncedSortChange = useCallback(
-    (newSortType: string, newFilters: string[]) => {
-      setIsFilterLoading(true); // Hiển thị loading ngay khi thay đổi
-      const debounced = debounce(() => {
+  // ✅ Tạo debounce chỉ một lần duy nhất, dùng useRef để giữ lại hàm
+  const debounceRef = useRef<
+    (newSortType: string, newFilters: string[]) => void
+  >(undefined);
+
+  useEffect(() => {
+    debounceRef.current = debounce(
+      (newSortType: string, newFilters: string[]) => {
         setSortType(newSortType);
         setSelectedFilters(newFilters);
-        setIsFilterLoading(false); // Tắt loading sau khi debounce hoàn thành
-      }, 500);
-      debounced();
-    },
-    [setSortType, setSelectedFilters]
-  );
+        setIsFilterLoading(false);
+      },
+      500
+    );
+  }, []);
 
   const handleSortChange = (newSortType: string, newFilters: string[]) => {
-    debouncedSortChange(newSortType, newFilters);
+    setIsFilterLoading(true);
+    debounceRef.current?.(newSortType, newFilters);
   };
 
   const handleInfoPress = (id: string) => {
     console.log('Doctor ID pressed:', id);
+    navigation.navigate('DoctorDetailScreen', {
+      id,
+    });
   };
 
-  // Sử dụng useInfiniteQuery để hỗ trợ infinite scroll
+  const handleSearchButtonPress = () => {
+    setIsSearchModalVisible(true);
+  };
+
   const {
     data,
     isLoading,
@@ -56,14 +84,18 @@ const DoctorScreen = () => {
       const request = {
         pageSize: 10,
         pageNumber: pageParam,
-        doctorName: selectedFilters.length > 0 ? selectedFilters.join(',') : undefined,
+        doctorName:
+          selectedFilters.length > 0
+            ? selectedFilters.join(',')
+            : undefined,
       };
-      showContextLoading('fetchDoctors'); // Hiển thị loading trước khi gọi API
+      showContextLoading('fetchDoctors');
       try {
-        const response = await getDoctors.mutateAsync(request);
+        // const response = await getDoctors.mutateAsync(request);
+        const response = await getDoctorApi(request);
         return response;
       } finally {
-        hideContextLoading('fetchDoctors'); // Tắt loading sau khi gọi API
+        hideContextLoading('fetchDoctors');
       }
     },
     getNextPageParam: (lastPage: GetDoctorResponsePaginate) => {
@@ -75,40 +107,55 @@ const DoctorScreen = () => {
     initialPageParam: 1,
   });
 
-  // Lấy danh sách bác sĩ từ các trang, lọc bỏ undefined
-  const doctors: GetDoctorResponse[] =
-    data?.pages
-      .flatMap((page) => page.items?.filter((item): item is GetDoctorResponse => !!item) || [])
-      .filter((item): item is GetDoctorResponse => !!item) || [];
+  // ✅ Lọc danh sách bác sĩ
+  const doctors = useMemo(
+    () =>
+      data?.pages
+        .flatMap((page) => page.items?.filter((item): item is GetDoctorResponse => !!item) || [])
+        .filter((item): item is GetDoctorResponse => !!item) || [],
+    [data]
+  );
 
-  // Xử lý khi lướt đến cuối danh sách
+  // ✅ Hàm load thêm trang
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
 
-  // Render item cho FlatList
-  const renderItem = ({ item }: { item: GetDoctorResponse }) => (
-    <DoctorCard
-      id={item.id}
-      fullName={item.fullName}
-      avatar={item.avatar}
-      major={item.major}
-      address={item.address}
-      onInfoPress={handleInfoPress}
-    />
+  // ✅ Tối ưu renderItem bằng useCallback
+  const renderItem = useCallback(
+    ({ item }: { item: GetDoctorResponse }) => (
+      <DoctorCard
+        id={item.id}
+        fullName={item.fullName}
+        avatar={item.avatar}
+        major={item.major}
+        address={item.address}
+        onInfoPress={handleInfoPress}
+      />
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
-  // Render footer khi đang tải thêm
+  // ✅ Hiển thị loading hoặc thông báo "đã hết dữ liệu"
   const renderFooter = () => {
     if (isFetchingNextPage) {
       return (
         <View style={styles.footerLoader}>
-          <ActivityIndicator size="small" color={Gradients.backgroundPrimary[0]} />
+          <ActivityIndicator
+            size="small"
+            color={Gradients.backgroundPrimary[0]}
+          />
         </View>
       );
     }
+
+    if (!hasNextPage && doctors.length > 0) {
+      return <Text style={styles.noDataText}>Bạn đã xem hết danh sách bác sĩ.</Text>;
+    }
+
     return null;
   };
 
@@ -118,8 +165,9 @@ const DoctorScreen = () => {
         title="Danh sách bác sĩ"
         disableBackButton={true}
         searchButton={true}
-        onSearchButtonPress={() => console.log('Search button pressed')}
+        onSearchButtonPress={handleSearchButtonPress}
       />
+
       <View style={styles.sortBy}>
         <SortBy onSortChange={handleSortChange} />
       </View>
@@ -133,22 +181,31 @@ const DoctorScreen = () => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
-        
         ListEmptyComponent={
           isLoading || isFetching ? (
             <Text style={styles.noDataText}>Đang tải...</Text>
-          ) : error ? (
-            <Text style={styles.noDataText}>
-              Lỗi khi tải danh sách bác sĩ: {(error as Error).message}
-            </Text>
+          ) : error instanceof Error ? (
+            <Text style={styles.noDataText}>Lỗi: {error.message}</Text>
           ) : (
             <Text style={styles.noDataText}>Không có bác sĩ nào để hiển thị.</Text>
           )
         }
       />
+
       <LoadingOverlay
-        visible={isContextLoading('fetchDoctors') || isLoading || isFetching || isFilterLoading}
+        visible={
+          // isContextLoading('fetchDoctors') ||
+          isLoading ||
+          isFetching ||
+          isFilterLoading
+        }
         fullScreen={false}
+      />
+
+      <SearchModal
+        visible={isSearchModalVisible}
+        onClose={() => setIsSearchModalVisible(false)}
+        onInfoPress={handleInfoPress}
       />
     </LinearGradient>
   );

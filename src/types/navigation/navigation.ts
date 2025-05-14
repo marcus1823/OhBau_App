@@ -23,6 +23,7 @@ export type HomeStackParamList = {
 //  kiểu cho DoctorStack
 export type DoctorStackParamList = {
     'DoctorScreen': undefined;
+    'DoctorDetailScreen': undefined
 }
 
 // kiểu cho ShopStack
