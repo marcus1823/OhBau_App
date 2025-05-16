@@ -23,7 +23,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ onMethodC
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Icon name="payment" size={22} color={Colors.primary} style={styles.headerIcon} />
+        <Icon name="payment" size={22} color={Colors.textBlack} style={styles.headerIcon} />
         <Text style={styles.title}>Chọn Phương Thức Thanh Toán</Text>
       </View>
       <View style={styles.methodList}>
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.textBlack,
   },
   methodList: {
     flexDirection: 'row',
