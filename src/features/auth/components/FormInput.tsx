@@ -13,6 +13,7 @@ interface FormInputProps {
     numberOfLines?: number;
     disabled?: boolean;
     editable?: boolean;
+    titleFontSize?: number; // Thêm prop mới
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -25,6 +26,7 @@ const FormInput: React.FC<FormInputProps> = ({
     numberOfLines = 1,
     disabled = false,
     editable = true,
+    titleFontSize = 18, // Giá trị mặc định là 18
 }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(secureTextEntry || false);
 
@@ -34,7 +36,7 @@ const FormInput: React.FC<FormInputProps> = ({
 
     return (
         <View style={styles.container}>
-            {title && <Text style={styles.title}>{title}</Text>}
+            {title && <Text style={[styles.title, { fontSize: titleFontSize }]}>{title}</Text>}
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
@@ -68,7 +70,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     title: {
-        fontSize: 18,
         color: Colors.textBlack,
         marginBottom: 5,
         fontWeight: '500',
@@ -87,7 +88,6 @@ const styles = StyleSheet.create({
     input: {
         height: 50,
         flex: 1,
-        // width: '90%', 
         paddingHorizontal: 15,
         fontSize: 12,
         fontWeight: '400',

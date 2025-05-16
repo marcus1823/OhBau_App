@@ -24,6 +24,9 @@ export type HomeStackParamList = {
 export type DoctorStackParamList = {
     'DoctorScreen': undefined;
     'DoctorDetailScreen': undefined
+    'DoctorBookingScreen': undefined;
+    'BookingConfirmationScreen': undefined;
+    'BookingStatusScreen': undefined;
 }
 
 // kiểu cho ShopStack
