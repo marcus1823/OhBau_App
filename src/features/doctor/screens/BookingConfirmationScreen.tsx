@@ -48,7 +48,7 @@ const BookingConfirmationScreen = ({ navigation, route }: any) => {
         <PaymentMethodSelector onMethodChange={setPaymentMethod} />
         <View style={styles.buttonContainer}>
           <ButtonAction
-            title="Xác Nhận Thanh Toán"
+            title="Thanh Toán"
             onPress={handleConfirmPayment}
             backgroundColor={Colors.primary}
             color={Colors.textWhite}

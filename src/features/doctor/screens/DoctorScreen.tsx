@@ -31,9 +31,9 @@ import { getDoctorApi } from '../api/doctorApi';
 
 const DoctorScreen = ({ navigation }: any) => {
   // const { getDoctors } = useDoctor();
-  const {  showContextLoading, hideContextLoading } =
+  const { showContextLoading, hideContextLoading } =
     useLoading();
-  const [sortType, setSortType] = useState('Tăng');
+  const [sortType, setSortType] = useState('A-Z');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false); // Modal tìm kiếm

@@ -10,7 +10,9 @@ interface BookingSummaryProps {
         patientType: string;
         name: string;
         age: string;
+        address: string;
         gender: string;
+        visitPurpose: string[];
         description: string;
         phoneNumber?: string;
     };
@@ -23,9 +25,6 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ selectedDate, selectedT
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Xác Nhận Thông Tin Đặt Lịch</Text>
-
-            {/* Thông Tin Lịch Hẹn */}
             <View style={styles.summarySection}>
                 <View style={styles.sectionHeader}>
                     <Icon name="event" size={20} color={Colors.textBlack} style={styles.sectionIcon} />
@@ -33,18 +32,14 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ selectedDate, selectedT
                 </View>
                 <View style={styles.infoRow2}>
                     <View style={styles.infoRow}>
-                        {/* <Icon name="calendar-today" size={16} color={Colors.textBlack} style={styles.infoIcon} /> */}
-                        {/* <Text style={styles.infoText}>Ngày: {formatDate(selectedDate)}</Text> */}
                         <Text style={styles.infoText}>Ngày: <Text style={styles.infoTextBold}>{formatDate(selectedDate)}</Text></Text>
                     </View>
                     <View style={styles.infoRow}>
-                        {/* <Icon name="access-time" size={16} color={Colors.textBlack} style={styles.infoIcon} /> */}
                         <Text style={styles.infoText}>Giờ: <Text style={styles.infoTextBold}>{selectedTime || 'Chưa chọn'}</Text></Text>
                     </View>
                 </View>
             </View>
 
-            {/* Thông Tin Bệnh Nhân */}
             <View style={styles.summarySection}>
                 <View style={styles.sectionHeader}>
                     <Icon name="person" size={20} color={Colors.textBlack} style={styles.sectionIcon} />
@@ -52,35 +47,40 @@ const BookingSummary: React.FC<BookingSummaryProps> = ({ selectedDate, selectedT
                 </View>
                 <View style={styles.infoRow3}>
                     <View style={styles.infoRow}>
-                        {/* <Icon name="group" size={16} color={Colors.textBlack} style={styles.infoIcon} /> */}
                         <Text style={styles.infoText}>Đặt cho: <Text style={styles.infoTextBold}>{patientInfo.patientType}</Text></Text>
                     </View>
                     <View style={styles.infoRow}>
-                        {/* <Icon name="wc" size={16} color={Colors.textBlack} style={styles.infoIcon} /> */}
                         <Text style={styles.infoText}>Giới Tính: <Text style={styles.infoTextBold}>{patientInfo.gender}</Text></Text>
+
+                    </View>
+                </View>
+                <View style={styles.infoRow3}>
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoText}>Họ và Tên: <Text style={styles.infoTextBold}>{patientInfo.name || 'Chưa nhập'}</Text></Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoText}>Tuổi: <Text style={styles.infoTextBold}>{patientInfo.age || 'Chưa nhập'}</Text></Text>
+
+
                     </View>
                 </View>
                 <View style={styles.infoRow}>
-                    {/* <Icon name="cake" size={16} color={Colors.textBlack} style={styles.infoIcon} /> */}
-                    <Text style={styles.infoText}>Tuổi: <Text style={styles.infoTextBold}>{patientInfo.age || 'Chưa nhập'}</Text></Text>
+                    <Text style={styles.infoText}>Địa chỉ: <Text style={styles.infoTextBold}>{patientInfo.address || 'Chưa nhập'}</Text></Text>
                 </View>
-                <View style={styles.infoRow}>
-                    {/* <Icon name="badge" size={16} color={Colors.textBlack} style={styles.infoIcon} /> */}
-                    <Text style={styles.infoText}>Họ và Tên: <Text style={styles.infoTextBold}>{patientInfo.name || 'Chưa nhập'}</Text></Text>
-                </View>
-
                 {patientInfo.phoneNumber && (
                     <View style={styles.infoRow}>
                         <Icon name="phone" size={16} color={Colors.textBlack} style={styles.infoIcon} />
-                        <Text style={styles.infoText}>Số Điện Thoại: {patientInfo.phoneNumber}</Text>
+                        <Text style={styles.infoText}>Số Điện Thoại: <Text style={styles.infoTextBold}>{patientInfo.phoneNumber}</Text></Text>
                     </View>
                 )}
                 <View style={styles.infoRow}>
-                    {/* <Icon name="description" size={16} color={Colors.textBlack} style={styles.infoIcon} /> */}
+                    <Text style={styles.infoText}>Mục đích khám: <Text style={styles.infoTextBold}>{patientInfo.visitPurpose.length > 0 ? patientInfo.visitPurpose.join(', ') : 'Chưa chọn'}</Text></Text>
+                </View>
+                <View style={styles.infoRow}>
                     <Text style={styles.infoText}>Mô Tả Triệu Chứng: <Text style={styles.infoTextBold}>{patientInfo.description || 'Chưa nhập'}</Text></Text>
                 </View>
             </View>
-        </View >
+        </View>
     );
 };
 
@@ -98,13 +98,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 5,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: Colors.primaryDark,
-        marginBottom: 15,
-        textAlign: 'center',
     },
     summarySection: {
         marginBottom: 20,
@@ -142,18 +135,18 @@ const styles = StyleSheet.create({
     },
     infoRow: {
         flexDirection: 'row',
-        alignItems: 'flex-start', 
+        alignItems: 'flex-start',
         marginBottom: 8,
     },
     infoIcon: {
         marginRight: 10,
-        marginTop: 2, 
+        marginTop: 2,
         fontSize: 19,
     },
     infoText: {
         fontSize: 15,
         color: Colors.primary,
-        flexShrink: 1, 
+        flexShrink: 1,
         fontWeight: 'bold',
     },
     infoTextBold: {

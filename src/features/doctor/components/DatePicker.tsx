@@ -4,27 +4,24 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Colors } from '../../../assets/styles/colorStyle';
 import LinearGradient from 'react-native-linear-gradient';
 
-// Định nghĩa kiểu props cho component
 interface DatePickerProps {
-  onDateChange: (date: Date) => void; // Callback khi người dùng chọn ngày
+  onDateChange: (date: Date) => void;
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
-  // Lấy ngày hiện tại thực tế
-  const currentDate = new Date(); // 04:55 PM +07, 15/05/2025
+  const currentDate = new Date();
   const [selectedDate, setSelectedDate] = useState<Date>(currentDate);
-  const [displayDate, setDisplayDate] = useState<Date>(currentDate); // Ngày để hiển thị tuần
-  const [isMonthModalVisible, setIsMonthModalVisible] = useState(false); // Trạng thái modal tháng
+  const [displayDate, setDisplayDate] = useState<Date>(currentDate);
+  const [isMonthModalVisible, setIsMonthModalVisible] = useState(false);
 
-  // Lấy danh sách 6 ngày từ T2 đến T7
   const getWeekDays = (startDate: Date) => {
     const days = [];
-    const startDay = startDate.getDay(); // 0 = Chủ Nhật, 1 = Thứ Hai, ...
-    const daysToMonday = (startDay + 6) % 7; // Tính số ngày để quay về T2
+    const startDay = startDate.getDay();
+    const daysToMonday = startDay === 0 ? 6 : startDay - 1;
     const monday = new Date(startDate);
     monday.setDate(startDate.getDate() - daysToMonday);
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
       const date = new Date(monday);
       date.setDate(monday.getDate() + i);
       days.push(date);
@@ -32,21 +29,16 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
     return days;
   };
 
-  // Lấy tuần hiện tại
   const daysToShow = getWeekDays(displayDate);
 
-  // Kiểm tra xem có thể chuyển sang tuần trước không
   const canGoPrevWeek = () => {
-    const firstDayOfWeek = daysToShow[0]; // Ngày đầu tiên trong tuần hiện tại (T2)
+    const firstDayOfWeek = daysToShow[0];
     const prevWeekDate = new Date(firstDayOfWeek);
-    prevWeekDate.setDate(prevWeekDate.getDate() - 7); // T2 của tuần trước
-
-    // Cho phép quay lại tuần trước nếu tuần đó vẫn có ngày từ 15/05/2025 trở đi
+    prevWeekDate.setDate(prevWeekDate.getDate() - 7);
     const earliestAllowedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
     return prevWeekDate >= earliestAllowedDate || daysToShow.some(day => day >= earliestAllowedDate);
   };
 
-  // Chuyển sang tuần trước
   const handlePrevWeek = () => {
     if (!canGoPrevWeek()) {return;}
     const newDate = new Date(displayDate);
@@ -54,25 +46,21 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
     setDisplayDate(newDate);
   };
 
-  // Chuyển sang tuần sau
   const handleNextWeek = () => {
     const newDate = new Date(displayDate);
     newDate.setDate(newDate.getDate() + 7);
     setDisplayDate(newDate);
   };
 
-  // Mở modal để chọn tháng
   const handleOpenMonthModal = () => {
     setIsMonthModalVisible(true);
   };
 
-  // Chọn tháng và đặt tuần đầu tiên của tháng (hoặc tuần hiện tại nếu là tháng hiện tại)
   const handleSelectMonth = (month: number) => {
     const year = displayDate.getFullYear();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
 
-    // Không cho phép chọn tháng trong quá khứ
     if (year < currentYear || (year === currentYear && month < currentMonth)) {
       return;
     }
@@ -83,19 +71,14 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
     setIsMonthModalVisible(false);
   };
 
-  // Hàm khi người dùng chọn ngày
   const handleDateSelect = (date: Date) => {
-    // Không cho phép chọn ngày trong quá khứ
     const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-    if (date < today) {
-      return;
-    }
+    if (date < today) return;
 
     setSelectedDate(date);
-    onDateChange(date); // Gọi callback để truyền ngày được chọn
+    onDateChange(date);
   };
 
-  // Lấy tên tháng bằng tiếng Việt
   const monthNames = [
     'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
     'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
@@ -104,14 +87,12 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
   const displayMonthIndex = displayDate.getMonth();
   const currentMonth = monthNames[displayDate.getMonth()];
 
-  // Lấy ngày trong tuần bằng tiếng Việt (T2, T3, T4, T5, T6, T7)
-  const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
   const getDayName = (date: Date) => {
-    const dayIndex = (date.getDay() + 6) % 7; // Điều chỉnh để T2 là 0, T7 là 5
+    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
     return dayNames[dayIndex];
   };
 
-  // Render item cho danh sách tháng trong modal
   const renderMonthItem = ({ item, index }: { item: string; index: number }) => {
     const isCurrentMonth = index === currentMonthIndex;
     const isSelectedMonth = index === displayMonthIndex;
@@ -146,7 +127,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header: Tháng và nút mở modal */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.monthContainer} onPress={handleOpenMonthModal}>
           <Text style={styles.monthText}>{currentMonth}</Text>
@@ -154,7 +134,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Danh sách ngày và nút điều hướng */}
       <View style={styles.daysWrapper}>
         <TouchableOpacity
           onPress={handlePrevWeek}
@@ -165,10 +144,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
         </TouchableOpacity>
         <View style={styles.daysContainer}>
           {daysToShow.map((date, index) => {
-            const isCurrentDay =
-              date.getDate() === currentDate.getDate() &&
-              date.getMonth() === currentDate.getMonth() &&
-              date.getFullYear() === currentDate.getFullYear();
             const isSelected =
               date.getDate() === selectedDate.getDate() &&
               date.getMonth() === selectedDate.getMonth() &&
@@ -181,7 +156,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
                 style={[
                   styles.dayItem,
                   isSelected && styles.dayItemSelected,
-                  isCurrentDay && styles.dayItemCurrent,
                   isPastDay && styles.dayItemDisabled,
                 ]}
                 onPress={() => handleDateSelect(date)}
@@ -191,7 +165,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
                   style={[
                     styles.dayText,
                     isSelected && styles.dayTextSelected,
-                    isCurrentDay && styles.dayTextCurrent,
                     isPastDay && styles.dayTextDisabled,
                   ]}
                 >
@@ -201,7 +174,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
                   style={[
                     styles.dayName,
                     isSelected && styles.dayNameSelected,
-                    isCurrentDay && styles.dayNameCurrent,
                     isPastDay && styles.dayNameDisabled,
                   ]}
                 >
@@ -216,7 +188,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal chọn tháng */}
       <Modal
         visible={isMonthModalVisible}
         transparent={true}
@@ -236,7 +207,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
                 data={monthNames}
                 renderItem={renderMonthItem}
                 keyExtractor={(item, index) => index.toString()}
-                numColumns={3} // 4 hàng, mỗi hàng 3 tháng
+                numColumns={3}
                 columnWrapperStyle={styles.row}
                 contentContainerStyle={styles.grid}
               />
@@ -287,16 +258,13 @@ const styles = StyleSheet.create({
   dayItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 45,
-    height: 65,
-    borderRadius: 18,
+    width: 40,
+    height: 60,
+    borderRadius: 12,
     backgroundColor: Colors.textWhite,
   },
   dayItemSelected: {
     backgroundColor: Colors.primaryDark,
-  },
-  dayItemCurrent: {
-    borderColor: Colors.primary,
   },
   dayItemDisabled: {
     backgroundColor: '#E0E0E0',
@@ -309,10 +277,6 @@ const styles = StyleSheet.create({
   dayTextSelected: {
     color: Colors.textWhite,
   },
-  dayTextCurrent: {
-    // color: Colors.textBlack,
-    color: 'blue',
-  },
   dayTextDisabled: {
     color: '#A0A0A0',
   },
@@ -324,11 +288,6 @@ const styles = StyleSheet.create({
   dayNameSelected: {
     color: Colors.textWhite,
     fontWeight: '900',
-  },
-  dayNameCurrent: {
-    // color: Colors.textBlack,
-    color: 'blue',
-    // opacity: 0.8
   },
   dayNameDisabled: {
     color: '#A0A0A0',

@@ -13,13 +13,13 @@ interface SortByProps {
  * Component SortBy
  * 
  * Cho phép người dùng:
- * - Chọn kiểu sắp xếp ("Tăng" hoặc "Giảm")
+ * - Chọn kiểu sắp xếp ("A-Z" hoặc "Z-A")
  * - Chọn các filter như star, heart, female, male
  * - Callback `onSortChange` sẽ được gọi sau khi debounce để tránh spam request
  * - Có trạng thái `isLoading` tạm thời để disable các nút trong lúc xử lý
  */
 const SortBy = ({ onSortChange }: SortByProps) => {
-  const [sortType, setSortType] = useState('Tăng');
+  const [sortType, setSortType] = useState('A-Z');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false); // Trạng thái loading tạm thời
 
@@ -38,9 +38,9 @@ const SortBy = ({ onSortChange }: SortByProps) => {
     [onSortChange]
   );
 
-  // Toggle giữa 'Tăng' và 'Giảm', sau đó gọi debounce
+  // Toggle giữa 'A-Z' và 'Z-A', sau đó gọi debounce
   const handleSortToggle = () => {
-    const newSortType = sortType === 'Tăng' ? 'Giảm' : 'Tăng';
+    const newSortType = sortType === 'A-Z' ? 'Z-A' : 'A-Z';
     setSortType(newSortType);
     debouncedSortChange(newSortType, selectedFilters);
   };
@@ -57,7 +57,7 @@ const SortBy = ({ onSortChange }: SortByProps) => {
   // Danh sách các filter có thể chọn
   const filters = [
     { name: 'star', label: 'Star', icon: 'star-outline', filledIcon: 'star', hasOutline: true },
-    { name: 'heart', label: 'Heart', icon: 'favorite-outline', filledIcon: 'favorite', hasOutline: true },
+    // { name: 'heart', label: 'Heart', icon: 'favorite-outline', filledIcon: 'favorite', hasOutline: true },
     { name: 'female', label: 'Female', icon: 'female', filledIcon: 'female', hasOutline: false },
     { name: 'male', label: 'Male', icon: 'male', filledIcon: 'male', hasOutline: false },
   ];

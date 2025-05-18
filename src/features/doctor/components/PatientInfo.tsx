@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 import ToggleButtonGroup from './ToggleButtonGroup';
+import CheckboxGroup from './CheckboxGroup';
 import DescriptionInput from './DescriptionInput';
 import FormInput from '../../auth/components/FormInput';
 import HorizontalLine from './HorizontalLine';
@@ -11,9 +12,11 @@ interface PatientInfoProps {
     patientType: string;
     name: string;
     age: string;
+    address: string;
     gender: string;
+    visitPurpose: string[];
     description: string;
-    phoneNumber?: string; // Thêm trường số điện thoại, tùy chọn
+    phoneNumber?: string;
   }) => void;
 }
 
@@ -21,9 +24,11 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
   const [patientType, setPatientType] = useState<string>('Tôi');
   const [name, setName] = useState<string>('');
   const [age, setAge] = useState<string>('');
+  const [address, setAddress] = useState<string>('');
   const [gender, setGender] = useState<string>('Nam');
+  const [visitPurpose, setVisitPurpose] = useState<string[]>([]);
   const [description, setDescription] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>(''); // Thêm state cho số điện thoại
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
 
   const handleInfoChange = () => {
     if (onInfoChange) {
@@ -31,9 +36,11 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
         patientType,
         name,
         age,
+        address,
         gender,
+        visitPurpose,
         description,
-        ...(patientType === 'Người khác' && { phoneNumber }), // Chỉ thêm phoneNumber nếu là "Người khác"
+        ...(patientType === 'Người khác' && { phoneNumber }),
       });
     }
   };
@@ -43,7 +50,6 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
       <HorizontalLine />
       <Text style={styles.title}>Thông Tin Bệnh Nhân</Text>
 
-      {/* Phần "Tôi" hay "Người khác" */}
       <ToggleButtonGroup
         options={['Tôi', 'Người khác']}
         onValueChange={(value) => {
@@ -53,7 +59,6 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
         defaultValue="Tôi"
       />
 
-      {/* Họ và Tên */}
       <FormInput
         title="Họ và Tên"
         titleFontSize={12}
@@ -66,7 +71,6 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
         value={name}
       />
 
-      {/* Tuổi */}
       <FormInput
         title="Tuổi"
         titleFontSize={12}
@@ -78,7 +82,19 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
         }}
         value={age}
       />
-       {/* Số điện thoại (chỉ hiển thị khi chọn "Người khác") */}
+
+      <FormInput
+        title="Địa Chỉ"
+        titleFontSize={12}
+        placeholder="Nhập địa chỉ"
+        keyboardType="default"
+        onChangeText={(text) => {
+          setAddress(text);
+          handleInfoChange();
+        }}
+        value={address}
+      />
+
       {patientType === 'Người khác' && (
         <FormInput
           title="Số Điện Thoại"
@@ -93,7 +109,6 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
         />
       )}
 
-      {/* Giới tính */}
       <ToggleButtonGroup
         options={['Nam', 'Nữ', 'Khác']}
         onValueChange={(value) => {
@@ -104,9 +119,15 @@ const PatientInfo: React.FC<PatientInfoProps> = ({ onInfoChange }) => {
       />
       <HorizontalLine />
 
-     
+      <Text style={styles.sectionTitle}>Bạn muốn khám gì?</Text>
+      <CheckboxGroup
+        options={['Khám Thai', 'Khám Phụ Khoa', 'Tái khám', 'Khác']}
+        onValueChange={(selected) => {
+          setVisitPurpose(selected);
+          handleInfoChange();
+        }}
+      />
 
-      {/* Mô tả triệu chứng */}
       <DescriptionInput
         title="Mô tả Triệu chứng"
         titleFontSize={12}
@@ -131,6 +152,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.primary,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.textBlack,
     marginBottom: 10,
   },
 });

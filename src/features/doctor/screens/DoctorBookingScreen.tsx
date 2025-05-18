@@ -12,30 +12,43 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
   const { doctorId } = route.params;
   console.log('doctorId in booking:', doctorId);
 
-  // State để lưu ngày và giờ được chọn
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Ngày hiện tại thực tế
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [patientInfo, setPatientInfo] = useState<any>(null);
+  const [patientInfo, setPatientInfo] = useState<{
+    patientType: string;
+    name: string;
+    age: string;
+    address: string;
+    gender: string;
+    visitPurpose: string[];
+    description: string;
+    phoneNumber?: string;
+  } | null>(null);
 
-  // Hàm xử lý khi chọn ngày
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
     console.log('Ngày được chọn:', date);
   };
 
-  // Hàm xử lý khi chọn giờ
   const handleTimeChange = (time: string) => {
     setSelectedTime(time);
     console.log('Giờ được chọn:', time);
   };
 
-  // Hàm xử lý khi thông tin bệnh nhân thay đổi
-  const handlePatientInfoChange = (info: any) => {
+  const handlePatientInfoChange = (info: {
+    patientType: string;
+    name: string;
+    age: string;
+    address: string;
+    gender: string;
+    visitPurpose: string[];
+    description: string;
+    phoneNumber?: string;
+  }) => {
     setPatientInfo(info);
     console.log('Thông tin bệnh nhân:', info);
   };
 
-  // Hàm xử lý khi nhấn nút xác nhận đặt lịch
   const handleConfirmBooking = () => {
     console.log('Xác nhận đặt lịch với thông tin:', {
       selectedDate,
@@ -49,7 +62,6 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
     });
   };
 
-  // Dữ liệu cho FlatList
   const sections = [
     { id: '1', component: <DatePicker onDateChange={handleDateChange} /> },
     { id: '2', component: <TimePicker selectedDate={selectedDate} onTimeChange={handleTimeChange} /> },
@@ -58,7 +70,7 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
       id: '4',
       component: (
         <ButtonAction
-          title="Xác Nhận Đặt Lịch"
+          title="Đặt Lịch"
           onPress={handleConfirmBooking}
           backgroundColor={Colors.primary}
           color={Colors.textWhite}
@@ -71,7 +83,7 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
     <View
       style={[
         styles.section,
-        item.id === '4' && styles.buttonSection, // Áp dụng style căn giữa chỉ cho ButtonAction
+        item.id === '4' && styles.buttonSection,
       ]}
     >
       {item.component}
@@ -106,10 +118,9 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   section: {
-    // marginBottom: 20,
   },
   buttonSection: {
-    alignItems: 'center', // Căn giữa theo chiều ngang
-    marginTop: 20, // Thêm khoảng cách phía trên để nút không sát với PatientInfo
+    alignItems: 'center',
+    marginTop: 20,
   },
 });
