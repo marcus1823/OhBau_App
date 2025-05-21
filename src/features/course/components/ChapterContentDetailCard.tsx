@@ -5,7 +5,7 @@ import { Colors } from '../../../assets/styles/colorStyle';
 
 
 interface ChapterContentDetailCardProps {
-  content: string; // Nội dung bài học
+  content: string; 
 }
 
 const ChapterContentDetailCard: React.FC<ChapterContentDetailCardProps> = ({ content }) => {
@@ -28,11 +28,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: Colors.textWhite,
     justifyContent: 'center',
-    // shadowColor: Colors.textBlack,
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 5,
-    // elevation: 3,
   },
   contentText: {
     fontSize: 14,

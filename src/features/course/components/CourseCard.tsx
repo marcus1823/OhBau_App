@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-// Danh sách màu background và text tương ứng
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
   { background: Colors.cardHome2, text: Colors.textCardHome2 },
@@ -18,7 +17,7 @@ interface CourseCardProps {
   price: number;
   showBuyButton?: boolean;
   onBuyPress?: () => void;
-  index: number; // Index sẽ được điều chỉnh ở CourseScreen
+  index: number; 
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({
@@ -30,7 +29,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   onBuyPress,
   index,
 }) => {
-  // Chọn màu dựa trên index
+  
   const colorIndex = index % cardColors.length;
   const { background, text } = cardColors[colorIndex];
 
@@ -70,7 +69,6 @@ const CourseCard: React.FC<CourseCardProps> = ({
         </View>
       )}
 
-      {/* Nút MUA NGAY */}
       {showBuyButton && (
         <View style={styles.buyButtonRow}>
           <TouchableOpacity style={styles.buyButton} onPress={onBuyPress}>

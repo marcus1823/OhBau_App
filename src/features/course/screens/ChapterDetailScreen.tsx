@@ -8,8 +8,8 @@ import ChapterContentDetailCard from '../components/ChapterContentDetailCard';
 
 const ChapterDetailScreen = ({ navigation, route }: any) => {
     const { chapter, course } = route.params;
-    console.log('Chapter data in ChapterDetailScreen:', chapter); // Debug
-    const lesson = chapter.lesson; // Lấy bài học duy nhất từ chapter
+    console.log('Chapter data in ChapterDetailScreen:', chapter); 
+    const lesson = chapter.lesson; 
 
     return (
         <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>

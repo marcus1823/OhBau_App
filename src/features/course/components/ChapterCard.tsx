@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 
-// Danh sách màu background và text tương ứng (đồng bộ với CourseCard và CourseCardDetail)
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
   { background: Colors.cardHome2, text: Colors.textCardHome2 },
@@ -14,7 +13,7 @@ interface ChapterCardProps {
   name: string;
   description: string;
   progress: number;
-  index: number; // Thêm index để chọn màu random
+  index: number; 
 }
 
 const ChapterCard: React.FC<ChapterCardProps> = ({ name, description, progress, index }) => {

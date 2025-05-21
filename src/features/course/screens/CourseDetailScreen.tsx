@@ -10,7 +10,6 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-      {/* PrimaryHeader với tiêu đề là tên khóa học */}
       <PrimaryHeader
         title={course.name}
         onBackButtonPress={() => navigation.goBack()}

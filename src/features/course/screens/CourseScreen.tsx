@@ -11,7 +11,6 @@ import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import SecondaryHeader from '../../../components/common/Header/SecondaryHeader';
 import CourseSection from '../components/CourseSection';
 
-// Dữ liệu mẫu từ API (đã được đồng bộ hóa)
 const apiData = {
   status: '200',
   message: 'Get course success',
@@ -255,7 +254,6 @@ const CourseScreen = ({ navigation }: any) => {
       return acc;
     }, [] as { title: string; courses: { name: string; rating: number; duration: number; price: number; lessons: any[]; active: boolean }[] }[]);
 
-  // Hàm điều hướng khi nhấn vào card
   const handleCardPress = (course: any) => {
     navigation.navigate('CourseDetailScreen', { course });
   };

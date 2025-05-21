@@ -8,15 +8,13 @@ import ChapterCard from '../components/ChapterCard';
 const CourseChapterScreen = ({ navigation, route }: any) => {
   const { lesson, course } = route.params;
 
-  // Hàm điều hướng đến ChapterDetailScreen
   const handleChapterPress = (chapter: any) => {
-    console.log('Navigating to ChapterDetailScreen with chapter:', chapter); // Debug
+    console.log('Navigating to ChapterDetailScreen with chapter:', chapter); 
     navigation.navigate('ChapterDetailScreen', { chapter, course });
   };
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-      {/* PrimaryHeader với tiêu đề là tên bài học */}
       <PrimaryHeader
         title={lesson.title}
         onBackButtonPress={() => navigation.goBack()}

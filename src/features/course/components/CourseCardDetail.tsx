@@ -24,7 +24,6 @@ const CourseCardDetail: React.FC<CourseCardDetailProps> = ({
   active,
   index,
 }) => {
-  // Chọn màu dựa trên index
   const colorIndex = index % cardColors.length;
   const { background, text } = cardColors[colorIndex];
 
