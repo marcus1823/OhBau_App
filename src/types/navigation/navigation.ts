@@ -37,6 +37,9 @@ export type ShopStackParamList = {
 // kiểu cho CourseStack
 export type CourseStackParamList = {
     'CourseScreen': undefined;
+    'CourseDetailScreen': undefined;
+    'CourseChapterScreen': undefined;
+    'ChapterDetailScreen': undefined;
 }
 
 // kiểu cho CommunityStack

@@ -14,9 +14,10 @@ export const Colors = {
     textCardHome1: '#AD0000', // Dark Pink, text card home 1
     cardHome2: '#BFBFE3', // Light Purpose, card home 2
     textCardHome2: '#000064', // Dark Purpose  , text card home 2
-    cardHome3: '#95C1DC', // Light Blue, card home 3
+    // cardHome3: '#95C1DC', // Light Blue, card home 3
+    cardHome3: '#92C0DC', // Light Blue, card home 3
     textCardHome3: '#104768', // Dark Blue, text card home 3
-    cardHome4: '##F5CAA0', // Light Yellow, card home 4
+    cardHome4: '#F5CAA0', // Light Yellow, card home 4
     textCardHome4: '#673400', // Dark Yellow, text card home 4
     disabledBg: '#D9D9D9', // Gray, disabled background
     disabledText: '#4E4E4E', // Gray, disabled text
