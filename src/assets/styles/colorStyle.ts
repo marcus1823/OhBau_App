@@ -8,7 +8,6 @@ export const Colors = {
     textWhite: '#FFFFFF', // White, text white
     textTimeDay: '#9F5554', // Dark Pink, text for time day primary,
     textTimeMonth :'#848484', // Gray, text for time month secondary 
-    // Home Background Linar Gradient from '#FFFFFF' to #E1D4D4'
     border: '#7A7A7A', // Gray, border
     cardHome1: '#DBB5B4', // Light Pink, card home 1
     textCardHome1: '#AD0000', // Dark Pink, text card home 1
@@ -26,5 +25,6 @@ export const Colors = {
 
 export const Gradients = {
     backgroundPrimary: ['#FFFFFF', '#E1D4D4'],
+    backgroundPrimaryDark: ['#FFFFFF', '#D09F9E'],
   };
   
