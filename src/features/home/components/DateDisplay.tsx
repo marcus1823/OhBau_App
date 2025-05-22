@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
   },
   monthContainer: {
     alignItems: 'center',
+    paddingVertical: 10,
   },
   monthText: {
     fontSize: 18,
