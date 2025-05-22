@@ -1,9 +1,11 @@
 import React from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
-import { Gradients } from '../../../assets/styles/colorStyle';
+import { StyleSheet, ScrollView, Text, View } from 'react-native';
+import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import LinearGradient from 'react-native-linear-gradient';
 import SecondaryHeader from '../../../components/common/Header/SecondaryHeader';
 import FetusTrackerCard from '../components/FetusTrackerCard';
+import FetusInfoStatus from '../components/FetusInfoStatus';
+import MotherInfoStatus from '../components/MotherInfoStatus';
 
 const HomeScreen = () => {
   const handleOpenNotificationModal = () => {
@@ -35,14 +37,27 @@ const HomeScreen = () => {
         unreadNotifications={3}
         onOpenNotificationModal={handleOpenNotificationModal}
       />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer} // Thêm contentContainerStyle
+        showsVerticalScrollIndicator={false} // Ẩn thanh cuộn
+      >
         {/* Gọi FetusTrackerCard */}
-        <FetusTrackerCard
-          weeks={weeks}
-          name={fetusData.name}
-          startDate={fetusData.startDate}
-          endDate={fetusData.endDate}
-        />
+        <View style={styles.trackerCardWrapper}>
+          <FetusTrackerCard
+            weeks={weeks}
+            name={fetusData.name}
+            startDate={fetusData.startDate}
+            endDate={fetusData.endDate}
+          />
+        </View>
+        <View style={styles.content}>
+          <Text style={styles.title}>Thông tin của con đây ạ</Text>
+          {/* Component FetusInfoStatus */}
+          <FetusInfoStatus />
+          <Text style={styles.title}>Thông tin của mẹ đây ạ</Text>
+          {/* Component MotherInfoStatus */}
+          <MotherInfoStatus />
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -52,9 +67,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollContainer: {
+    paddingBottom: 60, 
+  },
+  trackerCardWrapper: {
+    marginBottom: 20,
+  },
   content: {
-    // flexGrow: 1,
-    // paddingTop: 60,
+    marginHorizontal: 20,
+    marginVertical: 20,
+  },
+  title: {
+    fontSize: 27,
+    fontWeight: '600', 
+    color: Colors.primary,
+    fontFamily: 'League Spartan',
+    marginVertical: 20
   },
 });
 

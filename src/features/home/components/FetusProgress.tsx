@@ -64,8 +64,9 @@ const FetusProgress: React.FC<FetusProgressProps> = ({ weeks, startDate, endDate
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1.8,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   progressText: {
     fontSize: 18,

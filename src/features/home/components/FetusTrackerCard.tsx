@@ -26,14 +26,14 @@ const FetusTrackerCard: React.FC<FetusTrackerCardProps> = ({ weeks, name, startD
 
 const styles = StyleSheet.create({
   cardContainer: {
-    width: '100%', 
-    height: '115%', 
-    borderBottomLeftRadius: 140, 
-    borderBottomRightRadius: 140,
-    justifyContent: 'center',
+    width: '100%',
+    height: 450,
+    borderBottomLeftRadius: 130,
+    borderBottomRightRadius: 130,
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     overflow: 'hidden',
-    marginBottom: 20, 
+
   },
 });
 

@@ -54,11 +54,12 @@ const DateDisplay = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 0.2,
+
   },
   monthContainer: {
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingBottom: 10
   },
   monthText: {
     fontSize: 18,
