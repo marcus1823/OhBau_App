@@ -31,12 +31,11 @@ import { getDoctorApi } from '../api/doctorApi';
 
 const DoctorScreen = ({ navigation }: any) => {
   // const { getDoctors } = useDoctor();
-  const { showContextLoading, hideContextLoading } =
-    useLoading();
+  const { showContextLoading, hideContextLoading } = useLoading();
   const [sortType, setSortType] = useState('A-Z');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
-  const [isSearchModalVisible, setIsSearchModalVisible] = useState(false); // Modal tìm kiếm
+  const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);  // ✅ State để điều khiển modal tìm kiếm
 
   // ✅ Tạo debounce chỉ một lần duy nhất, dùng useRef để giữ lại hàm
   const debounceRef = useRef<

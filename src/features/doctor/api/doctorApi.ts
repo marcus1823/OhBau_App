@@ -40,9 +40,13 @@ export const getDoctorApi = async (request: GetDoctorRequest): Promise<GetDoctor
  */
 export const getDoctorByIdApi = async (request: GetDoctorByIdRequest): Promise<GetDoctorByIdResponse> => {
   const { doctorID } = request;
+  console.log('req', request);
+  
 
   // Gọi API GET với ID bác sĩ
-  const response = await rootApi.get<GetDoctorByIdResponseBaseResponse>(`/doctor/get-doctor-infor/${doctorID}`);
+  const response = await rootApi.get<GetDoctorByIdResponseBaseResponse>('/doctor/get-doctor-infor', {
+    params: { doctorID },
+  });
 
   // Kiểm tra dữ liệu trả về có hợp lệ hay không
   if (!response.data?.data) {
