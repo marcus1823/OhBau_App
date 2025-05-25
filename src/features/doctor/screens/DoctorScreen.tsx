@@ -19,8 +19,6 @@ import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import SortBy from '../components/SortBy';
 import DoctorCard from '../components/DoctorCard';
 import SearchModal from '../components/SearchModal';
-// import { useDoctor } from '../hooks/useDoctor.hook';
-import { useLoading } from '../../../utils/loading/useLoading';
 import {
   GetDoctorResponse,
   GetDoctorResponsePaginate,
@@ -31,7 +29,6 @@ import { getDoctorApi } from '../api/doctorApi';
 
 const DoctorScreen = ({ navigation }: any) => {
   // const { getDoctors } = useDoctor();
-  const { showContextLoading, hideContextLoading } = useLoading();
   const [sortType, setSortType] = useState('A-Z');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
@@ -60,6 +57,7 @@ const DoctorScreen = ({ navigation }: any) => {
 
   const handleInfoPress = (id: string) => {
     console.log('Doctor ID pressed:', id);
+    setIsSearchModalVisible(false); 
     navigation.navigate('DoctorDetailScreen', {
       id,
     });
@@ -88,13 +86,11 @@ const DoctorScreen = ({ navigation }: any) => {
             ? selectedFilters.join(',')
             : undefined,
       };
-      showContextLoading('fetchDoctors');
       try {
         // const response = await getDoctors.mutateAsync(request);
         const response = await getDoctorApi(request);
         return response;
       } finally {
-        hideContextLoading('fetchDoctors');
       }
     },
     getNextPageParam: (lastPage: GetDoctorResponsePaginate) => {

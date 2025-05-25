@@ -8,7 +8,6 @@ import { RootState } from '../../../stores/store';
 import FormInput from '../components/FormInput';
 import ButtonAction from '../components/ButtonAction';
 import DatePickerComponent from '../components/DatePicker';
-import { useLoading } from '../../../utils/loading/useLoading';
 import { useToast } from '../../../utils/toasts/useToast';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { useRegister } from '../hooks/useRegister.hook';
@@ -35,7 +34,6 @@ const RegisterScreen = ({ navigation }: any) => {
     const { showError, showSuccess } = useToast();
     const { mutate: registerUser, isPending } = useRegister();
     const { syncRole } = useAuthSync();
-    const { showContextLoading, hideContextLoading, isContextLoading } = useLoading();
     const dispatch = useDispatch();
 
     // lấy role từ redux 
@@ -114,7 +112,6 @@ const RegisterScreen = ({ navigation }: any) => {
             },
         };
 
-        showContextLoading('register');
         registerUser(payload, {
             onSuccess: async (data) => {
                 console.log('Register success, data:', data);
@@ -129,9 +126,6 @@ const RegisterScreen = ({ navigation }: any) => {
             },
             onError: (error: any) => {
                 showError(error.message || 'Đã xảy ra lỗi khi đăng ký tài khoản');
-            },
-            onSettled: () => {
-                hideContextLoading('register');
             },
         });
 
@@ -218,7 +212,7 @@ const RegisterScreen = ({ navigation }: any) => {
                     </View>
                 </View>
             </ScrollView>
-            <LoadingOverlay visible={isContextLoading('register')} fullScreen={false} />
+            <LoadingOverlay visible={isPending} fullScreen={false} />
 
         </LinearGradient>
     );

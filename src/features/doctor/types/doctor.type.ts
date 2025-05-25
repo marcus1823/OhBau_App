@@ -44,6 +44,14 @@ export interface GetDoctorByIdResponse {
     email: string;
     phone: string;
     active: boolean;
+    experence: string[];
+    focus: string[];
+    medicalProfile: string[];
+    careerPath: string[];
+    outStanding: string[];
+    totalFeedbacks: number; 
+    rating: number; 
+    workSchedule: string[]
 }
 
 export interface GetDoctorByIdResponseBaseResponse {

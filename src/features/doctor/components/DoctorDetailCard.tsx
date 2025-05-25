@@ -1,5 +1,5 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React from 'react';
 import { Colors } from '../../../assets/styles/colorStyle';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -8,21 +8,20 @@ interface DoctorDetailCardProps {
     avatar?: string;
     address?: string;
     major?: string;
-    experience?: string;
-    focus?: string;
+    experence?: string[];
+    focus?: string[];
     rating?: number;
-    comment?: string;
-    schedule?: string;
+    totalFeedbacks?: number;
+    workSchedule?: string[];
     bookingDoctorPress?: () => void;
 }
 
-const DoctorDetailCard = ({ fullName, avatar, address, major, experience, focus, rating, comment, schedule, bookingDoctorPress }: DoctorDetailCardProps) => {
+const DoctorDetailCard = ({ fullName, avatar, address, major, experence, focus, rating, totalFeedbacks, workSchedule, bookingDoctorPress }: DoctorDetailCardProps) => {
     const iconExperience = require('../../../assets/icons/iconExperienceDoctorDetail.png');
 
     return (
         <View style={styles.cardContainer}>
             <View style={styles.innerContainer}>
-
                 {/* Avatar && experience + focus (row + column) */}
                 <View style={styles.headerSection}>
                     <View style={styles.avatarContainer}>
@@ -32,11 +31,31 @@ const DoctorDetailCard = ({ fullName, avatar, address, major, experience, focus,
                     <View style={styles.headerInfo}>
                         <View style={styles.experienceContainer}>
                             <Image source={iconExperience} style={styles.experienceIcon} />
-                            <Text style={styles.headerText} numberOfLines={2} ellipsizeMode="tail">{experience}</Text>
+                            <View style={styles.experienceTextContainer}>
+                                {experence?.map((item, index) => (
+                                    <Text
+                                        key={index}
+                                        style={styles.headerText}
+                                        numberOfLines={1} // Giới hạn 1 dòng mỗi mục
+                                        ellipsizeMode="tail"
+                                    >
+                                        {item}
+                                    </Text>
+                                ))}
+                            </View>
                         </View>
                         <View style={styles.focusContainer}>
                             <Text style={styles.focusLabel}>Trọng tâm:</Text>
-                            <Text style={styles.headerText} numberOfLines={6} ellipsizeMode="tail">{focus}</Text>
+                            {focus?.map((item, index) => (
+                                <Text
+                                    key={index}
+                                    style={styles.headerText}
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
+                                >
+                                    {item}
+                                </Text>
+                            ))}
                         </View>
                     </View>
                 </View>
@@ -57,12 +76,12 @@ const DoctorDetailCard = ({ fullName, avatar, address, major, experience, focus,
                         </View>
                         <View style={styles.statItemSmall}>
                             <Icon name="comment" size={12} color={Colors.primary} />
-                            <Text style={styles.statText}>{comment}</Text>
+                            <Text style={styles.statText}>{totalFeedbacks}</Text>
                         </View>
                     </View>
                     <View style={styles.statItemLarge}>
                         <Icon name="access-alarm" size={12} color={Colors.primary} />
-                        <Text style={styles.statText} numberOfLines={1} ellipsizeMode="tail">{schedule}</Text>
+                        <Text style={styles.statText} numberOfLines={1} ellipsizeMode="tail">{workSchedule}</Text>
                     </View>
                 </View>
 
@@ -83,10 +102,10 @@ const DoctorDetailCard = ({ fullName, avatar, address, major, experience, focus,
                 </View>
             </View>
         </View>
-    )
-}
+    );
+};
 
-export default DoctorDetailCard
+export default DoctorDetailCard;
 
 const styles = StyleSheet.create({
     cardContainer: {
@@ -128,19 +147,25 @@ const styles = StyleSheet.create({
         maxWidth: 130,
     },
     experienceContainer: {
-        alignItems: 'center',
         flexDirection: 'row',
         paddingHorizontal: 8,
         paddingVertical: 5,
-        maxWidth: 130,
+        // maxWidth: 130,
+        width: 130,
         borderRadius: 18,
         backgroundColor: Colors.primary,
+        height: 60, 
+        alignItems: 'center',
     },
     experienceIcon: {
         marginRight: 5,
         resizeMode: 'cover',
         width: 25,
         height: 25,
+    },
+    experienceTextContainer: {
+        flexDirection: 'column',
+        flex: 1, 
     },
     headerText: {
         fontSize: 12,
@@ -158,9 +183,10 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         padding: 10,
         maxWidth: 130,
-        maxHeight: 130,
+        width: 130,
+        height: 60,
+        justifyContent: 'flex-start',
         alignItems: 'flex-start',
-        justifyContent: 'center',
     },
     infoSection: {
         flexDirection: 'column',
@@ -266,4 +292,4 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 8,
     },
-})
+});

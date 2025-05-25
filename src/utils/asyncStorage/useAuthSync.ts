@@ -1,77 +1,73 @@
-import { useDispatch } from "react-redux";
-import { setAccessToken, setRole } from "../../features/auth/slices/auth.slices"; 
-import { getAccessToken, storeAccessToken } from "./authStorage"; 
-import { role } from "../../features/auth/types/auth.types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLoading } from "../loading/useLoading"; 
+import { useDispatch } from 'react-redux';
+import { setAccessToken, setRole } from '../../features/auth/slices/auth.slices';
+import { getAccessToken, storeAccessToken } from './authStorage';
+import { role } from '../../features/auth/types/auth.types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLoading } from '../loading/useLoading';
 
+/**
+ * Custom hook để đồng bộ hóa trạng thái xác thực (auth) với Redux và AsyncStorage
+ */
 export const useAuthSync = () => {
-    const dispatch = useDispatch(); // Lấy dispatch để gửi action tới Redux
-    const { showGlobalLoading, hideGlobalLoading } = useLoading(); // Hook xử lý loading toàn cầu
+  const dispatch = useDispatch();
+  const { showGlobalLoading, hideGlobalLoading } = useLoading();
 
-    // Hàm đồng bộ hóa accessToken vào Redux store và AsyncStorage
-    const syncAccessToken = async (accessToken: string) => {
-        try {
-            // Gửi action để cập nhật accessToken vào Redux store
-            dispatch(setAccessToken(accessToken));
+  /**
+   * Đồng bộ accessToken vào Redux store và AsyncStorage
+   * @param accessToken - Chuỗi accessToken cần đồng bộ
+   */
+  const syncAccessToken = async (accessToken: string) => {
+    try {
+      dispatch(setAccessToken(accessToken));
+      await storeAccessToken(accessToken);
+    } catch (error: any) {
+      console.error('Sync access token error:', error);
+      throw error;
+    }
+  };
 
-            // Lưu accessToken vào AsyncStorage để sử dụng sau này (giữ trạng thái đăng nhập)
-            await storeAccessToken(accessToken);
-        } catch (error: any) {
-            // Xử lý lỗi khi đồng bộ hóa accessToken
-            console.error('Sync access token error:', error);
-            throw error; // Ném lỗi ra ngoài để gọi hàm này có thể biết được vấn đề
-        }
-    };
+  /**
+   * Đồng bộ role vào Redux store và AsyncStorage
+   * @param roleValue - Giá trị role (ví dụ: 'user', 'admin')
+   */
+  const syncRole = async (roleValue: role) => {
+    try {
+      dispatch(setRole(roleValue));
+      await AsyncStorage.setItem('role', roleValue);
+    } catch (error: any) {
+      console.error('Sync role error:', error);
+      throw error;
+    }
+  };
 
-    // Hàm đồng bộ hóa role vào Redux store và AsyncStorage
-    const syncRole = async (roleValue: role) => {
-        try {
-            // Gửi action để cập nhật role vào Redux store
-            dispatch(setRole(roleValue));
+  /**
+   * Khởi tạo auth bằng cách kiểm tra và đồng bộ accessToken/role từ AsyncStorage
+   * @returns Object xác nhận trạng thái khởi tạo (thành công hoặc lỗi)
+   */
+  const initializeAuth = async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      showGlobalLoading();
+      const accessToken = await getAccessToken();
+      const storedRole = await AsyncStorage.getItem('role') as role | null;
 
-            // Lưu role vào AsyncStorage để sử dụng lại sau này
-            await AsyncStorage.setItem('role', roleValue);
-        } catch (error: any) {
-            // Xử lý lỗi khi đồng bộ hóa role
-            console.error('Sync role error:', error);
-            throw error; // Ném lỗi ra ngoài
-        }
-    };
+      if (accessToken) {
+        await syncAccessToken(accessToken);
+      }
+      if (storedRole) {
+        await syncRole(storedRole);
+      }
+      return { success: true };
+    } catch (error: any) {
+      console.error('Initialize auth error:', error);
+      throw { success: false, error: error.message };
+    } finally {
+      hideGlobalLoading();
+    }
+  };
 
-    // Hàm khởi tạo auth, kiểm tra và đồng bộ hóa accessToken và role từ AsyncStorage
-    const initializeAuth = async () => {
-        try {
-            showGlobalLoading(); // Hiển thị loading khi khởi tạo auth
-
-            // Lấy accessToken từ AsyncStorage
-            const accessToken = await getAccessToken();
-
-            // Lấy role từ AsyncStorage
-            const storedRole = await AsyncStorage.getItem('role') as role | null;
-
-            // Nếu có accessToken thì đồng bộ vào Redux và AsyncStorage
-            if (accessToken) {
-                await syncAccessToken(accessToken);
-            }
-
-            // Nếu có role thì đồng bộ vào Redux và AsyncStorage
-            if (storedRole) {
-                await syncRole(storedRole);
-            }
-        } catch (error: any) {
-            // Xử lý lỗi trong quá trình khởi tạo auth
-            console.error('Initialize auth error:', error);
-            throw error;
-        } finally {
-            hideGlobalLoading(); // Ẩn loading sau khi hoàn thành hoặc gặp lỗi
-        }
-    };
-
-    // Trả về các hàm để có thể sử dụng ở nơi khác trong app
-    return {
-        syncAccessToken,
-        syncRole,
-        initializeAuth,
-    };
+  return {
+    syncAccessToken,
+    syncRole,
+    initializeAuth,
+  };
 };

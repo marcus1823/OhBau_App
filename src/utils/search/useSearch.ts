@@ -1,56 +1,63 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from 'react';
 
-// Định nghĩa kiểu dữ liệu kết quả tìm kiếm chung chung
+import { QueryFunctionContext } from '@tanstack/react-query';
+import { useCreateQuery } from '../../hooks/useCreateQuery';
+
+/**
+ * Định nghĩa kiểu dữ liệu kết quả tìm kiếm
+ */
 type SearchResult = {
-  id: string;                 // Mỗi kết quả phải có một ID duy nhất
-  [key: string]: any;        // Các thuộc tính khác không giới hạn
+  id: string; // Mỗi kết quả phải có ID duy nhất
+  [key: string]: any; // Các thuộc tính khác linh hoạt
 };
 
-// Định nghĩa kiểu hàm tìm kiếm
+/**
+ * Định nghĩa kiểu hàm tìm kiếm
+ */
 type SearchFn<T> = (query: string) => Promise<{ items: T[] }>;
 
-// Kết quả trả về từ hook useSearch
+/**
+ * Kết quả trả về từ hook useSearch
+ */
 interface UseSearchResult<T> {
-  searchQuery: string;                 // Từ khóa người dùng đang tìm
-  setSearchQuery: (query: string) => void; // Hàm cập nhật từ khóa tìm kiếm
-  results: T[];                        // Danh sách kết quả tìm kiếm
-  isLoading: boolean;                 // Trạng thái đang loading kết quả
+  searchQuery: string; // Từ khóa tìm kiếm hiện tại
+  setSearchQuery: (query: string) => void; // Hàm cập nhật từ khóa
+  results: T[]; // Danh sách kết quả tìm kiếm
+  isLoading: boolean; // Trạng thái loading
 }
 
 /**
- * Custom hook để thực hiện tìm kiếm có debounce và caching bằng React Query.
+ * Custom hook để thực hiện tìm kiếm với debounce và caching bằng useCreateQuery
  *
+ * @template T - Kiểu dữ liệu của kết quả tìm kiếm (phải có id)
  * @param searchFn - Hàm async nhận query string và trả về danh sách item
- * @param enabled - Cờ boolean cho phép kích hoạt query
+ * @param enabled - Cờ boolean để kích hoạt query
  * @returns searchQuery, setSearchQuery, results, isLoading
  */
 export const useSearch = <T extends SearchResult>(
   searchFn: SearchFn<T>,
   enabled: boolean
 ): UseSearchResult<T> => {
-  // State để lưu từ khóa tìm kiếm hiện tại
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Dùng useQuery để xử lý fetch và cache dữ liệu tìm kiếm
-  const { data, isLoading } = useQuery({
-    queryKey: ['search', searchQuery],      // Cache theo từ khóa tìm kiếm
-    queryFn: async () => {
-      // Nếu query rỗng thì trả về mảng rỗng, tránh gọi API không cần thiết
-      if (!searchQuery) {
+  const { data, isLoading } = useCreateQuery(
+    ['search', searchQuery] as const,
+    async ({ queryKey }: QueryFunctionContext<readonly [string, string]>) => {
+      const [, query] = queryKey;
+      if (!query) {
         return { items: [] };
       }
-
-      // Gọi hàm tìm kiếm được truyền vào
-      return searchFn(searchQuery);
+      return searchFn(query);
     },
-    enabled: enabled && !!searchQuery,       // Chỉ chạy query khi `enabled` là true và có từ khóa tìm
-  });
+    '',
+    'Lỗi khi tìm kiếm',
+    {
+      enabled: enabled && !!searchQuery, // Chỉ chạy query khi enabled và có từ khóa
+    }
+  );
 
-  // Lấy danh sách kết quả từ data trả về
   const results = data?.items || [];
 
-  // Trả về dữ liệu và setter cho component sử dụng hook này
   return {
     searchQuery,
     setSearchQuery,

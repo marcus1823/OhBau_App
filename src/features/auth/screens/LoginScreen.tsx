@@ -14,129 +14,139 @@ import { useLogin } from '../hooks/useLogin.hook';
 import { setRole } from '../slices/auth.slices';
 import { role } from '../types/auth.types';
 import { validatePhone } from '../../../utils/validations/validations';
-import { useLoading } from '../../../utils/loading/useLoading';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 
 const LoginScreen = ({ navigation }: any) => {
-    const [phone, setPhone] = useState('');
-    const [password, setPassword] = useState('');
-    const [parentTitle, setParentTitle] = useState('Mẹ');
-    const [hasInitialized, setHasInitialized] = useState(false); // Thêm trạng thái để kiểm soát initializeAuth
-    const { initializeAuth, syncAccessToken, syncRole } = useAuthSync();
-    const { showError, showSuccess } = useToast();
-    const { mutate: loginUser, isPending } = useLogin();
-    const selectedRole = useSelector((state: RootState) => state.auth.role);
-    const { showContextLoading, hideContextLoading, isContextLoading } = useLoading();
-    const dispatch = useDispatch();
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [parentTitle, setParentTitle] = useState('Mẹ');
+  const { showError } = useToast();
+  const { syncAccessToken, syncRole } = useAuthSync();
+  const { mutate: loginUser, isPending } = useLogin();
+  const selectedRole = useSelector((state: RootState) => state.auth.role);
+  const dispatch = useDispatch();
 
-    useEffect(() => {
-        if (!selectedRole && !hasInitialized) {
-            initializeAuth()
-                .then(() => {
-                    setHasInitialized(true);
-                })
-                .catch((error) => {
-                    console.log('initializeAuth error:', error);
-                    setHasInitialized(true);
-                });
-        }
-        setParentTitle(selectedRole === role.FATHER ? 'Bố' : selectedRole === role.MOTHER ? 'Mẹ' : 'Mẹ');
-    }, [selectedRole, initializeAuth, hasInitialized]);
+  // Update parentTitle based on selectedRole when component mounts
+  useEffect(() => {
+    setParentTitle(selectedRole === role.FATHER ? 'Bố' : selectedRole === role.MOTHER ? 'Mẹ' : 'Mẹ');
+  }, [selectedRole]);
 
-    const handleLogin = () => {
-        if (!phone) {
-            showError('Vui lòng nhập số điện thoại');
-            return;
-        } else if (!validatePhone(phone)) {
-            showError('Số điện thoại không hợp lệ');
-            return;
-        } else if (!password) {
-            showError('Vui lòng nhập mật khẩu');
-            return;
-        }
+  const handleLogin = () => {
+    if (!phone) {
+      showError('Vui lòng nhập số điện thoại');
+      return;
+    } else if (!validatePhone(phone)) {
+      showError('Số điện thoại không hợp lệ');
+      return;
+    } else if (!password) {
+      showError('Vui lòng nhập mật khẩu');
+      return;
+    }
 
-        showContextLoading('login');
-        loginUser(
-            { phone, password },
-            {
-                onSuccess: async (data) => {
-                    console.log('Login success, data:', data);
-                    // Đồng bộ accessToken và role từ API response
-                    if (data.accessToken) {
-                        await syncAccessToken(data.accessToken);
-                    }
-                    if (data.role) {
-                        await syncRole(data.role);
-                        dispatch(setRole(data.role)); // Cập nhật role ngay lập tức
-                    }
-                    const newParentTitle = data.role === role.FATHER ? 'Bố' : data.role === role.MOTHER ? 'Mẹ' : 'Mẹ';
-                    setParentTitle(newParentTitle);
-                    showSuccess(`Chúc mừng ${newParentTitle} đăng nhập thành công`);
-                    // navigation.navigate('TabNavigation');
-                    navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'TabNavigation' }],
-                    });
-                },
-                onError: (error: any) => {
-                    console.log('Login error:', error);
-                    showError(error?.message || 'Đã xảy ra lỗi khi đăng nhập');
-                },
-                onSettled: () => {
-                    hideContextLoading('login');
-                },
-            }
-        );
-    };
-
-    const handleForgotPassword = () => {
-        navigation.navigate('ForgotPasswordScreen');
-    };
-
-    const handleOptionLogin = (option: string) => {
-        console.log(`${option} login option selected`);
-    };
-
-    return (
-        <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-            <PrimaryHeader roleTitle={parentTitle} title="Đăng Nhập Nào!" onBackButtonPress={() => navigation.goBack()} />
-            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                <View style={styles.contentContainer}>
-                    <View style={styles.welcomeContainer}>
-                        <Text style={styles.welcomeTile}>{`Chào ${parentTitle} Yêu!`}</Text>
-                        <Text style={styles.welcomeMessage}>{`Con đang lớn lên từng ngày trong bụng mẹ nè! ${parentTitle} nhớ đăng nhập để con có thể cùng ${parentTitle} theo dõi hành trình tuyệt vời này nhé!`}</Text>
-                    </View>
-                    <View style={styles.formContainer}>
-                        <FormInput title="Số Điện Thoại" placeholder="0123456789" keyboardType="phone-pad" onChangeText={setPhone} value={phone} />
-                        <FormInput title="Mật Khẩu" placeholder="********" secureTextEntry onChangeText={setPassword} value={password} />
-                        <TouchableOpacity onPress={handleForgotPassword} activeOpacity={0.8}>
-                            <Text style={styles.forgotPasswordText}>{parentTitle} quên mật khẩu ạ?</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.actionContainer}>
-                        <ButtonAction title="Đăng Nhập" onPress={handleLogin} backgroundColor={Colors.primary} color={Colors.textWhite} disabled={isPending} />
-                        <Text style={styles.optionText}>Hoặc {parentTitle} có thể đăng nhập bằng</Text>
-                        <OptionLogin onPress={handleOptionLogin} />
-                        <TouchableOpacity style={styles.registerOptionContainer} onPress={() => navigation.navigate('RegisterScreen')}>
-                            <Text style={styles.registerText}>{parentTitle} chưa có tài khoản sao? </Text>
-                            <Text style={styles.registerLink}>Đăng ký nhé</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </ScrollView>
-            <LoadingOverlay visible={isContextLoading('login')} fullScreen={false} />
-        </LinearGradient>
+    loginUser(
+      { phone, password },
+      {
+        onSuccess: async (data) => {
+          console.log('Login success, data:', data);
+          // showSuccess('Đăng nhập thành công!');
+          if (data.accessToken) {
+            await syncAccessToken(data.accessToken);
+          }
+          if (data.role) {
+            await syncRole(data.role);
+            dispatch(setRole(data.role));
+          }
+          const newParentTitle = data.role === role.FATHER ? 'Bố' : data.role === role.MOTHER ? 'Mẹ' : 'Mẹ';
+          setParentTitle(newParentTitle);
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'TabNavigation' }],
+          });
+        },
+        onError: (error: any) => {
+          console.log('Login error:', error);
+          showError(error.message || 'Đã xảy ra lỗi trong quá trình đăng nhập');
+        },
+      }
     );
+  };
+
+  const handleForgotPassword = () => {
+    navigation.navigate('ForgotPasswordScreen');
+  };
+
+  const handleOptionLogin = (option: string) => {
+    console.log(`${option} login option selected`);
+  };
+
+  return (
+    <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
+      <PrimaryHeader
+        roleTitle={parentTitle}
+        title="Đăng Nhập Nào!"
+        onBackButtonPress={() => navigation.goBack()}
+      />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.contentContainer}>
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeTile}>{`Chào ${parentTitle} Yêu!`}</Text>
+            <Text style={styles.welcomeMessage}>
+              {`Con đang lớn lên từng ngày trong bụng mẹ nè! ${parentTitle} nhớ đăng nhập để con có thể cùng ${parentTitle} theo dõi hành trình tuyệt vời này nhé!`}
+            </Text>
+          </View>
+          <View style={styles.formContainer}>
+            <FormInput
+              title="Số Điện Thoại"
+              placeholder="0123456789"
+              keyboardType="phone-pad"
+              onChangeText={setPhone}
+              value={phone}
+            />
+            <FormInput
+              title="Mật Khẩu"
+              placeholder="********"
+              secureTextEntry
+              onChangeText={setPassword}
+              value={password}
+            />
+            <TouchableOpacity onPress={handleForgotPassword} activeOpacity={0.8}>
+              <Text style={styles.forgotPasswordText}>{parentTitle} quên mật khẩu ạ?</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.actionContainer}>
+            <ButtonAction
+              title="Đăng Nhập"
+              onPress={handleLogin}
+              backgroundColor={Colors.primary}
+              color={Colors.textWhite}
+              disabled={isPending}
+            />
+            <Text style={styles.optionText}>Hoặc {parentTitle} có thể đăng nhập bằng</Text>
+            <OptionLogin onPress={handleOptionLogin} />
+            <TouchableOpacity
+              style={styles.registerOptionContainer}
+              onPress={() => navigation.navigate('RegisterScreen')}
+            >
+              <Text style={styles.registerText}>{parentTitle} chưa có tài khoản sao? </Text>
+              <Text style={styles.registerLink}>Đăng ký nhé</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+      <LoadingOverlay visible={isPending} fullScreen={false} />
+    </LinearGradient>
+  );
 };
 
 export default LoginScreen;
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1, 
+    flexGrow: 1,
     paddingBottom: 20,
   },
   contentContainer: {
@@ -163,7 +173,6 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: '100%',
-    // gap: 20,
     marginBottom: 30,
   },
   forgotPasswordText: {
@@ -175,13 +184,12 @@ const styles = StyleSheet.create({
   },
   actionContainer: {
     gap: 20,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   optionText: {
     fontSize: 12,
     fontWeight: '300',
     color: Colors.textBlack,
-
   },
   registerOptionContainer: {
     flexDirection: 'row',

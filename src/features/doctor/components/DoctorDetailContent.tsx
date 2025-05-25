@@ -3,17 +3,17 @@ import React from 'react'
 import { Colors } from '../../../assets/styles/colorStyle';
 
 interface DoctorDetailContentProps {
-    profile?: string[];
+    medicalProfile?: string[];
     careerPath?: string[];
-    outstanding?: string[];
+    outStanding?: string[];
 }
 
-const DoctorDetailContent = ({ profile, careerPath, outstanding }: DoctorDetailContentProps) => {
+const DoctorDetailContent = ({ medicalProfile, careerPath, outStanding }: DoctorDetailContentProps) => {
   return (
     <View style={styles.container}>
         <View style={styles.contentContainer}>
             <Text style={styles.title}>Hồ sơ</Text>
-            {profile?.map((item, index) => (
+            {medicalProfile?.map((item, index) => (
                 <Text key={index} style={styles.content}>
                     • {item}
                 </Text>
@@ -31,7 +31,7 @@ const DoctorDetailContent = ({ profile, careerPath, outstanding }: DoctorDetailC
 
         <View style={styles.contentContainer}>
             <Text style={styles.title}>Nổi bật</Text>
-            {outstanding?.map((item, index) => (
+            {outStanding?.map((item, index) => (
                 <Text key={index} style={styles.content}>
                     • {item}
                 </Text>

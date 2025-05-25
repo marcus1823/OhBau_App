@@ -22,15 +22,7 @@ export const loginApi = async (request: AuthenticationRequest): Promise<Authenti
 };
 
 
-// {
-//     "phone": "0987654321",
-//     "email": "cuongtq@gmail.com",
-//     "password": "123456",
-//     "role": "FATHER/MOTHER",
-//     "registerParentRequest": {
-//       "fullName": "Father 1",
-//       "dob": "1990-05-01"
-//     }
+
 export const registerApi = async (request: RegisterRequest): Promise<RegisterResponseBaseResponse> => {
     console.log('registerApi request:', request);
     try {
