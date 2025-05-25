@@ -59,3 +59,33 @@ export interface GetDoctorByIdResponseBaseResponse {
     message: string;
     data: GetDoctorByIdResponse;
   }
+
+//   https://ohbau.cloud/api/v1/doctor-slot/3c26ab90-01e2-47f6-882f-3da0d93ba57d/user?date=2025%2F04%2F25
+  export interface GetDoctorSlotRequest {
+      doctorID: string;
+      date: string;
+  }
+
+  export interface SlotResponse {
+        id: string;
+        name?: string; 
+        startTime: string; //($time)
+        endTime: string; //($time)
+  }
+
+  export interface GetDoctorSlotResponse {
+    id: string;
+    slot: SlotResponse;
+    isBooking: boolean; 
+  }
+
+  export interface GetDoctorSlotForUserResponse {
+    name?: string;
+    doctorSlots : GetDoctorSlotResponse[];
+  }
+
+  export interface GetDoctorSlotForUserResponseBaseResponse {
+    status: string;
+    message: string;
+    data: GetDoctorSlotForUserResponse;
+  }

@@ -5,6 +5,9 @@ import {
   GetDoctorByIdResponseBaseResponse,
   GetDoctorRequest,
   GetDoctorResponsePaginate,
+  GetDoctorSlotForUserResponse,
+  GetDoctorSlotForUserResponseBaseResponse,
+  GetDoctorSlotRequest,
   GetDoctorsResponsePaginateBaseResponse,
 } from "../types/doctor.type";
 
@@ -55,3 +58,27 @@ export const getDoctorByIdApi = async (request: GetDoctorByIdRequest): Promise<G
 
   return response.data.data;
 };
+
+
+/**
+ * Gọi API để lấy slot của bác sĩ theo ID và ngày
+ * https://ohbau.cloud/api/v1/doctor-slot/3c26ab90-01e2-47f6-882f-3da0d93ba57d/user?date=2025%2F04%2F25
+ * 
+ */
+
+export const getDoctorSlotApi = async (request: GetDoctorSlotRequest): Promise<GetDoctorSlotForUserResponse> => {
+  const { doctorID, date } = request;
+  console.log('getDoctorSlotApi req:', request);
+
+  // Gọi API GET với ID bác sĩ và ngày
+  const response = await rootApi.get<GetDoctorSlotForUserResponseBaseResponse>(`/doctor-slot/${doctorID}/user`, {
+    params: { date },
+  });
+
+  // Kiểm tra dữ liệu trả về có hợp lệ hay không
+  if (!response.data) {
+    throw new Error('Invalid response structure');
+  }
+
+  return response.data.data;
+}

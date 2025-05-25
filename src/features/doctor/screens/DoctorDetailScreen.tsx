@@ -19,8 +19,6 @@ const DoctorDetailScreen = ({ navigation, route }: any) => {
         queryFn: () => getDoctorByIdApi({ doctorID: doctorId }),
     });
 
-    console.log('Doctor details:', data);
-
     if (isLoading) {
         return <LoadingOverlay visible={isLoading} />;
     }

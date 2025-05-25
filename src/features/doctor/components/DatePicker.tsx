@@ -73,7 +73,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange }) => {
 
   const handleDateSelect = (date: Date) => {
     const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-    if (date < today) return;
+    if (date < today) {return;}
 
     setSelectedDate(date);
     onDateChange(date);

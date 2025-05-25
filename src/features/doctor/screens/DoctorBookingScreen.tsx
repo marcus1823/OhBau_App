@@ -7,6 +7,10 @@ import PatientInfo from '../components/PatientInfo';
 import ButtonAction from '../../auth/components/ButtonAction';
 import DatePicker from '../components/DatePicker';
 import TimePicker from '../components/TimePicker';
+import { useQuery } from '@tanstack/react-query';
+import { getDoctorSlotApi } from '../api/doctorApi';
+import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
+
 
 const DoctorBookingScreen = ({ navigation, route }: any) => {
   const { doctorId } = route.params;
@@ -24,6 +28,23 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
     description: string;
     phoneNumber?: string;
   } | null>(null);
+
+  const { data, isPending, error } = useQuery({
+    queryKey: ['doctorSlots', doctorId, selectedDate],
+    queryFn: () =>
+      getDoctorSlotApi({
+        doctorID: doctorId,
+        date: selectedDate.toISOString().split('T')[0].replace(/-/g, '/'),
+      }),
+    enabled: !!doctorId && !!selectedDate,
+  });
+
+  console.log('Doctor slots data:', data);
+
+  if (error) {
+    console.error('Error fetching doctor slots:', error);
+    return null;
+  }
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
@@ -64,7 +85,16 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
 
   const sections = [
     { id: '1', component: <DatePicker onDateChange={handleDateChange} /> },
-    { id: '2', component: <TimePicker selectedDate={selectedDate} onTimeChange={handleTimeChange} /> },
+    {
+      id: '2',
+      component: (
+        <TimePicker
+          selectedDate={selectedDate}
+          onTimeChange={handleTimeChange}
+          doctorSlots={data?.doctorSlots || []} // Truyền doctorSlots xuống TimePicker
+        />
+      ),
+    },
     { id: '3', component: <PatientInfo onInfoChange={handlePatientInfoChange} /> },
     {
       id: '4',
@@ -96,13 +126,16 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
         title="Đặt Lịch"
         onBackButtonPress={() => navigation.goBack()}
       />
-      <FlatList
-        data={sections}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={styles.flatListContainer}>
+        <FlatList
+          data={sections}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        />
+        <LoadingOverlay visible={isPending} fullScreen={false} />
+      </View>
     </LinearGradient>
   );
 };
@@ -113,12 +146,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  flatListContainer: {
+    flex: 1,
+    position: 'relative',
+  },
   contentContainer: {
     paddingTop: 60,
     paddingBottom: 100,
   },
-  section: {
-  },
+  section: {},
   buttonSection: {
     alignItems: 'center',
     marginTop: 20,
