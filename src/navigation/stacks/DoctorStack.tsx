@@ -7,6 +7,7 @@ import DoctorDetailScreen from '../../features/doctor/screens/DoctorDetailScreen
 import DoctorBookingScreen from '../../features/doctor/screens/DoctorBookingScreen';
 import BookingConfirmationScreen from '../../features/doctor/screens/BookingConfirmationScreen';
 import BookingStatusScreen from '../../features/doctor/screens/BookingStatusScreen';
+import withAuth from '../../components/hoc/withAuth';
 
 const Stack = createNativeStackNavigator<DoctorStackParamList>();
 const DoctorStack = () => {
@@ -14,9 +15,9 @@ const DoctorStack = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="DoctorScreen" component={DoctorScreen} />
       <Stack.Screen name="DoctorDetailScreen" component={DoctorDetailScreen}  />
-      <Stack.Screen name="DoctorBookingScreen" component={DoctorBookingScreen} />
-      <Stack.Screen name="BookingConfirmationScreen" component={BookingConfirmationScreen} />
-      <Stack.Screen name="BookingStatusScreen" component={BookingStatusScreen} />
+      <Stack.Screen name="DoctorBookingScreen" component={withAuth(DoctorBookingScreen)} />
+      <Stack.Screen name="BookingConfirmationScreen" component={withAuth(BookingConfirmationScreen)} />
+      <Stack.Screen name="BookingStatusScreen" component={withAuth(BookingStatusScreen)} />
     </Stack.Navigator>
   )
 }

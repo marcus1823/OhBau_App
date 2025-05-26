@@ -65,7 +65,6 @@ const TimePicker: React.FC<TimePickerProps> = ({ selectedDate, onTimeChange, doc
       return false;
     }
 
-    // Parse timeString (e.g., "06:00") into hours
     const date = new Date(selectedDate);
     const [hourStr] = timeString.split(':');
     const hour = parseInt(hourStr, 10);
@@ -73,9 +72,10 @@ const TimePicker: React.FC<TimePickerProps> = ({ selectedDate, onTimeChange, doc
     const slotStartTime = date.getTime();
 
     return doctorSlots.some((doctorSlot) => {
-      const { startTime, endTime } = doctorSlot.slot;
+      const { startTime, endTime } = doctorSlot.slot; // Lấy từ doctorSlot.slot
+      const isBooking = doctorSlot.isBooking; // Assuming isBooking is on doctorSlot, not doctorSlot.slot
+      if (isBooking) {return false;} // Bỏ qua slot đã được đặt
 
-      // Parse startTime and endTime from API (e.g., "08:00" to timestamp)
       const [startHour, startMinute] = startTime.split(':').map(Number);
       const [endHour, endMinute] = endTime.split(':').map(Number);
 

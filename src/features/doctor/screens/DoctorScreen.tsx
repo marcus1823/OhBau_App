@@ -57,7 +57,7 @@ const DoctorScreen = ({ navigation }: any) => {
 
   const handleInfoPress = (id: string) => {
     console.log('Doctor ID pressed:', id);
-    setIsSearchModalVisible(false); 
+    setIsSearchModalVisible(false);
     navigation.navigate('DoctorDetailScreen', {
       id,
     });
@@ -94,29 +94,37 @@ const DoctorScreen = ({ navigation }: any) => {
       }
     },
     getNextPageParam: (lastPage: GetDoctorResponsePaginate) => {
-      if (lastPage.page < lastPage.totalPage) {
+      console.log('Last Page:', lastPage); // In log để kiểm tra
+      if (lastPage.page < lastPage.totalPages) {
         return lastPage.page + 1;
       }
       return undefined;
     },
     initialPageParam: 1,
   });
+  console.log('Query States:', { isLoading, isFetching, isFetchingNextPage, hasNextPage });
 
   // ✅ Lọc danh sách bác sĩ
-  const doctors = useMemo(
-    () =>
-      data?.pages
-        .flatMap((page) => page.items?.filter((item): item is GetDoctorResponse => !!item) || [])
-        .filter((item): item is GetDoctorResponse => !!item) || [],
-    [data]
-  );
+  // const doctors = useMemo(
+  //   () =>
+  //     data?.pages
+  //       .flatMap((page) => page.items?.filter((item): item is GetDoctorResponse => !!item) || [])
+  //       .filter((item): item is GetDoctorResponse => !!item) || [],
+  //   [data]
+  // );
+  
+const doctors = useMemo(
+  () => data?.pages.flatMap((page) => page.items || []) || [],
+  [data]
+);
 
   // ✅ Hàm load thêm trang
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  };
+const handleLoadMore = () => {
+  console.log('handleLoadMore called', { hasNextPage, isFetchingNextPage });
+  if (hasNextPage && !isFetchingNextPage) {
+    fetchNextPage();
+  }
+};
 
   // ✅ Tối ưu renderItem bằng useCallback
   const renderItem = useCallback(
@@ -135,24 +143,20 @@ const DoctorScreen = ({ navigation }: any) => {
   );
 
   // ✅ Hiển thị loading hoặc thông báo "đã hết dữ liệu"
-  const renderFooter = () => {
-    if (isFetchingNextPage) {
-      return (
-        <View style={styles.footerLoader}>
-          <ActivityIndicator
-            size="small"
-            color={Gradients.backgroundPrimary[0]}
-          />
-        </View>
-      );
-    }
-
-    if (!hasNextPage && doctors.length > 0) {
-      return <Text style={styles.noDataText}>Bạn đã xem hết danh sách bác sĩ.</Text>;
-    }
-
-    return null;
-  };
+const renderFooter = () => {
+  console.log('Render Footer:', { isFetchingNextPage, hasNextPage, doctorsLength: doctors.length });
+  if (isFetchingNextPage) {
+    return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" color={Gradients.backgroundPrimary[0]} />
+      </View>
+    );
+  }
+  if (!hasNextPage && doctors.length > 0) {
+    return <Text style={styles.noDataText}>Bạn đã xem hết danh sách bác sĩ.</Text>;
+  }
+  return null;
+};
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
@@ -174,7 +178,7 @@ const DoctorScreen = ({ navigation }: any) => {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={
           isLoading || isFetching ? (
@@ -210,7 +214,7 @@ export default DoctorScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  contentContainer: { paddingTop: 20, paddingBottom: 100, paddingHorizontal: 10 },
+  contentContainer: { paddingTop: 20, paddingBottom: 20, paddingHorizontal: 10 },
   sortBy: { marginTop: 50 },
   noDataText: { fontSize: 16, color: '#666', textAlign: 'center', marginTop: 20 },
   footerLoader: { padding: 20, alignItems: 'center' },

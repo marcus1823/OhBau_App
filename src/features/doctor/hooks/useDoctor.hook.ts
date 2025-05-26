@@ -1,11 +1,16 @@
 import {
   GetDoctorRequest,
-  
+
   GetDoctorByIdRequest,
+  CreateBookingRequest,
+  CreateBookingResponse,
 } from '../types/doctor.type';
-import { getDoctorApi, getDoctorByIdApi } from '../api/doctorApi';
+import { createBookingApi, getDoctorApi, getDoctorByIdApi } from '../api/doctorApi';
 import { useCreateQuery } from '../../../hooks/useCreateQuery';
 import { QueryFunctionContext } from '@tanstack/react-query';
+import { useCreateMutation } from '../../../hooks/useCreateMutation';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../stores/store';
 
 /**
  * Custom hook để lấy danh sách bác sĩ (phân trang)
@@ -42,3 +47,26 @@ export const useGetDoctorById = (request: GetDoctorByIdRequest) =>
     'Thông tin bác sĩ đã được lấy thành công!',
     'Đã xảy ra lỗi trong quá trình lấy thông tin bác sĩ'
   );
+
+
+
+/**
+ * Custom hook để đặt lịch hẹn với bác sĩ
+ * @returns Kết quả mutation với mutate, isLoading, isError, error, v.v.
+ */
+export const useBookingDoctor = () => {
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  console.log('accessToken in useBookingDoctor:', accessToken);
+  
+
+  return useCreateMutation<
+    CreateBookingResponse,
+    Error,
+    CreateBookingRequest
+  >(
+    (request: CreateBookingRequest) => createBookingApi(request, accessToken!), // dấu ! ở sau accesstoken để đảm bảo không null
+    'bookingDoctor',
+    'Đặt lịch hẹn thành công!',
+    'Đã xảy ra lỗi trong quá trình đặt lịch hẹn với bác sĩ'
+  );
+};

@@ -34,9 +34,10 @@ const BookingStatusScreen = ({ navigation }: any) => {
         });
     }
     const handleNavSchedule = () => {
-        console.log('Navigate to Schedule');
+        navigation.navigate('Cá nhân', {
+            screen: 'MyAppointmentScreen',
+        });
 
-        // navigation.navigate('Schedule');
     }
 
     const currentStatus = statusMap[status] || statusMap.success;

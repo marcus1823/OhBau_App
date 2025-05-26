@@ -16,7 +16,7 @@ export interface GetDoctorResponsePaginate {
     size: number; // int32
     page: number; // int32
     total: number; // int32
-    totalPage: number; // int32
+    totalPages: number; // int32
     items?: GetDoctorResponse[];
 }
 
@@ -60,7 +60,6 @@ export interface GetDoctorByIdResponseBaseResponse {
     data: GetDoctorByIdResponse;
   }
 
-//   https://ohbau.cloud/api/v1/doctor-slot/3c26ab90-01e2-47f6-882f-3da0d93ba57d/user?date=2025%2F04%2F25
   export interface GetDoctorSlotRequest {
       doctorID: string;
       date: string;
@@ -89,3 +88,62 @@ export interface GetDoctorByIdResponseBaseResponse {
     message: string;
     data: GetDoctorSlotForUserResponse;
   }
+
+  export interface CreateBookingRequest {
+    dotorSlotId: string;
+    bookingModule?: string;
+    description?: string;
+    fullName?: string;
+    yearOld?: number; // int32
+    address?: string;
+    phone?: string;
+    date: string; //($date)
+  }
+
+  export interface CreateBookingResponse {
+    id: string;
+    parentId: string;
+    doctorSlotId: string;
+    type?: string; 
+    bookingModule?: string;
+    description?: string;
+    fullName?: string;
+    yearOld?: number; // int32
+    address?: string;
+    phone?: string;
+    date: string; //($date)
+  }
+
+export interface CreateBookingResponseBaseResponse {
+    status: string;
+    message: string;
+    data: CreateBookingResponse;
+}
+
+export interface GetBookingRequest {
+  page: number;
+  size: number;
+}
+
+export interface GetBookingResponse {
+  parent: GetParentResponse;
+  type? : string; 
+  bookingModule?: string;
+  description?: string;
+  date: string; //($date)
+  doctor: GetDoctorResponse;
+  slot: SlotResponse;
+}
+
+
+export interface GetParentResponse {
+  id?: string;
+  fullName?: string;
+  dob?: string; //($date)
+  getMotherHealthResponse?: GetMotherHealthResponse;
+}
+
+export interface GetMotherHealthResponse {
+  weith?: number;
+  bloodPressure?: number;
+}

@@ -10,11 +10,14 @@ import TimePicker from '../components/TimePicker';
 import { useQuery } from '@tanstack/react-query';
 import { getDoctorSlotApi } from '../api/doctorApi';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
-
+import { useToast } from '../../../utils/toasts/useToast';
+import { validateDateRequired, validateRequired, formatDateToString } from '../../../utils/validations/validations';
 
 const DoctorBookingScreen = ({ navigation, route }: any) => {
   const { doctorId } = route.params;
   console.log('doctorId in booking:', doctorId);
+
+  const { showError } = useToast();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -70,16 +73,52 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
     console.log('Thông tin bệnh nhân:', info);
   };
 
-  const handleConfirmBooking = () => {
-    console.log('Xác nhận đặt lịch với thông tin:', {
-      selectedDate,
-      selectedTime,
-      patientInfo,
-    });
+  const handleProceedToConfirmation = () => {
+    // Validate date
+    const dateError = validateDateRequired(selectedDate, 'ngày khám');
+    if (dateError) {
+      showError(dateError);
+      return;
+    }
+
+    // Validate time
+    if (!selectedTime) {
+      showError('Vui lòng chọn giờ khám');
+      return;
+    }
+
+    const requiredFields: { value: string | null | undefined; fieldName: string }[] = [
+      { value: patientInfo?.name, fieldName: 'tên bệnh nhân' },
+      { value: patientInfo?.age, fieldName: 'tuổi' },
+      { value: patientInfo?.address, fieldName: 'địa chỉ' },
+      { value: patientInfo?.gender, fieldName: 'giới tính' },
+      { value: patientInfo?.description, fieldName: 'mô tả triệu chứng' },
+    ];
+
+    for (const field of requiredFields) {
+      const validationError = validateRequired(field.value, field.fieldName);
+      if (validationError) {
+        showError(validationError);
+        return;
+      }
+    }
+
+    // Validate visit purpose
+    if (!patientInfo?.visitPurpose || patientInfo.visitPurpose.length === 0) {
+      showError('Vui lòng chọn mục đích khám');
+      return;
+    }
+
+    // Ensure selectedDate is always a string
+    const formattedDate = formatDateToString(selectedDate) || 'Chưa chọn';
+
+    // Navigate to BookingConfirmationScreen with serialized selectedDate
     navigation.navigate('BookingConfirmationScreen', {
-      selectedDate,
+      selectedDate: formattedDate, // Use fallback if formatDateToString fails
       selectedTime,
-      patientInfo,
+      patientInfo: patientInfo || {}, // Ensure patientInfo is not null
+      doctorId,
+      doctorSlots: data?.doctorSlots || [],
     });
   };
 
@@ -91,7 +130,7 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
         <TimePicker
           selectedDate={selectedDate}
           onTimeChange={handleTimeChange}
-          doctorSlots={data?.doctorSlots || []} // Truyền doctorSlots xuống TimePicker
+          doctorSlots={data?.doctorSlots || []}
         />
       ),
     },
@@ -100,8 +139,8 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
       id: '4',
       component: (
         <ButtonAction
-          title="Đặt Lịch"
-          onPress={handleConfirmBooking}
+          title="Tiếp Tục"
+          onPress={handleProceedToConfirmation}
           backgroundColor={Colors.primary}
           color={Colors.textWhite}
         />
