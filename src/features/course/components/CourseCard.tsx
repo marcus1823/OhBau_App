@@ -2,77 +2,120 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAddCourseToCart } from '../hooks/useCourse.hook';
+import { useSelector } from 'react-redux';
+
+import { useToast } from '../../../utils/toasts/useToast';
+import { RootState } from '../../../stores/store';
 
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
   { background: Colors.cardHome2, text: Colors.textCardHome2 },
-  { background: Colors.cardHome3, text: Colors.textCardHome3 },
+  { background: Colors.cardHome3, text: Colors.cardHome3 },
   { background: Colors.cardHome4, text: Colors.textCardHome4 },
 ];
 
 interface CourseCardProps {
+  courseId: string;
   name: string;
   rating: number;
   duration: number;
   price: number;
+  isPurchased: boolean;
   showBuyButton?: boolean;
-  onBuyPress?: () => void;
-  index: number; 
+  index: number;
+  navigation: any;
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({
+  courseId,
   name,
   rating,
   duration,
   price,
+  isPurchased,
   showBuyButton = false,
-  onBuyPress,
   index,
+  navigation,
 }) => {
-  
-  const colorIndex = index % cardColors.length;
-  const { background, text } = cardColors[colorIndex];
+  const { mutate, isPending } = useAddCourseToCart();
+  const addedCourses = useSelector((state: RootState) => state.cart.addedCourses);
+  const { showSuccess, showError } = useToast();
+  const isInCart = addedCourses.includes(courseId);
 
-  // Chọn icon dựa trên showBuyButton
-  const iconName = showBuyButton ? 'shopping-cart' : 'favorite-outline';
+  const handleAddToCart = () => {
+    if (!isInCart && !isPending) {
+      mutate({ courseId }, {
+        onError: (error) => {
+          if (error instanceof Error && error.message.includes('208')) {
+            showError('Sản phẩm đã có trong giỏ hàng');
+          }
+        },
+      });
+    } else if (isInCart) {
+      showError('Sản phẩm đã có trong giỏ hàng');
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (!isInCart && !isPending) {
+      mutate({ courseId, isBuyNow: true }, {
+        onSuccess: () => {
+          showSuccess('Thêm vào giỏ hàng thành công!');
+          navigation.navigate('CartScreen');
+        },
+        onError: (error) => {
+          if (error instanceof Error && error.message.includes('208')) {
+            showError('Sản phẩm đã có trong giỏ hàng');
+            navigation.navigate('CartScreen');
+          }
+        },
+      });
+    } else {
+      showError('Sản phẩm đã có trong giỏ hàng');
+      navigation.navigate('CartScreen');
+    }
+  };
+
+  const iconName = isInCart || isPending ? 'check' : (showBuyButton ? 'shopping-cart' : 'favorite-outline');
+  const isIconDisabled = isInCart || isPending;
 
   return (
-    <View style={[styles.card, { backgroundColor: background }]}>
-      {/* Tên khóa học và biểu tượng */}
+    <View style={[styles.card, { backgroundColor: cardColors[index % cardColors.length].background }]}>
       <View style={styles.headerRow}>
-        <Text style={styles.courseName} numberOfLines={2}>
-          {name}
-        </Text>
-        <View style={styles.iconContainer}>
-          <Icon name={iconName} size={16} color={text} />
-        </View>
+        <Text style={styles.courseName} numberOfLines={2}>{name}</Text>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={handleAddToCart}
+          disabled={isIconDisabled}
+        >
+          <Icon name={iconName} size={16} color={isIconDisabled ? Colors.disabledBg : cardColors[index % cardColors.length].text} />
+        </TouchableOpacity>
       </View>
 
-      {/* Rating và Duration */}
       <View style={styles.infoRow}>
         <View style={styles.ratingContainer}>
-          <Icon name="star-outline" size={16} color={text} />
-          <Text style={[styles.ratingText, { color: text }]}>{rating}</Text>
+          <Icon name="star-outline" size={16} color={cardColors[index % cardColors.length].text} />
+          <Text style={[styles.ratingText, { color: cardColors[index % cardColors.length].text }]}>{rating}</Text>
         </View>
         <View style={styles.durationContainer}>
-          <Icon name="access-time" size={16} color={text} />
-          <Text style={[styles.durationText, { color: text }]}>{duration} hours</Text>
+          <Icon name="access-time" size={16} color={cardColors[index % cardColors.length].text} />
+          <Text style={[styles.durationText, { color: cardColors[index % cardColors.length].text }]}>{duration} hours</Text>
         </View>
       </View>
 
-      {/* Giá (ẩn khi showBuyButton là false) */}
-      {showBuyButton && (
+      {!isPurchased && showBuyButton && (
         <View style={styles.priceRow}>
           <View style={styles.priceContainer}>
-            <Text style={[styles.price, { color: text }]}>{price.toLocaleString()} VNĐ</Text>
+            <Text style={styles.price}>{price.toLocaleString()} VNĐ</Text>
           </View>
         </View>
       )}
 
-      {showBuyButton && (
+      {!isPurchased && showBuyButton && (
         <View style={styles.buyButtonRow}>
-          <TouchableOpacity style={styles.buyButton} onPress={onBuyPress}>
-            <Text style={[styles.buyButtonText, { color: text }]}>MUA NGAY</Text>
+          <TouchableOpacity style={styles.buyButton} onPress={handleBuyNow} disabled={isPending}>
+            <Text style={[styles.buyButtonText, { color: cardColors[index % cardColors.length].text }]}>MUA NGAY</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -150,25 +193,26 @@ const styles = StyleSheet.create({
   },
   priceContainer: {
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.textWhite,
+    alignItems: 'flex-end',
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   price: {
-    fontSize: 12,
+    fontSize: 14,
+    color: Colors.textWhite,
+    fontWeight: 'bold',
   },
   buyButtonRow: {},
   buyButton: {
     backgroundColor: Colors.textWhite,
-    borderRadius: 5,
+    borderRadius: 30,
     paddingVertical: 8,
     paddingHorizontal: 15,
     alignItems: 'center',
   },
   buyButtonText: {
-    fontWeight: 500,
+    fontWeight: '500',
     fontSize: 12,
   },
 });

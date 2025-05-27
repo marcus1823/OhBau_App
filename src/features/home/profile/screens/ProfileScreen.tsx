@@ -1,17 +1,34 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { ScrollView, StyleSheet, View, ActivityIndicator, Text } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Gradients } from '../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../components/common/Header/PrimaryHeader';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '../../../../utils/toasts/useToast';
 import { clearAuthData } from '../../../auth/slices/auth.slices';
 import { clearData } from '../../../../utils/asyncStorage/authStorage';
 import ProfileHeader from '../components/ProfileHeader';
 import MenuProfile from '../components/MenuProfile';
+import { useQuery } from '@tanstack/react-query';
+import { getProfileApi } from '../api/profileApi'; 
+import { RootState } from '../../../../stores/store';
 
 const ProfileScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
   const { showSuccess } = useToast();
+  const accessToken = useSelector((state: any) => state.auth.accessToken); 
+ const role = useSelector((state: RootState) => state.auth.role);
+  
+  const {
+    data: profileData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['profile', accessToken],
+    queryFn: () => getProfileApi(accessToken),
+    enabled: !!accessToken, 
+    retry: 1, 
+  });
 
   const handleLogout = async () => {
     try {
@@ -24,15 +41,15 @@ const ProfileScreen = ({ navigation }: any) => {
       await clearData();
       console.log('clearData');
       showSuccess('Đăng xuất thành công!');
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (err) {
+      console.error('Logout error:', err);
     }
   };
 
   const menuOptionsPress = (option: string) => {
     switch (option) {
       case 'Hồ sơ cá nhân':
-        navigation.navigate('PersonalScreen');
+        navigation.navigate('PersonalScreen', { profileData, role });
         break;
       case 'Danh mục yêu thích':
         navigation.navigate('FavoriteScreen');
@@ -58,12 +75,38 @@ const ProfileScreen = ({ navigation }: any) => {
     }
   };
 
+  // Render profile header with dynamic data
+  const renderProfileHeader = () => {
+    if (isLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Gradients.backgroundPrimary[0]} />
+        </View>
+      );
+    }
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            {error instanceof Error ? error.message : 'Không thể tải thông tin hồ sơ'}
+          </Text>
+        </View>
+      );
+    }
+    return (
+      <ProfileHeader
+        avatarUrl={profileData?.avatar || 'https://i.pinimg.com/736x/fa/d2/ea/fad2ea48c9b071f3f785395458aebce0.jpg'}
+        name={profileData?.fullName || 'Chưa cập nhật'}
+        email={profileData?.email || 'marcuschill1823@gmail.com'}
+      />
+    );
+  };
+
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
       <PrimaryHeader
         title="Tài khoản"
         disableBackButton={true}
-        // onBackButtonPress={() => navigation.goBack()}
         moreButton
         modalTitle="Tùy chọn"
         modalButtons={[
@@ -73,11 +116,7 @@ const ProfileScreen = ({ navigation }: any) => {
         onModalClose={() => console.log('Modal closed')}
       />
       <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
-        <ProfileHeader
-          avatarUrl="https://i.pinimg.com/736x/fa/d2/ea/fad2ea48c9b071f3f785395458aebce0.jpg"
-          name="Trương Minh Tiền"
-          email="marcuschill1823@gmail.com"
-        />
+        {renderProfileHeader()}
         <View style={styles.mainContent}>
           <MenuProfile
             icon="person"
@@ -94,7 +133,6 @@ const ProfileScreen = ({ navigation }: any) => {
             title="Danh mục yêu thích"
             onPress={() => menuOptionsPress('Danh mục yêu thích')}
           />
-
           <MenuProfile
             icon="calendar-today"
             title="Lịch hẹn tái khám"
@@ -105,7 +143,6 @@ const ProfileScreen = ({ navigation }: any) => {
             title="Lịch sử đi khám"
             onPress={() => menuOptionsPress('Lịch sử đi khám')}
           />
-
           <MenuProfile
             icon="shopping-bag"
             title="Thanh toán và giao hàng"
@@ -137,7 +174,6 @@ export default ProfileScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#fff',
   },
   contentContainer: {
     flex: 1,
@@ -147,5 +183,22 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     marginTop: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ff4444',
+    textAlign: 'center',
   },
 });

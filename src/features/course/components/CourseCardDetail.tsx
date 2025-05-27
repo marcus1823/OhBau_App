@@ -3,7 +3,6 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-// Danh sách màu background và text tương ứng
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
   { background: Colors.cardHome2, text: Colors.textCardHome2 },
@@ -14,21 +13,20 @@ const cardColors = [
 interface CourseCardDetailProps {
   title: string;
   duration: number;
-  active: boolean;
+  isPurchased: boolean;
   index: number;
 }
 
 const CourseCardDetail: React.FC<CourseCardDetailProps> = ({
   title,
   duration,
-  active,
+  isPurchased,
   index,
 }) => {
   const colorIndex = index % cardColors.length;
   const { background, text } = cardColors[colorIndex];
 
-  // Chọn icon dựa trên trạng thái active
-  const iconName = active ? 'favorite-outline' : 'shopping-cart';
+  const iconName = isPurchased ? 'favorite' : 'favorite-outline';
 
   return (
     <View style={[styles.card, { backgroundColor: background }]}>

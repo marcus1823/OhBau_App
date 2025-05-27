@@ -3,19 +3,20 @@ import { StyleSheet, Text, ScrollView, View, TouchableOpacity } from 'react-nati
 import CourseCard from './CourseCard';
 
 interface Course {
+  courseId: string;
   name: string;
   rating: number;
   duration: number;
   price: number;
-  active?: boolean;
-  lessons?: any[];
+  isPurchased: boolean;
 }
 
 interface CourseSectionProps {
   title: string;
   courses: Course[];
   showBuyButton?: boolean;
-  onCardPress?: (course: Course) => void; // Thêm prop để xử lý onPress
+  onCardPress?: (course: Course) => void;
+  navigation: any; // Thêm navigation prop
 }
 
 const CourseSection: React.FC<CourseSectionProps> = ({
@@ -23,6 +24,7 @@ const CourseSection: React.FC<CourseSectionProps> = ({
   courses,
   showBuyButton = false,
   onCardPress,
+  navigation,
 }) => {
   return (
     <View style={styles.section}>
@@ -32,13 +34,15 @@ const CourseSection: React.FC<CourseSectionProps> = ({
           <View key={index}>
             <TouchableOpacity onPress={() => onCardPress && onCardPress(course)}>
               <CourseCard
+                courseId={course.courseId}
                 name={course.name}
                 rating={course.rating}
                 duration={course.duration}
                 price={course.price}
-                showBuyButton={showBuyButton}
-                onBuyPress={() => console.log(`Mua khóa học: ${course.name}`)}
+                isPurchased={course.isPurchased}
+                showBuyButton={showBuyButton && !course.isPurchased}
                 index={index}
+                navigation={navigation} 
               />
             </TouchableOpacity>
           </View>

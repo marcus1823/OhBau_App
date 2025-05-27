@@ -16,8 +16,10 @@ export type AuthStackParamList = {
 export type HomeStackParamList = {
     'HomeScreen': undefined;
 
-    'ChatScreen': undefined;
+    'ProfileStack': { screen?: keyof ProfileStackParamList }; // Cho phép truyền screen vào ProfileStack
+    'PaymentScreen': undefined;
 
+    'CartScreen': undefined;
 }
 
 //  kiểu cho DoctorStack
@@ -40,6 +42,10 @@ export type CourseStackParamList = {
     'CourseDetailScreen': undefined;
     'CourseChapterScreen': undefined;
     'ChapterDetailScreen': undefined;
+    'CartScreen': undefined;
+    'PaymentScreen': undefined;
+    'ProfileStack': { screen?: keyof ProfileStackParamList }; // Cho phép truyền screen vào ProfileStack
+
 }
 
 // kiểu cho CommunityStack
@@ -61,13 +67,18 @@ export type ProfileStackParamList = {
     'RequestSupportScreen': undefined;
 }
 
+// Kiểu cho ChatStack
+export type ChatStackParamList = {
+    'ChatScreen': undefined;
+}
 // kiểu cho TabNavigation
 export type TabParamList = {
     'Trang Chủ': undefined;
     'Bác sĩ': undefined;
     'Cộng Đồng': undefined;
-    'Khoá Học': undefined;
-    'Cá nhân': undefined;
+    'Khoá học': undefined;
+    // 'Cá nhân': undefined;
+    'Tin nhắn': undefined;
     // 'Cửa Hàng': undefined;
 }
 
@@ -77,6 +88,7 @@ export type RootStackParamList = {
     StartScreen: undefined;
     AuthStack: undefined;
     TabNavigation: { screen?: keyof TabParamList }; // Cho phép truyền screen vào TabNavigation
+
 };
 
 // Kiểu cho navigation prop 
@@ -85,6 +97,7 @@ export type HomeStackNavigationProp = NativeStackNavigationProp<HomeStackParamLi
 export type DoctorStackNavigationProp = NativeStackNavigationProp<DoctorStackParamList>;
 export type CourseStackNavigationProp = NativeStackNavigationProp<CourseStackParamList>;
 export type ShopStackNavigationProp = NativeStackNavigationProp<ShopStackParamList>;
+export type ChatStackNavigationProp = NativeStackNavigationProp<ChatStackParamList>;
 export type CommunityStackNavigationProp = NativeStackNavigationProp<CommunityStackParamList>;
 export type ProfileStackNavigationProp = NativeStackNavigationProp<ProfileStackParamList>;
 export type TabNavigationProp = BottomTabNavigationProp<TabParamList>;

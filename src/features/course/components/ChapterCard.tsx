@@ -10,46 +10,44 @@ const cardColors = [
 ];
 
 interface ChapterCardProps {
-  name: string;
-  description: string;
+  title: string;
+  content: string;
   progress: number;
-  index: number; 
+  index: number;
 }
 
-const ChapterCard: React.FC<ChapterCardProps> = ({ name, description, progress, index }) => {
-  // Chọn màu dựa trên index
+const ChapterCard: React.FC<ChapterCardProps> = ({ title, content, progress, index }) => {
   const colorIndex = index % cardColors.length;
   const { background, text } = cardColors[colorIndex];
 
-  // Tính vị trí của text dựa trên progress
   const progressPercentage = progress * 100;
-  const textPosition = progressPercentage === 0 ? 50 : progressPercentage; // Nếu progress là 0%, đặt text ở giữa (50%)
-  
-  // Đảm bảo text không vượt quá biên (giới hạn trong khoảng 5% đến 95% để không bị cắt)
+  const textPosition = progressPercentage === 0 ? 50 : progressPercentage;
   const adjustedTextPosition = Math.min(Math.max(textPosition, 5), 95);
 
   return (
     <View style={[styles.card, { backgroundColor: background }]}>
       {/* Tiêu đề chương */}
       <Text style={[styles.chapterTitle]} numberOfLines={2}>
-        {name}
+        {title}
       </Text>
 
       {/* Mô tả chương */}
-      <Text style={[styles.chapterDescription]}>{description}</Text>
+      <Text style={[styles.chapterDescription]} numberOfLines={2}>
+        {content}
+      </Text>
 
       {/* Thanh tiến độ */}
       <View style={styles.progressBarContainer}>
         <View
           style={[
             styles.progressBarFill,
-            { width: `${progressPercentage}%` }, 
+            { width: `${progressPercentage}%` },
           ]}
         />
         <Text
           style={[
             styles.progressText,
-            { color: text }, 
+            { color: text },
             { left: `${adjustedTextPosition}%`, transform: [{ translateX: -15 }] },
           ]}
         >
@@ -87,17 +85,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: 18,
     overflow: 'hidden',
-    position: 'relative', // Để định vị text tuyệt đối bên trong
+    position: 'relative',
   },
   progressBarFill: {
-    backgroundColor:'#16A34A',
+    backgroundColor: '#16A34A',
     height: '100%',
   },
   progressText: {
     position: 'absolute',
     top: 2,
     fontSize: 10,
-    width: 30, 
+    width: 30,
     textAlign: 'center',
   },
 });

@@ -12,7 +12,8 @@ import CourseStack from './stacks/CourseStack';
 import CommunityStack from './stacks/CommunityStack';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
-import ProfileStack from './stacks/ProfileStack';
+// import ProfileStack from './stacks/ProfileStack';
+import ChatStack from './stacks/ChatStack';
 
 // Import PNG icons
 const homeIcon = require('../assets/icons/homeIcon.png');
@@ -20,7 +21,8 @@ const doctorIcon = require('../assets/icons/doctorIcon.png');
 const courseIcon = require('../assets/icons/courseIcon.png');
 // const shopIcon = require('../assets/icons/shopIcon.png');
 const communityIcon = require('../assets/icons/communityIcon.png');
-const someProfileIcon = require('../assets/icons/icons8-maternity-48.png');
+// const someProfileIcon = require('../assets/icons/icons8-maternity-48.png');
+const chatIcon = require('../assets/icons/icons8-chat-48-field.png');
 
 const Tab = createBottomTabNavigator();
 
@@ -98,18 +100,26 @@ const TabNavigation: React.FC = () => {
                 tabBarIcon: getTabBarIcon(doctorIcon),
               }}
             />
-            <Tab.Screen
-              name="Cộng đồng"
-              component={CommunityStack}
-              options={{
-                tabBarIcon: getTabBarIcon(communityIcon),
-              }}
-            />
+            
             <Tab.Screen
               name="Khóa học"
               component={CourseStack}
               options={{
                 tabBarIcon: getTabBarIcon(courseIcon),
+              }}
+            />
+            <Tab.Screen
+              name="Tin nhắn"
+              component={ChatStack}
+              options={{
+                tabBarIcon: getTabBarIcon(chatIcon),
+              }}
+            />
+            <Tab.Screen
+              name="Cộng đồng"
+              component={CommunityStack}
+              options={{
+                tabBarIcon: getTabBarIcon(communityIcon),
               }}
             />
             {/* <Tab.Screen
@@ -119,13 +129,13 @@ const TabNavigation: React.FC = () => {
               tabBarIcon: getTabBarIcon(shopIcon),
             }}
           /> */}
-            <Tab.Screen
+            {/* <Tab.Screen
               name="Cá nhân"
               component={ProfileStack}
               options={{
                 tabBarIcon: getTabBarIcon(someProfileIcon),
               }}
-            />
+            /> */}
 
           </Tab.Navigator>
         </SafeAreaView>

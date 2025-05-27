@@ -5,7 +5,11 @@ import { Colors, Gradients } from '../../../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../../../components/common/Header/PrimaryHeader';
 import PersonalInfoItem from '../components/PersonalInfoItem';
 
-const PersonalScreen = ({ navigation }: any) => {
+const PersonalScreen = ({ navigation, route }: any) => {
+  const { profileData, role } = route.params;
+  console.log('PersonalScreen profileData:', profileData);
+  console.log('PersonalScreen role:', role);
+
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
       <PrimaryHeader
@@ -29,11 +33,11 @@ const PersonalScreen = ({ navigation }: any) => {
 
         {/* Nội dung chính */}
         <View style={styles.mainContent}>
-          <PersonalInfoItem title="Họ và Tên" value="Trương Minh Tiền" />
-          <PersonalInfoItem title="Vai trò" value="Mẹ" />
-          <PersonalInfoItem title="Ngày sinh" value="01/08/2003" />
-          <PersonalInfoItem title="Số điện thoại" value="0901234567" />
-          <PersonalInfoItem title="Email" value="marcuschill1823@gmail.com" />
+          <PersonalInfoItem title="Họ và Tên" value={profileData?.fullName || 'chưa cập nhật'}/>
+          <PersonalInfoItem title="Vai trò" value={role || 'chưa cập nhật'} />
+          <PersonalInfoItem title="Ngày sinh" value={profileData?.dob || 'chưa cập nhật'} />
+          <PersonalInfoItem title="Số điện thoại" value={profileData?.phone || 'chưa cập nhật'} />
+          <PersonalInfoItem title="Email" value={profileData?.email || 'chưa cập nhật'} />
         </View>
       </ScrollView>
     </LinearGradient>

@@ -18,11 +18,7 @@ const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificati
     <View style={styles.contentContainer}>
       {/* Avatar */}
       <TouchableOpacity
-        onPress={() =>
-          navigation.navigate('TabNavigation', {
-            screen: 'Cá nhân', // Navigate to the "Cá nhân" tab
-          })
-        }
+        onPress={() => navigation.navigate('ProfileStack')} // Navigate to ProfileScreen in ProfileStack
         style={styles.avatarContainer}
       >
         <Image
@@ -34,7 +30,7 @@ const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificati
 
       {/* Icon tin nhắn và thông báo */}
       <View style={styles.iconsContainer}>
-        {/* Tin nhắn */}
+        {/* Tin nhắn
         <TouchableOpacity
           onPress={() => navigation.navigate('ChatScreen')} // Assuming ChatScreen is in HomeStack
           style={styles.iconWrapper}
@@ -45,7 +41,8 @@ const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificati
               <Text style={styles.badgeText}>{unreadMessages}</Text>
             </View>
           )}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+
 
         {/* Thông báo */}
         <TouchableOpacity
@@ -59,6 +56,21 @@ const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificati
             </View>
           )}
         </TouchableOpacity>
+
+
+        {/* Giỏ hàng */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Trang Chủ', { screen: 'CartScreen' })}
+
+          style={styles.iconWrapper}
+        >
+          <Icon name="shopping-cart" size={24} color={Colors.primaryDark} />
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>0</Text>
+          </View>
+        </TouchableOpacity>
+
+
       </View>
     </View>
   );
