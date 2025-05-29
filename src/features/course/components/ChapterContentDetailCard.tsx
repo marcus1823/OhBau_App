@@ -16,42 +16,42 @@ const source = {
     html: htmlContent,
   };
 
-  const customStyles = {
-    p: {
-      color: Colors.textBlack,
-      fontSize: 16,
-      lineHeight: 24,
-      marginBottom: 10,
-    },
-    h1: {
-      color: Colors.primary,
-      fontSize: 24,
-      fontWeight: 'bold' as const,
-      marginBottom: 10,
-    },
-    h2: {
-      color: Colors.textBlack,
-      fontSize: 20,
-      fontWeight: '600' as const,
-      marginBottom: 8,
-    },
-    ul: {
-      marginLeft: 20,
-      marginBottom: 10,
-    },
-    li: {
-      color: Colors.textBlack,
-      fontSize: 16,
-      lineHeight: 24,
-    },
-  };
+  // const customStyles = {
+  //   p: {
+  //     color: Colors.textBlack,
+  //     fontSize: 16,
+  //     lineHeight: 24,
+  //     marginBottom: 10,
+  //   },
+  //   h1: {
+  //     color: Colors.primary,
+  //     fontSize: 24,
+  //     fontWeight: 'bold' as const,
+  //     marginBottom: 10,
+  //   },
+  //   h2: {
+  //     color: Colors.textBlack,
+  //     fontSize: 20,
+  //     fontWeight: '600' as const,
+  //     marginBottom: 8,
+  //   },
+  //   ul: {
+  //     marginLeft: 20,
+  //     marginBottom: 10,
+  //   },
+  //   li: {
+  //     color: Colors.textBlack,
+  //     fontSize: 16,
+  //     lineHeight: 24,
+  //   },
+  // };
   return (
     <View style={styles.card}>
       {/* Nội dung bài học */}
       <RenderHtml
         contentWidth={300} // Độ rộng tối đa, có thể điều chỉnh theo thiết bị
         source={source}
-        tagsStyles={customStyles}
+        // tagsStyles={customStyles}
       />
     </View>
   );

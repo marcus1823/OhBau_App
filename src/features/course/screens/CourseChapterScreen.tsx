@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import ChapterCard from '../components/ChapterCard';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { getChaptersApi } from '../api/courseApi';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { useToast } from '../../../utils/toasts/useToast';
@@ -16,12 +16,28 @@ const CourseChapterScreen = ({ navigation, route }: any) => {
 
   const { showError } = useToast();
 
-  const { data: chapters, isLoading, isError } = useQuery<GetChaptersResponse, Error>({
+  const {
+    data: chapters,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<GetChaptersResponse, Error>({
     queryKey: ['chapters', topicId],
-    queryFn: () => getChaptersApi({ topicId, pageSize: 10, pageNumber: 1 }),
+    queryFn: ({ pageParam = 1 }) =>
+      getChaptersApi({
+        topicId,
+        pageSize: 10,
+        pageNumber: pageParam as number,
+      }),
+    getNextPageParam: (lastPage) => {
+      const hasMore = lastPage.page < lastPage.totalPages;
+      return hasMore ? lastPage.page + 1 : undefined;
+    },
+    initialPageParam: 1, // Start from page 1
     enabled: !!topicId,
-    refetchOnWindowFocus: false,
-  });
+  })
   console.log('CourseChapterScreen chapters:', chapters);
 
   if (isLoading) {
@@ -59,7 +75,8 @@ const CourseChapterScreen = ({ navigation, route }: any) => {
 
       {/* Danh sách chương */}
       <FlatList
-        data={chapters?.items || []}
+        // data={chapters?.items || []}
+        data={chapters?.pages.flatMap(page => page.items) || []}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.content}
@@ -68,11 +85,20 @@ const CourseChapterScreen = ({ navigation, route }: any) => {
             <Text style={styles.lockedText}>
               Vui lòng mua khóa học này để xem nội dung chi tiết.
             </Text>
-          ) : chapters?.items.length === 0 ? (
+          ) : chapters?.pages.flatMap(page => page.items).length === 0 ? (
             <Text style={styles.noChaptersText}>
               Hiện tại chưa có chương nào trong bài học này.
             </Text>
           ) : null
+        }
+        onEndReachedThreshold={0.5}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        ListFooterComponent={
+          isFetchingNextPage ? <LoadingOverlay visible={true} fullScreen={false} /> : null
         }
       />
     </LinearGradient>

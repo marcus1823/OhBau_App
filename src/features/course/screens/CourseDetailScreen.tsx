@@ -18,13 +18,6 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
 
   const { showError, showInfo } = useToast();
 
-  // const { data: topics, isLoading, isError } = useQuery<GetTopicsResponse, Error>({
-  //   queryKey: ['topics', courseId],
-  //   queryFn: () => getTopicsApi({ courseId, pageSize: 10, pageNumber: 1 }),
-  //   enabled: !!courseId,
-  //   refetchOnWindowFocus: false,
-  // });
-
   const {
     data: topics,
     isLoading,
