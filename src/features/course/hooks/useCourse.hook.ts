@@ -4,6 +4,7 @@ import { setAddedCourses } from '../slices/cartSlice';
 import { CreateOrderResponse } from '../types/course.types';
 import { AppDispatch, RootState } from '../../../stores/store';
 import { useCreateMutation } from '../../../hooks/useCreateMutation';
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * Custom hook để xử lý thêm khóa học vào giỏ hàng
@@ -11,11 +12,14 @@ import { useCreateMutation } from '../../../hooks/useCreateMutation';
 export const useAddCourseToCart = () => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const dispatch = useDispatch<AppDispatch>();
+  const queryClient = useQueryClient();
   const addedCourses = useSelector((state: RootState) => state.cart.addedCourses || []);
 
   return useCreateMutation<void, Error, { courseId: string; isBuyNow?: boolean }>(
     async (variables) => {
-      if (!accessToken) {throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');}
+      if (!accessToken) {
+        throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+      }
       await addCourseToCartApi(variables.courseId, accessToken);
     },
     'addCourseToCart',
@@ -23,21 +27,28 @@ export const useAddCourseToCart = () => {
     'Đã xảy ra lỗi khi thêm vào giỏ hàng',
     {
       onMutate: (variables) => {
+        // Optimistic update: Chỉ thêm courseId vào addedCourses nếu chưa có
         if (!addedCourses.includes(variables.courseId)) {
           dispatch(setAddedCourses([...addedCourses, variables.courseId]));
         }
       },
       onSuccess: (data, variables) => {
+        // Đảm bảo courseId được thêm vào addedCourses
         if (!addedCourses.includes(variables.courseId)) {
           dispatch(setAddedCourses([...addedCourses, variables.courseId]));
         }
+        // Invalidate queries của CartScreen để làm mới giỏ hàng
+        queryClient.invalidateQueries({ queryKey: ['cartItemsByAccountInfinite'] });
+        queryClient.invalidateQueries({ queryKey: ['cartItemsDetailsInfinite'] });
       },
       onError: (error, variables) => {
+        // Rollback nếu lỗi không phải 208
         if (error instanceof Error && !error.message.includes('208')) {
-          dispatch(setAddedCourses(addedCourses.filter(id => id !== variables.courseId)));
+          dispatch(setAddedCourses(addedCourses.filter((id) => id !== variables.courseId)));
         }
+        // Không thêm courseId vào addedCourses nếu lỗi là 208
         if (error instanceof Error && error.message.includes('208')) {
-          dispatch(setAddedCourses([...addedCourses, variables.courseId]));
+          // Không cần dispatch vì courseId không nên được thêm
         }
       },
     }
@@ -52,7 +63,9 @@ export const useDeleteCartItem = () => {
 
   return useCreateMutation<void, Error, { itemId: string }>(
     async (variables) => {
-      if (!accessToken) {throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');}
+      if (!accessToken) {
+        throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+      }
       await deleteCartItemApi(variables.itemId, accessToken);
     },
     'deleteCartItem',
@@ -69,7 +82,9 @@ export const useCreateOrder = () => {
 
   return useCreateMutation<CreateOrderResponse, Error, { cartId: string }>(
     async (variables) => {
-      if (!accessToken) {throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');}
+      if (!accessToken) {
+        throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+      }
       return await createOrderApi(variables.cartId, accessToken);
     },
     'createOrder',

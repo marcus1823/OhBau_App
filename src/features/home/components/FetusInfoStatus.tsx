@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 import CardInfoStatus from './CardInfoStatus';
+import { FetusDetail } from '../types/family.type';
 
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
@@ -10,15 +11,27 @@ const cardColors = [
   { background: Colors.cardHome4, text: Colors.textCardHome4 },
 ];
 
-const FetusInfoStatus = () => {
-  // Dữ liệu giả định
-  const fetusInfo = [
-    { icon: 'scale', title: 'Cân nặng', value: '146 gam' },
-    { icon: 'straighten', title: 'Chiều dài', value: '18.6 cm' },
-    { icon: 'graphic-eq', title: 'Nhịp tim', value: '120 - 160 lần/phút' },
-    { icon: 'query-stats', title: 'Số lần đạp', value: '16 - 45 lần/ngày' },
+interface FetusInfoStatusProps {
+  fetusDetails: FetusDetail[];
+}
 
-  ];
+const FetusInfoStatus: React.FC<FetusInfoStatusProps> = ({ fetusDetails }) => {
+  // Select the first fetusDetail
+  const firstFetusDetail = fetusDetails[0] || null;
+
+  // Log the fetusDetails and firstFetusDetail
+  useEffect(() => {
+    console.log('FetusInfoStatus - Received Fetus Details:', fetusDetails);
+    console.log('FetusInfoStatus - First Fetus Detail:', firstFetusDetail);
+  }, [fetusDetails, firstFetusDetail]);
+
+  // Hardcoded data for UI (as requested, not using fetusDetails yet)
+const fetusInfo = [
+  { icon: 'scale', title: 'Cân nặng', value: `${firstFetusDetail?.weight || 0} kg` },
+  { icon: 'straighten', title: 'Chiều dài', value: `${firstFetusDetail?.height || 0} cm` },
+  { icon: 'graphic-eq', title: 'Nhịp tim', value: '120 - 160 lần/phút' },
+  { icon: 'query-stats', title: 'Số lần đạp', value: '16 - 45 lần/ngày' },
+];
 
   return (
     <View>

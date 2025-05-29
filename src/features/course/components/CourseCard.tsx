@@ -4,14 +4,13 @@ import { Colors } from '../../../assets/styles/colorStyle';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAddCourseToCart } from '../hooks/useCourse.hook';
 import { useSelector } from 'react-redux';
-
 import { useToast } from '../../../utils/toasts/useToast';
 import { RootState } from '../../../stores/store';
 
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
   { background: Colors.cardHome2, text: Colors.textCardHome2 },
-  { background: Colors.cardHome3, text: Colors.cardHome3 },
+  { background: Colors.cardHome3, text: Colors.textCardHome3 },
   { background: Colors.cardHome4, text: Colors.textCardHome4 },
 ];
 
@@ -39,68 +38,129 @@ const CourseCard: React.FC<CourseCardProps> = ({
   navigation,
 }) => {
   const { mutate, isPending } = useAddCourseToCart();
-  const addedCourses = useSelector((state: RootState) => state.cart.addedCourses);
+  const addedCourses = useSelector((state: RootState) => state.cart.addedCourses || []);
   const { showSuccess, showError } = useToast();
   const isInCart = addedCourses.includes(courseId);
 
   const handleAddToCart = () => {
-    if (!isInCart && !isPending) {
-      mutate({ courseId }, {
-        onError: (error) => {
-          if (error instanceof Error && error.message.includes('208')) {
-            showError('Sản phẩm đã có trong giỏ hàng');
-          }
-        },
-      });
-    } else if (isInCart) {
-      showError('Sản phẩm đã có trong giỏ hàng');
+    if (isPurchased) {
+      showError('Bạn đã mua khóa học này rồi');
+      return;
+    }
+    if (isInCart) {
+      showError('Khóa học đã có trong giỏ hàng');
+      return;
+    }
+    if (!isPending) {
+      mutate(
+        { courseId },
+        {
+          onSuccess: () => {
+            showSuccess('Thêm vào giỏ hàng thành công!');
+          },
+          onError: (error) => {
+            if (error instanceof Error && error.message.includes('208')) {
+              const message = error.message.includes('already purchased')
+                ? 'Bạn đã mua khóa học này rồi'
+                : 'Khóa học đã có trong giỏ hàng';
+              showError(message);
+            } else {
+              showError('Đã xảy ra lỗi khi thêm vào giỏ hàng');
+            }
+          },
+        }
+      );
     }
   };
 
   const handleBuyNow = () => {
-    if (!isInCart && !isPending) {
-      mutate({ courseId, isBuyNow: true }, {
-        onSuccess: () => {
-          showSuccess('Thêm vào giỏ hàng thành công!');
-          navigation.navigate('CartScreen');
-        },
-        onError: (error) => {
-          if (error instanceof Error && error.message.includes('208')) {
-            showError('Sản phẩm đã có trong giỏ hàng');
-            navigation.navigate('CartScreen');
-          }
-        },
+    if (isPurchased) {
+      showError('Bạn đã mua khóa học này rồi');
+      navigation.navigate('TabNavigation', {
+        screen: 'CourseScreen',
+        params: { screen: 'Khóa học', tab: 'myCourses' }, // Chuyển đến tab "Khóa học của tôi"
       });
-    } else {
-      showError('Sản phẩm đã có trong giỏ hàng');
-      navigation.navigate('CartScreen');
+      return;
+    }
+    if (isInCart) {
+      showError('Khóa học đã có trong giỏ hàng');
+      navigation.navigate('TabNavigation', {
+        screen: 'CartScreen',
+        params: { previousTab: 'Khóa học' },
+      });
+      return;
+    }
+    if (!isPending) {
+      mutate(
+        { courseId, isBuyNow: true },
+        {
+          onSuccess: () => {
+            showSuccess('Thêm vào giỏ hàng thành công!');
+            navigation.navigate('TabNavigation', {
+              screen: 'CartScreen',
+              params: { previousTab: 'Khóa học' },
+            });
+          },
+          onError: (error) => {
+            if (error instanceof Error && error.message.includes('208')) {
+              const message = error.message.includes('already purchased')
+                ? 'Bạn đã mua khóa học này rồi'
+                : 'Khóa học đã có trong giỏ hàng';
+              showError(message);
+              if (error.message.includes('already purchased')) {
+                navigation.navigate('TabNavigation', {
+                  screen: 'CourseScreen',
+                  params: { screen: 'Khóa học', tab: 'myCourses' },
+                });
+              } else {
+                navigation.navigate('TabNavigation', {
+                  screen: 'CartScreen',
+                  params: { previousTab: 'Khóa học' },
+                });
+              }
+            } else {
+              showError('Đã xảy ra lỗi khi thêm vào giỏ hàng');
+            }
+          },
+        }
+      );
     }
   };
 
-  const iconName = isInCart || isPending ? 'check' : (showBuyButton ? 'shopping-cart' : 'favorite-outline');
-  const isIconDisabled = isInCart || isPending;
+  const iconName = isPurchased || isInCart || isPending ? 'check' : showBuyButton ? 'shopping-cart' : 'favorite-outline';
+  const isIconDisabled = isPurchased || isInCart || isPending;
 
   return (
     <View style={[styles.card, { backgroundColor: cardColors[index % cardColors.length].background }]}>
       <View style={styles.headerRow}>
-        <Text style={styles.courseName} numberOfLines={2}>{name}</Text>
+        <Text style={styles.courseName} numberOfLines={2}>
+          {name}
+        </Text>
         <TouchableOpacity
           style={styles.iconContainer}
           onPress={handleAddToCart}
           disabled={isIconDisabled}
         >
-          <Icon name={iconName} size={16} color={isIconDisabled ? Colors.disabledBg : cardColors[index % cardColors.length].text} />
+          <Icon
+            name={iconName}
+            size={16}
+            color={isIconDisabled ? Colors.disabledBg : cardColors[index % cardColors.length].text}
+          />
         </TouchableOpacity>
       </View>
 
       <View style={styles.infoRow}>
         <View style={styles.ratingContainer}>
           <Icon name="star-outline" size={16} color={cardColors[index % cardColors.length].text} />
-          <Text style={[styles.ratingText, { color: cardColors[index % cardColors.length].text }]}>{rating}</Text>
+          <Text style={[styles.ratingText, { color: cardColors[index % cardColors.length].text }]}>
+            {rating}
+          </Text>
         </View>
         <View style={styles.durationContainer}>
           <Icon name="access-time" size={16} color={cardColors[index % cardColors.length].text} />
-          <Text style={[styles.durationText, { color: cardColors[index % cardColors.length].text }]}>{duration} hours</Text>
+          <Text style={[styles.durationText, { color: cardColors[index % cardColors.length].text }]}>
+            {duration} hours
+          </Text>
         </View>
       </View>
 
@@ -115,7 +175,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
       {!isPurchased && showBuyButton && (
         <View style={styles.buyButtonRow}>
           <TouchableOpacity style={styles.buyButton} onPress={handleBuyNow} disabled={isPending}>
-            <Text style={[styles.buyButtonText, { color: cardColors[index % cardColors.length].text }]}>MUA NGAY</Text>
+            <Text style={[styles.buyButtonText, { color: cardColors[index % cardColors.length].text }]}>
+              MUA NGAY
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -148,6 +210,8 @@ const styles = StyleSheet.create({
     flex: 1,
     color: Colors.textWhite,
     marginRight: 10,
+    lineHeight: 22,
+    height: 22 * 2,
   },
   iconContainer: {
     backgroundColor: Colors.textWhite,

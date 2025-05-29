@@ -5,9 +5,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useDeleteCartItem } from '../hooks/useCourse.hook';
 import { useToast } from '../../../utils/toasts/useToast';
 import { useQueryClient } from '@tanstack/react-query';
+import { GetCartItemsByAccountResponse, GetCartItemsDetailsResponse } from '../types/course.types';
 
 interface CartItemCardProps {
-  itemId: string; // This is now the detailId from get-cart-items-details
+  itemId: string; // This is the detailId from get-cart-items-details
   name: string;
   unitPrice: number;
 }
@@ -15,41 +16,49 @@ interface CartItemCardProps {
 const CartItemCard: React.FC<CartItemCardProps> = ({ itemId, name, unitPrice }) => {
   const queryClient = useQueryClient();
   const { mutate: deleteItem, isPending } = useDeleteCartItem();
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
 
   const handleDelete = () => {
-    // Optimistically update the UI before the API call
-    const queryKeyByAccount = ['cartItemsByAccount'];
-    const queryKeyDetails = ['cartItemsDetails'];
-    const previousDataByAccount: any = queryClient.getQueryData(queryKeyByAccount);
-    const previousDataDetails: any = queryClient.getQueryData(queryKeyDetails);
+    // Lưu trữ dữ liệu trước đó để rollback nếu cần
+    const queryKeyByAccount = ['cartItemsByAccountInfinite'];
+    const queryKeyDetails = ['cartItemsDetailsInfinite'];
+    const previousDataByAccount = queryClient.getQueryData<GetCartItemsByAccountResponse[]>(queryKeyByAccount);
+    const previousDataDetails = queryClient.getQueryData<GetCartItemsDetailsResponse[]>(queryKeyDetails);
 
-    // Update cartItemsByAccount
+    // Optimistic update
     queryClient.setQueryData(queryKeyByAccount, (old: any) => {
-      if (!old || !old.items || !old.items[0]) {return old;}
-      const updatedCart = { ...old.items[0] };
-      updatedCart.cartItem = updatedCart.cartItem.filter((item: any) => item.itemId !== itemId);
-      return { ...old, items: [updatedCart] };
+      if (!old || !old.pages) {return old;}
+      const updatedPages = old.pages.map((page: GetCartItemsByAccountResponse) => {
+        if (!page.items[0]) {return page;}
+        const updatedCart = { ...page.items[0] };
+        updatedCart.cartItem = updatedCart.cartItem.filter((item: any) => item.itemId !== itemId);
+        return { ...page, items: [updatedCart] };
+      });
+      return { ...old, pages: updatedPages };
     });
 
-    // Update cartItemsDetails
     queryClient.setQueryData(queryKeyDetails, (old: any) => {
-      if (!old || !old.items || !old.items[0]) {return old;}
-      const updatedDetails = { ...old.items[0] };
-      updatedDetails.cartItems = updatedDetails.cartItems.filter((item: any) => item.detailId !== itemId);
-      return { ...old, items: [updatedDetails] };
+      if (!old || !old.pages) {return old;}
+      const updatedPages = old.pages.map((page: GetCartItemsDetailsResponse) => {
+        if (!page.items[0]) {return page;}
+        const updatedDetails = { ...page.items[0] };
+        updatedDetails.cartItems = updatedDetails.cartItems.filter((item: any) => item.detailId !== itemId);
+        return { ...page, items: [updatedDetails] };
+      });
+      return { ...old, pages: updatedPages };
     });
 
     deleteItem(
       { itemId },
       {
         onSuccess: () => {
-          // Invalidate both queries to ensure consistency with the server
+          showSuccess('Xóa sản phẩm khỏi giỏ hàng thành công!');
+          // Invalidate queries để đồng bộ với server
           queryClient.invalidateQueries({ queryKey: queryKeyByAccount });
           queryClient.invalidateQueries({ queryKey: queryKeyDetails });
         },
         onError: (error) => {
-          // Rollback on error
+          // Rollback nếu có lỗi
           queryClient.setQueryData(queryKeyByAccount, previousDataByAccount);
           queryClient.setQueryData(queryKeyDetails, previousDataDetails);
           showError(error.message || 'Đã xảy ra lỗi khi xóa sản phẩm');
@@ -61,7 +70,9 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ itemId, name, unitPrice }) 
   return (
     <View style={styles.card}>
       <View style={styles.infoContainer}>
-        <Text style={styles.name} numberOfLines={2}>{name}</Text>
+        <Text style={styles.name} numberOfLines={2}>
+          {name}
+        </Text>
         <Text style={styles.price}>{unitPrice.toLocaleString()} VNĐ</Text>
       </View>
       <TouchableOpacity onPress={handleDelete} disabled={isPending} style={styles.deleteButton}>

@@ -60,7 +60,7 @@ export interface GetTopicsRequest {
   courseId: string;
   courseName?: string;
   pageSize?: number;
-  pageNumber?: number;
+  pageNumber?: number ;
 }
 
 export interface GetTopicsResponse {

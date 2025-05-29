@@ -111,8 +111,11 @@ const styles = StyleSheet.create({
     cardContainer: {
         flex: 1,
         backgroundColor: Colors.textLightGray,
-        width: 360,
-        height: 360,
+        // width: 360,
+        // height: 360,
+        width: '100%',
+        marginVertical: 10,
+        alignSelf: 'center',
         borderRadius: 20,
     },
     innerContainer: {

@@ -11,14 +11,25 @@ interface SecondaryHeaderProps {
   onOpenNotificationModal: () => void;
 }
 
-const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificationModal }: SecondaryHeaderProps) => {
-  const navigation = useNavigation<RootStackNavigationProp>(); // Use RootStackNavigationProp
+const SecondaryHeader = ({ unreadNotifications, onOpenNotificationModal }: SecondaryHeaderProps) => {
+  const navigation = useNavigation<RootStackNavigationProp>();
+
+  const getCurrentTab = () => {
+    const state = navigation.getState();
+    const currentRoute = state.routes[state.index];
+    if (currentRoute.name === 'TabNavigation') {
+      const tabState = currentRoute.state;
+      if (tabState && tabState.routes && tabState.index !== undefined) {
+        return tabState.routes[tabState.index].name;
+      }
+    }
+    return 'Khóa học'; // Mặc định là Khóa học nếu không xác định được
+  };
 
   return (
     <View style={styles.contentContainer}>
-      {/* Avatar */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('ProfileStack')} // Navigate to ProfileScreen in ProfileStack
+        onPress={() => navigation.navigate('TabNavigation', { screen: 'ProfileStack' })}
         style={styles.avatarContainer}
       >
         <Image
@@ -28,23 +39,7 @@ const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificati
         />
       </TouchableOpacity>
 
-      {/* Icon tin nhắn và thông báo */}
       <View style={styles.iconsContainer}>
-        {/* Tin nhắn
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ChatScreen')} // Assuming ChatScreen is in HomeStack
-          style={styles.iconWrapper}
-        >
-          <Icon name="messenger" size={24} color={Colors.primaryDark} />
-          {unreadMessages > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{unreadMessages}</Text>
-            </View>
-          )}
-        </TouchableOpacity> */}
-
-
-        {/* Thông báo */}
         <TouchableOpacity
           onPress={onOpenNotificationModal}
           style={styles.iconWrapper}
@@ -57,11 +52,13 @@ const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificati
           )}
         </TouchableOpacity>
 
-
-        {/* Giỏ hàng */}
         <TouchableOpacity
-          onPress={() => navigation.navigate('Trang Chủ', { screen: 'CartScreen' })}
-
+          onPress={() =>
+            navigation.navigate('TabNavigation', {
+              screen: 'CartScreen',
+              params: { previousTab: getCurrentTab() },
+            })
+          }
           style={styles.iconWrapper}
         >
           <Icon name="shopping-cart" size={24} color={Colors.primaryDark} />
@@ -69,8 +66,6 @@ const SecondaryHeader = ({ unreadMessages, unreadNotifications, onOpenNotificati
             <Text style={styles.badgeText}>0</Text>
           </View>
         </TouchableOpacity>
-
-
       </View>
     </View>
   );

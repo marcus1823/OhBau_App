@@ -5,84 +5,106 @@ import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import ChapterMediaDetailCard from '../components/ChapterMediaDetailCard';
 import ChapterContentDetailCard from '../components/ChapterContentDetailCard';
+import { useQuery } from '@tanstack/react-query';
+import { getChapterApi } from '../api/courseApi';
+import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
+import { useToast } from '../../../utils/toasts/useToast';
 
 const ChapterDetailScreen = ({ navigation, route }: any) => {
-    const { chapter, course } = route.params;
-    console.log('Chapter data in ChapterDetailScreen:', chapter); 
-    const lesson = chapter.lesson; 
+  const { chapters, isPurchased } = route.params;
+  const chapterId = chapters.id;
 
-    return (
-        <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-            <PrimaryHeader
-                title={chapter.name}
-                onBackButtonPress={() => navigation.goBack()}
-            />
+  const { showError } = useToast();
 
-            {/* Nội dung bài học */}
-            <ScrollView contentContainerStyle={styles.content}>
-                {course.active ? (
-                    lesson && Object.keys(lesson).length > 0 ? ( 
-                        <View style={styles.lessonContainer}>
+  const {
+    data,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ['chapterDetail', chapterId],
+    queryFn: () => getChapterApi(chapterId),
+    enabled: !!chapterId,
+    refetchOnWindowFocus: false,
+  });
 
-                            {/* Card hiển thị media */}
-                            <ChapterMediaDetailCard
-                                imageUrl={lesson.imageUrl}
-                                videoUrl={lesson.videoUrl}
-                            />
-                            <Text style={styles.lessonTitle}>{lesson.title}</Text>
+  if (isPending) {
+    return <LoadingOverlay visible={isPending} fullScreen={false} />;
+  }
 
+  if (isError) {
+    showError('Không thể tải chi tiết chương. Vui lòng thử lại sau.');
+    return null;
+  }
 
-                            {/* Card hiển thị nội dung */}
-                            <ChapterContentDetailCard
-                                content={lesson.content}
-                            />
-                        </View>
-                    ) : (
-                        <Text style={styles.noLessonsText}>
-                            Hiện tại chưa có bài học nào trong chương này.
-                        </Text>
-                    )
-                ) : (
-                    <Text style={styles.lockedText}>
-                        Vui lòng mua khóa học này để xem nội dung chi tiết.
-                    </Text>
-                )}
-            </ScrollView>
-        </LinearGradient>
-    );
+  return (
+    <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
+      <PrimaryHeader
+        title={chapters.title}
+        onBackButtonPress={() => navigation.goBack()}
+      />
+
+      <ScrollView contentContainerStyle={styles.content}>
+        {isPurchased ? (
+          data && Object.keys(data).length > 0 ? (
+            <View style={styles.chapterContainer}>
+              {/* Card hiển thị media */}
+              <ChapterMediaDetailCard
+                imageUrl={data.imageUrl}
+                videoUrl={data.videoUrl}
+              />
+              <Text style={styles.chapterTitle}>{data.title || 'Không có tiêu đề'}</Text>
+
+              {/* Card hiển thị nội dung HTML */}
+              <ChapterContentDetailCard
+                content={data.content || ''}
+              />
+            </View>
+          ) : (
+            <Text style={styles.noChapterText}>
+              Hiện tại chưa có bài học nào trong chương này.
+            </Text>
+          )
+        ) : (
+          <Text style={styles.lockedText}>
+            Vui lòng mua khóa học này để xem nội dung chi tiết.
+          </Text>
+        )}
+      </ScrollView>
+    </LinearGradient>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    content: {
-        flexGrow: 1,
-        paddingTop: 60,
-        paddingHorizontal: 20,
-        paddingBottom: 50,
-    },
-    lessonContainer: {
-        marginBottom: 20,
-    },
-    lessonTitle: {
-        fontSize: 18,
-        fontWeight: 500,
-        color: Colors.textBlack,
-        marginBottom: 10,
-    },
-    noLessonsText: {
-        fontSize: 16,
-        color: Colors.textBlack,
-        textAlign: 'center',
-        marginTop: 20,
-    },
-    lockedText: {
-        fontSize: 16,
-        color: Colors.textBlack,
-        textAlign: 'center',
-        marginTop: 20,
-    },
+  container: {
+    flex: 1,
+  },
+  content: {
+    flexGrow: 1,
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 50,
+  },
+  chapterContainer: {
+    marginBottom: 20,
+  },
+  chapterTitle: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: Colors.textBlack,
+    marginBottom: 10,
+  },
+  noChapterText: {
+    fontSize: 16,
+    color: Colors.textBlack,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  lockedText: {
+    fontSize: 16,
+    color: Colors.textBlack,
+    textAlign: 'center',
+    marginTop: 20,
+  },
 });
 
 export default ChapterDetailScreen;

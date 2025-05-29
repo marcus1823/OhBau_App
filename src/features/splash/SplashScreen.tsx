@@ -10,8 +10,8 @@ import { setRole } from '../auth/slices/auth.slices'
 
 const SplashScreen = ({navigation}: any) => {
     const logoNoText = require('../../assets/images/logo/logoNoText.png')
+    const logoWithText = require('../../assets/images/logo/OHBAU_Logo_Text1.png')
     const { logoAnimatedStyle, contentAnimatedStyle } = useSplashAnimation();
-
     const dispatch = useDispatch();
 
     const handleButtonPress = (selectedRole: string) => {

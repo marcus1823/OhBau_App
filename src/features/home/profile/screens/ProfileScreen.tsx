@@ -42,7 +42,7 @@ const ProfileScreen = ({ navigation }: any) => {
       console.log('clearData');
       showSuccess('Đăng xuất thành công!');
     } catch (err) {
-      console.error('Logout error:', err);
+      console.log('Logout error:', err);
     }
   };
 
@@ -135,8 +135,8 @@ const ProfileScreen = ({ navigation }: any) => {
           />
           <MenuProfile
             icon="calendar-today"
-            title="Lịch hẹn tái khám"
-            onPress={() => menuOptionsPress('Lịch hẹn tái khám')}
+            title="Lịch hẹn đi khám"
+            onPress={() => menuOptionsPress('Lịch hẹn đi khám')}
           />
           <MenuProfile
             icon="history"

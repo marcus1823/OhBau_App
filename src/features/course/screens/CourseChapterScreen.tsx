@@ -11,7 +11,7 @@ import { useToast } from '../../../utils/toasts/useToast';
 import { GetChaptersResponse, Chapter } from '../types/course.types';
 
 const CourseChapterScreen = ({ navigation, route }: any) => {
-  const { topic, course, isPurchased } = route.params;
+  const { topic, isPurchased } = route.params;
   const topicId = topic.id;
 
   const { showError } = useToast();
@@ -33,8 +33,7 @@ const CourseChapterScreen = ({ navigation, route }: any) => {
   }
 
   const handleChapterPress = (chapter: Chapter) => {
-    console.log('Navigating to ChapterDetailScreen with chapter:', chapter);
-    navigation.navigate('ChapterDetailScreen', { chapter, course });
+    navigation.navigate('ChapterDetailScreen', { chapters: chapter, isPurchased });
   };
 
   const renderItem = ({ item, index }: { item: Chapter; index: number }) => (

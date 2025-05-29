@@ -54,11 +54,6 @@ const CourseScreen = ({ navigation }: any) => {
     enabled: !!accessToken,
   });
 
-  const courses = useMemo(
-    () => coursesData?.pages.flatMap((page) => page.items || []).map((course) => ({ ...course, isPurchased: false })) || [],
-    [coursesData]
-  );
-
   const {
     data: myCoursesData,
     isLoading: isLoadingMyCourses,
@@ -92,8 +87,24 @@ const CourseScreen = ({ navigation }: any) => {
     enabled: !!accessToken,
   });
 
+  const myCoursesIds = useMemo(
+    () => myCoursesData?.pages.flatMap((page) => page.items.map((course) => course.id)) || [],
+    [myCoursesData]
+  );
+
+  const courses = useMemo(
+    () =>
+      coursesData?.pages.flatMap((page) =>
+        page.items.map((course) => ({
+          ...course,
+          isPurchased: myCoursesIds.includes(course.id),
+        }))
+      ) || [],
+    [coursesData, myCoursesIds]
+  );
+
   const myCoursesFromApi = useMemo(
-    () => myCoursesData?.pages.flatMap((page) => page.items || []).map((course) => ({ ...course, isPurchased: true })) || [],
+    () => myCoursesData?.pages.flatMap((page) => page.items.map((course) => ({ ...course, isPurchased: true }))) || [],
     [myCoursesData]
   );
 
@@ -110,9 +121,7 @@ const CourseScreen = ({ navigation }: any) => {
           isPurchased: item.isPurchased,
         };
 
-        const existingCategory = acc.find(
-          (section: { title: any }) => section.title === category
-        );
+        const existingCategory = acc.find((section: { title: any }) => section.title === category);
         if (existingCategory) {
           existingCategory.courses.push(course);
         } else {
@@ -136,9 +145,7 @@ const CourseScreen = ({ navigation }: any) => {
           isPurchased: item.isPurchased,
         };
 
-        const existingCategory = acc.find(
-          (section: { title: any }) => section.title === category
-        );
+        const existingCategory = acc.find((section: { title: any }) => section.title === category);
         if (existingCategory) {
           existingCategory.courses.push(course);
         } else {
@@ -153,9 +160,16 @@ const CourseScreen = ({ navigation }: any) => {
     console.log('Open notification modal');
   }, []);
 
-  const handleCardPress = useCallback((course: any) => {
-    navigation.navigate('CourseDetailScreen', { courseId: course.courseId, courseName: course.name, isPurchased: course.isPurchased });
-  }, [navigation]);
+  const handleCardPress = useCallback(
+    (course: any) => {
+      navigation.navigate('CourseDetailScreen', {
+        courseId: course.courseId,
+        courseName: course.name,
+        isPurchased: course.isPurchased,
+      });
+    },
+    [navigation]
+  );
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore) {return;}
@@ -178,6 +192,7 @@ const CourseScreen = ({ navigation }: any) => {
     fetchNextMyCoursesPage,
     isLoadingMore,
   ]);
+
   const renderItem = useCallback(
     ({ item }: { item: { title: string; courses: any[] } }) => (
       <CourseSection
@@ -230,34 +245,18 @@ const CourseScreen = ({ navigation }: any) => {
       />
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[
-            styles.tabButton,
-            activeTab === 'all' && styles.activeTabButton,
-          ]}
+          style={[styles.tabButton, activeTab === 'all' && styles.activeTabButton]}
           onPress={() => setActiveTab('all')}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'all' && styles.activeTabText,
-            ]}
-          >
+          <Text style={[styles.tabText, activeTab === 'all' && styles.activeTabText]}>
             Tất cả khóa học
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.tabButton,
-            activeTab === 'myCourses' && styles.activeTabButton,
-          ]}
+          style={[styles.tabButton, activeTab === 'myCourses' && styles.activeTabButton]}
           onPress={() => setActiveTab('myCourses')}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'myCourses' && styles.activeTabText,
-            ]}
-          >
+          <Text style={[styles.tabText, activeTab === 'myCourses' && styles.activeTabText]}>
             Khóa học của tôi
           </Text>
         </TouchableOpacity>
@@ -290,12 +289,7 @@ const CourseScreen = ({ navigation }: any) => {
         }
       />
       <LoadingOverlay
-        visible={
-          isLoadingCourses ||
-          isFetchingCourses ||
-          isLoadingMyCourses ||
-          isFetchingMyCourses
-        }
+        visible={isLoadingCourses || isFetchingCourses || isLoadingMyCourses || isFetchingMyCourses}
         fullScreen={false}
       />
     </LinearGradient>

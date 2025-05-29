@@ -45,7 +45,7 @@ const DoctorBookingScreen = ({ navigation, route }: any) => {
   console.log('Doctor slots data:', data);
 
   if (error) {
-    console.error('Error fetching doctor slots:', error);
+    console.log('Error fetching doctor slots:', error);
     return null;
   }
 

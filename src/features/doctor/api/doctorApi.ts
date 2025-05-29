@@ -141,7 +141,7 @@ export const createBookingApi = async (
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
       request: request, // Log thêm yêu cầu để dễ debug
     };
-    console.error('createBookingApi error:', errorDetails);
+    console.log('createBookingApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to create booking: ${error.message}`
@@ -195,7 +195,7 @@ export const getBookingsApi = async (
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
       request, // Log thêm yêu cầu để dễ debug
     };
-    console.error('getBookingsApi error:', errorDetails);
+    console.log('getBookingsApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get bookings: ${error.message}`

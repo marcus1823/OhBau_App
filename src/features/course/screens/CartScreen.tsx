@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { StyleSheet, Text, FlatList, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
@@ -9,45 +9,103 @@ import { RootState } from '../../../stores/store';
 import { createPaymentApi, getCartItemsByAccountApi, getCartItemsDetailsApi } from '../api/courseApi';
 import { useToast } from '../../../utils/toasts/useToast';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useCreateOrder } from '../hooks/useCourse.hook';
 import { GetCartItemsByAccountResponse, GetCartItemsDetailsResponse } from '../types/course.types';
 import ButtonAction from '../../auth/components/ButtonAction';
+import { useFocusEffect } from '@react-navigation/native';
 
-const CartScreen = ({ navigation }: any) => {
+const CartScreen = ({ navigation, route }: any) => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const { showSuccess, showError } = useToast();
   const queryClient = useQueryClient();
   const { mutate: createOrder, isPending: isPlacingOrder } = useCreateOrder();
 
-  // Fetch cart items by account
-  const { data: cartByAccountData, isLoading: isLoadingByAccount, error: errorByAccount } = useQuery<
-    GetCartItemsByAccountResponse,
-    Error
-  >({
-    queryKey: ['cartItemsByAccount'],
-    queryFn: async () => {
+
+  // Lấy previousTab từ route params, không đặt mặc định
+  const previousTab = route.params?.previousTab || 'Trang Chủ';
+
+
+  // Làm mới dữ liệu khi màn hình được focus
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ['cartItemsByAccountInfinite'] });
+      queryClient.invalidateQueries({ queryKey: ['cartItemsDetailsInfinite'] });
+    }, [queryClient])
+  );
+
+
+const handleBackPress = () => {
+  const previousScreen = route.params?.previousScreen;
+  const previousStack = route.params?.previousStack;
+
+  if (navigation.canGoBack()) {
+    navigation.goBack(); // Quay lại màn hình trước đó trong stack
+  } else if (previousScreen && previousStack) {
+    // Nếu có thông tin previousScreen và previousStack
+    navigation.navigate('TabNavigation', {
+      screen: previousStack,
+      params: { screen: previousScreen },
+    });
+  } else {
+    // Mặc định quay lại tab
+    navigation.navigate('TabNavigation', {
+      screen: 'MainTabs',
+      params: { screen: previousTab },
+    });
+  }
+};
+
+  // Infinite Query cho cart items by account
+  const {
+    data: cartByAccountData,
+    fetchNextPage: fetchNextCartItems,
+    hasNextPage: hasNextCartItems,
+    isLoading: isLoadingByAccount,
+    isFetchingNextPage: isFetchingNextCartItems,
+    error: errorByAccount,
+  } = useInfiniteQuery<GetCartItemsByAccountResponse, Error>({
+    queryKey: ['cartItemsByAccountInfinite'],
+    queryFn: async ({ pageParam = 1 }) => {
       if (!accessToken) {
         throw new Error('Vui lòng đăng nhập để xem giỏ hàng');
       }
-      return await getCartItemsByAccountApi(1, 10, accessToken);
+      return await getCartItemsByAccountApi(pageParam as number, 10, accessToken);
     },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page < lastPage.totalPages) {
+        return lastPage.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     enabled: !!accessToken,
     retry: false,
   });
 
-  // Fetch cart items details
-  const { data: cartDetailsData, isLoading: isLoadingDetails, error: errorDetails } = useQuery<
-    GetCartItemsDetailsResponse,
-    Error
-  >({
-    queryKey: ['cartItemsDetails'],
-    queryFn: async () => {
+  // Infinite Query cho cart items details
+  const {
+    data: cartDetailsData,
+    fetchNextPage: fetchNextDetails,
+    hasNextPage: hasNextDetails,
+    isLoading: isLoadingDetails,
+    isFetchingNextPage: isFetchingNextDetails,
+    error: errorDetails,
+  } = useInfiniteQuery<GetCartItemsDetailsResponse, Error>({
+    queryKey: ['cartItemsDetailsInfinite'],
+    queryFn: async ({ pageParam = 1 }) => {
       if (!accessToken) {
         throw new Error('Vui lòng đăng nhập để xem giỏ hàng');
       }
-      return await getCartItemsDetailsApi(1, 10, accessToken);
+      return await getCartItemsDetailsApi(pageParam as number, 10, accessToken);
     },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page < lastPage.totalPages) {
+        return lastPage.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     enabled: !!accessToken,
     retry: false,
   });
@@ -63,14 +121,18 @@ const CartScreen = ({ navigation }: any) => {
     }
   }, [errorByAccount, errorDetails, navigation, showError]);
 
-  // Combine data from both APIs
+  // Kết hợp dữ liệu từ cả hai API
   const cartData = useMemo(() => {
-    const cart = cartByAccountData?.items?.[0] || null;
-    const details = cartDetailsData?.items?.[0] || null;
+    const cartItemsByAccount = cartByAccountData?.pages.flatMap((page) => page.items) || [];
+    const cartDetails = cartDetailsData?.pages.flatMap((page) => page.items) || [];
 
-    if (!cart || !details) {return { cartItems: [], cartId: null };}
+    const cart = cartItemsByAccount[0] || null;
+    const details = cartDetails[0] || null;
 
-    // Map detailId to itemId by matching on name
+    if (!cart || !details) {
+      return { cartItems: [], cartId: null };
+    }
+
     const cartItems = cart.cartItem.map((item) => {
       const detailItem = details.cartItems.find((detail) => detail.name === item.name);
       return {
@@ -87,13 +149,15 @@ const CartScreen = ({ navigation }: any) => {
 
   const { cartItems, cartId } = cartData;
   const isLoading = isLoadingByAccount || isLoadingDetails;
+  const isFetchingNextPage = isFetchingNextCartItems || isFetchingNextDetails;
 
-  // Log cartItems to debug
-  useEffect(() => {
-    console.log('Combined cartItems:', cartItems);
-  }, [cartItems]);
+  // Xử lý load thêm dữ liệu khi cuộn đến cuối danh sách
+  const handleEndReached = () => {
+    if (hasNextCartItems) { fetchNextCartItems(); }
+    if (hasNextDetails) { fetchNextDetails(); }
+  };
 
-  // Handle placing order and payment
+  // Handle đặt hàng và thanh toán
   const handlePlaceOrder = async () => {
     if (!cartId) {
       showError('Giỏ hàng trống. Vui lòng thêm sản phẩm để đặt hàng.');
@@ -110,14 +174,16 @@ const CartScreen = ({ navigation }: any) => {
       { cartId },
       {
         onSuccess: async (response) => {
-          queryClient.invalidateQueries({ queryKey: ['cartItemsByAccount'] });
-          queryClient.invalidateQueries({ queryKey: ['cartItemsDetails'] });
+          queryClient.invalidateQueries({ queryKey: ['cartItemsByAccountInfinite'] });
+          queryClient.invalidateQueries({ queryKey: ['cartItemsDetailsInfinite'] });
           showSuccess('Đặt hàng thành công!');
 
           try {
-            const paymentUrl = await createPaymentApi(response.orderCode, response.orderCode, accessToken); // Pass accessToken
-            console.log('Payment URL:', paymentUrl);
-            navigation.navigate('PaymentScreen', { url: paymentUrl });
+            const paymentUrl = await createPaymentApi(response.orderCode, response.orderCode, accessToken);
+            navigation.navigate('TabNavigation', {
+              screen: 'PaymentScreen',
+              params: { url: paymentUrl, previousTab },
+            });
           } catch (error) {
             showError('Không thể tạo liên kết thanh toán: ' + (error instanceof Error ? error.message : 'Lỗi không xác định'));
           }
@@ -130,24 +196,24 @@ const CartScreen = ({ navigation }: any) => {
   };
 
   const renderItem = ({ item }: { item: { itemId: string; name: string; unitPrice: number } }) => (
-    <CartItemCard
-      itemId={item.itemId}
-      name={item.name}
-      unitPrice={item.unitPrice}
-    />
+    <CartItemCard itemId={item.itemId} name={item.name} unitPrice={item.unitPrice} />
   );
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-      <PrimaryHeader
-        title="Giỏ Hàng"
-        onBackButtonPress={() => navigation.goBack()}
-      />
+      <PrimaryHeader title="Giỏ Hàng" onBackButtonPress={handleBackPress} />
       <FlatList
         data={cartItems}
         renderItem={renderItem}
         keyExtractor={(item) => item.itemId}
         contentContainerStyle={styles.content}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <Text style={styles.loadingMore}>Đang tải thêm...</Text>
+          ) : null
+        }
         ListEmptyComponent={
           <Text style={styles.emptyMessage}>
             {isLoading ? 'Đang tải...' : errorByAccount || errorDetails ? 'Lỗi tải giỏ hàng' : 'Giỏ hàng của bạn đang trống!'}
@@ -185,6 +251,12 @@ const styles = StyleSheet.create({
     color: Colors.textBlack,
     textAlign: 'center',
     marginTop: 20,
+  },
+  loadingMore: {
+    fontSize: 16,
+    color: Colors.textBlack,
+    textAlign: 'center',
+    padding: 10,
   },
   placeOrderButton: {
     bottom: 100,

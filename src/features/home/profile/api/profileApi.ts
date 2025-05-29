@@ -27,7 +27,7 @@ export const getProfileApi = async (accessToken: string) => {
             response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
             status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
         };
-        console.error('getProfileApi error:', errorDetails);
+        console.log('getProfileApi error:', errorDetails);
         throw new Error(
             error instanceof Error
                 ? `Failed to get profile: ${error.message}`

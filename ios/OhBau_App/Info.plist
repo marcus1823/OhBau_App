@@ -67,5 +67,16 @@
 		<string>LeagueSpartan-SemiBold.ttf</string>
 		<string>LeagueSpartan-Thin.ttf</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ohbau</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>PaymentResult</string>
+		</dict>
+	</array>
 </dict>
 </plist>

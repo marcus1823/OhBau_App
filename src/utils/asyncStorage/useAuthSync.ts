@@ -21,7 +21,7 @@ export const useAuthSync = () => {
       dispatch(setAccessToken(accessToken));
       await storeAccessToken(accessToken);
     } catch (error: any) {
-      console.error('Sync access token error:', error);
+      console.log('Sync access token error:', error);
       throw error;
     }
   };
@@ -35,7 +35,7 @@ export const useAuthSync = () => {
       dispatch(setRole(roleValue));
       await AsyncStorage.setItem('role', roleValue);
     } catch (error: any) {
-      console.error('Sync role error:', error);
+      console.log('Sync role error:', error);
       throw error;
     }
   };
@@ -58,7 +58,7 @@ export const useAuthSync = () => {
       }
       return { success: true };
     } catch (error: any) {
-      console.error('Initialize auth error:', error);
+      console.log('Initialize auth error:', error);
       throw { success: false, error: error.message };
     } finally {
       hideGlobalLoading();

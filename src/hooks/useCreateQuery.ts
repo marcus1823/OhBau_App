@@ -40,7 +40,7 @@ export const useCreateQuery = <
       }
       return data; // Đảm bảo luôn trả về giá trị
     } catch (error) {
-      console.error(`${queryKey.join('-')} error - Details:`, {
+      console.log(`${queryKey.join('-')} error - Details:`, {
         message: error instanceof Error ? error.message : 'Unknown error',
         response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
         status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,

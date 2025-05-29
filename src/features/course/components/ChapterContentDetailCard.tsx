@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
-
+import RenderHtml from 'react-native-render-html';
 
 
 interface ChapterContentDetailCardProps {
@@ -10,13 +10,49 @@ interface ChapterContentDetailCardProps {
 
 const ChapterContentDetailCard: React.FC<ChapterContentDetailCardProps> = ({ content }) => {
 
+const htmlContent = content || '<p>Không có nội dung</p>';
 
+const source = {
+    html: htmlContent,
+  };
+
+  const customStyles = {
+    p: {
+      color: Colors.textBlack,
+      fontSize: 16,
+      lineHeight: 24,
+      marginBottom: 10,
+    },
+    h1: {
+      color: Colors.primary,
+      fontSize: 24,
+      fontWeight: 'bold' as const,
+      marginBottom: 10,
+    },
+    h2: {
+      color: Colors.textBlack,
+      fontSize: 20,
+      fontWeight: '600' as const,
+      marginBottom: 8,
+    },
+    ul: {
+      marginLeft: 20,
+      marginBottom: 10,
+    },
+    li: {
+      color: Colors.textBlack,
+      fontSize: 16,
+      lineHeight: 24,
+    },
+  };
   return (
     <View style={styles.card}>
       {/* Nội dung bài học */}
-      <Text style={styles.contentText}>
-        {content || 'Không có nội dung'}
-      </Text>
+      <RenderHtml
+        contentWidth={300} // Độ rộng tối đa, có thể điều chỉnh theo thiết bị
+        source={source}
+        tagsStyles={customStyles}
+      />
     </View>
   );
 };

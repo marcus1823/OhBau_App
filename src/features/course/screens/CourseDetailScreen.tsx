@@ -4,11 +4,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import CourseCardDetail from '../components/CourseCardDetail';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { getTopicsApi } from '../api/courseApi';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { useToast } from '../../../utils/toasts/useToast';
-import { GetTopicsResponse, Topic } from '../types/course.types';
+import {  Topic } from '../types/course.types';
 
 const CourseDetailScreen = ({ navigation, route }: any) => {
   const { courseId, courseName, isPurchased } = route.params;
@@ -18,12 +18,36 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
 
   const { showError, showInfo } = useToast();
 
-  const { data: topics, isLoading, isError } = useQuery<GetTopicsResponse, Error>({
+  // const { data: topics, isLoading, isError } = useQuery<GetTopicsResponse, Error>({
+  //   queryKey: ['topics', courseId],
+  //   queryFn: () => getTopicsApi({ courseId, pageSize: 10, pageNumber: 1 }),
+  //   enabled: !!courseId,
+  //   refetchOnWindowFocus: false,
+  // });
+
+  const {
+    data: topics,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['topics', courseId],
-    queryFn: () => getTopicsApi({ courseId, pageSize: 10, pageNumber: 1 }),
+    queryFn: ({ pageParam = 1 }) =>
+      getTopicsApi({
+        courseId,
+        pageSize: 10,
+        pageNumber: pageParam,
+      }), 
+    getNextPageParam: ( lastPage ) => {
+      const hasMore = lastPage.page < lastPage.totalPages;
+      return hasMore ? lastPage.page + 1 : undefined;
+    },
+    initialPageParam: 1, // Start from page 1
     enabled: !!courseId,
-    refetchOnWindowFocus: false,
   });
+  
   console.log('CourseDetailScreen topics:', topics);
 
   if (isLoading) {
@@ -37,7 +61,7 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
   const handleTopicPress = (item: Topic) => {
     if (!isPurchased) {
       showInfo('Vui lòng mua khoá học để xem nội dung chi tiết.');
-     
+
       return;
     }
     navigation.navigate('CourseChapterScreen', { topic: item, course: { id: courseId, name: courseName }, isPurchased });
@@ -64,7 +88,8 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
         onBackButtonPress={() => navigation.goBack()}
       />
       <FlatList
-        data={topics?.items || []}
+        // data={topics?.items || []}
+        data={topics?.pages.flatMap(page => page.items ?? []) || []} // để kết hợp các trang vì useInfiniteQuery trả về mảng các trang
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.content}
@@ -72,6 +97,17 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
           <Text style={styles.noLessonsText}>
             Hiện tại chưa có khóa học con nào trong khóa học này.
           </Text>
+        }
+        onEndReachedThreshold={0.5} // Ngưỡng để kích hoạt onEndReached là khi người dùng cuộn đến 50% cuối danh sách
+        onEndReached={() => { // Kiểm tra nếu có trang tiếp theo và không đang trong quá trình lấy dữ liệu
+          // nếu có trang tiếp theo và không đang lấy dữ liệu thì gọi fetchNextPage để lấy trang tiếp theo
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        ListFooterComponent={ // Hiển thị LoadingOverlay khi đang lấy dữ liệu trang tiếp theo
+        
+          isFetchingNextPage ? <LoadingOverlay visible={isFetchingNextPage} fullScreen={false} /> : null
         }
       />
     </LinearGradient>

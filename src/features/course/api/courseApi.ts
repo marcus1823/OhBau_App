@@ -6,7 +6,6 @@ import {
   GetTopicsResponse,
   GetChaptersRequest,
   GetChaptersResponse,
-  GetChapterRequest,
   GetChapterResponse,
   GetMyCoursesRequest,
   GetMyCoursesResponse,
@@ -37,7 +36,7 @@ export const getCoursesApi = async (request: GetCoursesRequest): Promise<GetCour
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
       request,
     };
-    console.error('getCoursesApi error:', errorDetails);
+    console.log('getCoursesApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get courses: ${error.message}`
@@ -79,7 +78,7 @@ export const getMyCoursesApi = async (
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
       request,
     };
-    console.error('getMyCoursesApi error:', errorDetails);
+    console.log('getMyCoursesApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get my courses: ${error.message}`
@@ -110,7 +109,7 @@ export const getTopicsApi = async (request: GetTopicsRequest): Promise<GetTopics
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
       request,
     };
-    console.error('getTopicsApi error:', errorDetails);
+    console.log('getTopicsApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get topics: ${error.message}`
@@ -141,7 +140,7 @@ export const getChaptersApi = async (request: GetChaptersRequest): Promise<GetCh
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
       request,
     };
-    console.error('getChaptersApi error:', errorDetails);
+    console.log('getChaptersApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get chapters: ${error.message}`
@@ -150,29 +149,29 @@ export const getChaptersApi = async (request: GetChaptersRequest): Promise<GetCh
   }
 };
 
-export const getChapterApi = async (request: GetChapterRequest): Promise<GetChapterResponse> => {
-  console.log('getChapterApi req:', request);
+export const getChapterApi = async (chapterId: string): Promise<GetChapterResponse> => {
+  console.log('getChapterApi req:', chapterId);
 
   try {
     const response = await rootApi.get('/get-chapter', {
-      params: request
+      params: { chapterId }
     });
 
-    console.log('getChapterApi res:', response);
+    console.log('getChapterApi res:', response.data);
 
     if (!response.data?.data) {
       throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
     }
 
-    return response.data.data;
+    return response.data.data 
   } catch (error) {
     const errorDetails = {
       message: error instanceof Error ? error.message : 'Unknown error',
       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-      request,
+      chapterId,
     };
-    console.error('getChapterApi error:', errorDetails);
+    console.log('getChapterApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get chapter: ${error.message}`
@@ -209,7 +208,7 @@ export const addCourseToCartApi = async (courseId: string, accessToken: string):
       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
     };
-    console.error('addCourseToCartApi error:', errorDetails);
+    console.log('addCourseToCartApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to add course to cart: ${error.message}`
@@ -247,7 +246,7 @@ export const getCartItemsDetailsApi = async (pageNumber: number, pageSize: numbe
       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
     };
-    console.error('getCartItemsDetailsApi error:', errorDetails);
+    console.log('getCartItemsDetailsApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get cart items details: ${error.message}`
@@ -285,7 +284,7 @@ export const getCartItemsByAccountApi = async (pageNumber: number, pageSize: num
       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
     };
-    console.error('getCartItemsByAccountApi error:', errorDetails);
+    console.log('getCartItemsByAccountApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to get cart items by account: ${error.message}`
@@ -320,7 +319,7 @@ export const deleteCartItemApi = async (itemId: string, accessToken: string): Pr
       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
     };
-    console.error('deleteCartItemApi error:', errorDetails);
+    console.log('deleteCartItemApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to delete cart item: ${error.message}`
@@ -356,7 +355,7 @@ export const createOrderApi = async (cartId: string, accessToken: string): Promi
       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
     };
-    console.error('createOrderApi error:', errorDetails);
+    console.log('createOrderApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to create order: ${error.message}`
@@ -397,11 +396,43 @@ export const createPaymentApi = async (OrderCode: string, Des: string, accessTok
       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
     };
-    console.error('createPaymentApi error:', errorDetails);
+    console.log('createPaymentApi error:', errorDetails);
     throw new Error(
       error instanceof Error
         ? `Failed to create payment: ${error.message}`
         : 'Failed to create payment: Unknown error'
+    );
+  }
+};
+
+export const getPaymentReturnApi = async (queryString: string, accessToken: string) => {
+  try {
+    console.log('Sending query string to API:', queryString); // Log query string
+    const response = await rootApi.get(`/payment/return-payment?${queryString}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        accept: 'application/json',
+      },
+      timeout: 10000,
+    });
+
+    console.log('getPaymentReturnApi res:', response);
+    if (!response.data) {
+      throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    const errorDetails = {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
+      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
+    };
+    console.log('getPaymentReturnApi error:', errorDetails);
+    throw new Error(
+      error instanceof Error
+        ? `Failed to get payment return: ${error.message}`
+        : 'Failed to get payment return: Unknown error'
     );
   }
 };
