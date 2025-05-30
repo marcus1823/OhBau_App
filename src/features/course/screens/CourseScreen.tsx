@@ -19,6 +19,7 @@ import { getCoursesApi, getMyCoursesApi } from '../api/courseApi';
 import { GetCoursesRequest, GetCoursesResponse, GetMyCoursesRequest, GetMyCoursesResponse } from '../types/course.types';
 
 const CourseScreen = ({ navigation }: any) => {
+
   const [activeTab, setActiveTab] = useState<'all' | 'myCourses'>('all');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -51,8 +52,9 @@ const CourseScreen = ({ navigation }: any) => {
       return undefined;
     },
     initialPageParam: 1,
-    enabled: !!accessToken,
   });
+  console.log('CourseScreen - coursesData:', coursesData);
+
 
   const {
     data: myCoursesData,
@@ -86,6 +88,8 @@ const CourseScreen = ({ navigation }: any) => {
     initialPageParam: 1,
     enabled: !!accessToken,
   });
+
+  console.log('CourseScreen - myCoursesData:', myCoursesData);
 
   const myCoursesIds = useMemo(
     () => myCoursesData?.pages.flatMap((page) => page.items.map((course) => course.id)) || [],
@@ -172,7 +176,7 @@ const CourseScreen = ({ navigation }: any) => {
   );
 
   const handleLoadMore = useCallback(() => {
-    if (isLoadingMore) {return;}
+    if (isLoadingMore) { return; }
 
     setIsLoadingMore(true);
     if (activeTab === 'all' && hasNextCoursesPage && !isFetchingNextCoursesPage) {
@@ -279,12 +283,17 @@ const CourseScreen = ({ navigation }: any) => {
             ) : (
               <Text style={styles.emptyMessage}>Không có khóa học nào!</Text>
             )
-          ) : isLoadingMyCourses || isFetchingMyCourses ? (
-            <Text style={styles.emptyMessage}>Đang tải...</Text>
-          ) : myCoursesError instanceof Error ? (
-            <Text style={styles.emptyMessage}>Lỗi: {myCoursesError.message}</Text>
           ) : (
-            <Text style={styles.emptyMessage}>Bạn chưa mua khoá học nào!</Text>
+            // Tab "myCourses"
+            !accessToken ? (
+              <Text style={styles.emptyMessage}>Bạn cần phải đăng nhập mới xem được khóa học của bạn.</Text>
+            ) : isLoadingMyCourses || isFetchingMyCourses ? (
+              <Text style={styles.emptyMessage}>Đang tải...</Text>
+            ) : myCoursesError instanceof Error ? (
+              <Text style={styles.emptyMessage}>Lỗi: {myCoursesError.message}</Text>
+            ) : (
+              <Text style={styles.emptyMessage}>Bạn chưa mua khóa học nào!</Text>
+            )
           )
         }
       />
