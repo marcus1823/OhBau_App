@@ -21,7 +21,7 @@ const LoginScreen = ({ navigation }: any) => {
   const [password, setPassword] = useState('');
   const [parentTitle, setParentTitle] = useState('Mẹ');
   const { showError } = useToast();
-  const { syncAccessToken, syncRole } = useAuthSync();
+  const { syncAccessToken, syncRole, syncAccountId } = useAuthSync();
   const { mutate: loginUser, isPending } = useLogin();
   const selectedRole = useSelector((state: RootState) => state.auth.role);
   const dispatch = useDispatch();
@@ -55,6 +55,9 @@ const LoginScreen = ({ navigation }: any) => {
           if (data.role) {
             await syncRole(data.role);
             dispatch(setRole(data.role));
+          }
+          if (data.id) {
+            await syncAccountId(data.id);
           }
           const newParentTitle = data.role === role.FATHER ? 'Bố' : data.role === role.MOTHER ? 'Mẹ' : 'Mẹ';
           setParentTitle(newParentTitle);

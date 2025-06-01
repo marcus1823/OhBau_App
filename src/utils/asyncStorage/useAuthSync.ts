@@ -41,6 +41,19 @@ export const useAuthSync = () => {
   };
 
   /**
+   * đồng bộ account Id vào AsyncStorage
+   * @param id - ID của tài khoản người dùng
+   */
+  const syncAccountId = async (id: string) => {
+    try {
+      await AsyncStorage.setItem('accountId', id);
+    } catch (error: any) {
+      console.log('Sync account ID error:', error);
+      throw error;
+    }
+  };
+
+  /**
    * Khởi tạo auth bằng cách kiểm tra và đồng bộ accessToken/role từ AsyncStorage
    * @returns Object xác nhận trạng thái khởi tạo (thành công hoặc lỗi)
    */
@@ -49,12 +62,17 @@ export const useAuthSync = () => {
       showGlobalLoading();
       const accessToken = await getAccessToken();
       const storedRole = await AsyncStorage.getItem('role') as role | null;
+      const accountId = await AsyncStorage.getItem('accountId');
+
 
       if (accessToken) {
         await syncAccessToken(accessToken);
       }
       if (storedRole) {
         await syncRole(storedRole);
+      }
+      if (accountId) {
+        await syncAccountId(accountId);
       }
       return { success: true };
     } catch (error: any) {
@@ -68,6 +86,7 @@ export const useAuthSync = () => {
   return {
     syncAccessToken,
     syncRole,
+    syncAccountId,
     initializeAuth,
   };
 };

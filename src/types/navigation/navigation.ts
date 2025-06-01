@@ -40,6 +40,7 @@ export type CourseStackParamList = {
 export type CommunityStackParamList = {
   'CommunityScreen': undefined;
   'BlogDetailScreen': undefined;
+  'CreateBlogScreen': undefined;
 };
 
 // Kiểu cho ProfileStack

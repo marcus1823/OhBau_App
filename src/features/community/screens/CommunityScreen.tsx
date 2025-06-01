@@ -1,23 +1,29 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-} from 'react-native';
+import { FlatList, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
-import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import CardBlog from '../components/CardBlog';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getBlogsApi } from '../api/blogApi';
 import { Blog, GetBlogsRequest } from '../types/blog.types';
 import { debounce } from 'lodash';
 import SecondaryHeader from '../../../components/common/Header/SecondaryHeader';
+import CreatePostInput from '../components/CreatePostInput';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CommunityScreen = ({ navigation }: any) => {
+  const [accountId, setAccountId] = React.useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  React.useEffect(() => {
+    const fetchAccountId = async () => {
+      const id = await AsyncStorage.getItem('accountId');
+      setAccountId(id);
+    };
+    fetchAccountId();
+  }, []);
+
   const {
     data,
     isLoading,
@@ -29,76 +35,54 @@ const CommunityScreen = ({ navigation }: any) => {
   } = useInfiniteQuery({
     queryKey: ['blogs'],
     queryFn: async ({ pageParam = 1 }) => {
-      const request: GetBlogsRequest = {
-        pageSize: 10,
-        pageNumber: pageParam,
-      };
-      try {
-        const response = await getBlogsApi(request);
-        return response.data;
-      } catch (err) {
-        throw new Error('Failed to fetch blogs');
-      }
+      const request: GetBlogsRequest = { pageSize: 10, pageNumber: pageParam };
+      const response = await getBlogsApi(request);
+      return response.data;
     },
-    getNextPageParam: (lastPage) => {
-      if (lastPage.page < lastPage.totalPages) {
-        return lastPage.page + 1;
-      }
-      return undefined;
-    },
+    getNextPageParam: (lastPage) => (lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined),
     initialPageParam: 1,
+    refetchOnWindowFocus: true, // Tự động refetch khi màn hình được focus lại
   });
 
-  const blogs = useMemo(
-    () => data?.pages.flatMap((page) => page.items || []) || [],
-    [data]
-  );
+  const blogs = useMemo(() => data?.pages.flatMap((page) => page.items || []) || [], [data]);
 
   const handleBlogPress = useCallback((blog: Blog) => {
     navigation.navigate('BlogDetailScreen', { blogId: blog.id });
   }, [navigation]);
 
-  // Debounce fetchNextPage để tránh gọi API liên tục
-  const debouncedFetchNextPage = useRef(
-    debounce(() => {
-      if (hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    }, 300)
-  ).current;
+  const handleCreatePost = useCallback(() => {
+    navigation.navigate('CreateBlogScreen');
+  }, [navigation]);
 
-  const handleLoadMore = useCallback(() => {
-    debouncedFetchNextPage();
-  }, [debouncedFetchNextPage]);
+  const debouncedFetchNextPage = useRef(debounce(() => {
+    if (hasNextPage && !isFetchingNextPage) {fetchNextPage();}
+  }, 300)).current;
 
-  const renderItem = useCallback(
-    ({ item }: { item: Blog }) => (
-      <CardBlog blog={item} onPress={handleBlogPress} />
-    ),
-    [handleBlogPress]
-  );
+  const handleLoadMore = useCallback(() => debouncedFetchNextPage(), [debouncedFetchNextPage]);
+
+  const renderItem = useCallback(({ item }: { item: Blog }) => (
+    <CardBlog blog={item} onPress={handleBlogPress} navigation={navigation} onLikeUpdate={() => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
+      queryClient.invalidateQueries({ queryKey: ['blog', item.id] });
+    }} />
+  ), [handleBlogPress, navigation, queryClient]);
+
+  const renderHeader = useCallback(() => <CreatePostInput onPress={handleCreatePost} />, [handleCreatePost]);
 
   const renderFooter = useCallback(() => {
-    if (isFetchingNextPage) {
-      return (
-        <View style={styles.footerLoader}>
-          <ActivityIndicator size="small" color={Colors.primary} />
-        </View>
-      );
-    } else if (!hasNextPage && blogs.length > 0) {
-      return <Text style={styles.noDataText}>Đã hết bài viết để xem</Text>;
-    }
+    if (isFetchingNextPage) {return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" color={Colors.primary} />
+      </View>
+    );}
+    if (!hasNextPage && blogs.length > 0) {return (
+      <Text style={styles.noDataText}>Đã hết bài viết để xem</Text>
+    );}
     return null;
   }, [isFetchingNextPage, hasNextPage, blogs.length]);
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-      {/* <PrimaryHeader
-        title="Cộng đồng"
-        onBackButtonPress={() => navigation.goBack()}
-        disableBackButton={false}
-      /> */}
-
       <SecondaryHeader
         unreadMessages={0}
         unreadNotifications={10}
@@ -111,51 +95,26 @@ const CommunityScreen = ({ navigation }: any) => {
         contentContainerStyle={styles.content}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          isLoading || isFetching ? (
-            <Text style={styles.emptyMessage}>Đang tải...</Text>
-          ) : error instanceof Error ? (
-            <Text style={styles.emptyMessage}>Lỗi: {error.message}</Text>
-          ) : (
-            <Text style={styles.emptyMessage}>Không có bài viết nào!</Text>
-          )
+          isLoading || isFetching ? <Text style={styles.emptyMessage}>Đang tải...</Text>
+          : error instanceof Error ? <Text style={styles.emptyMessage}>Lỗi: {error.message}</Text>
+          : <Text style={styles.emptyMessage}>Không có bài viết nào!</Text>
         }
       />
-      <LoadingOverlay
-        visible={isLoading || isFetching}
-        fullScreen={false}
-      />
+      <LoadingOverlay visible={isLoading || isFetching} fullScreen={false} />
     </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flexGrow: 1,
-    paddingTop: 60,
-    paddingBottom: 50,
-  },
-  emptyMessage: {
-    fontSize: 18,
-    color: Colors.textBlack,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  noDataText: {
-    fontSize: 16,
-    color: Colors.textBlack,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  footerLoader: {
-    padding: 20,
-    alignItems: 'center',
-  },
+  container: { flex: 1 },
+  content: { flexGrow: 1, paddingBottom: 100 },
+  emptyMessage: { fontSize: 18, color: Colors.textBlack, textAlign: 'center', marginTop: 20 },
+  noDataText: { fontSize: 16, color: Colors.textBlack, textAlign: 'center', marginTop: 20 },
+  footerLoader: { padding: 20, alignItems: 'center' },
 });
 
 export default CommunityScreen;

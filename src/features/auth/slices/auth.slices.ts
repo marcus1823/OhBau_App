@@ -4,11 +4,13 @@ import { role } from "../types/auth.types";
 interface AuthState {
     role: role | null;
     accessToken: string | null;
+    accountId?: string | null; // Optional field for account ID
 }
 
 const initialState: AuthState = {
     role: null,
     accessToken: null,
+    accountId: null,
 };
 
 const authSlice = createSlice({
@@ -21,11 +23,14 @@ const authSlice = createSlice({
         setAccessToken: (state, action: PayloadAction<string>) => {
             state.accessToken = action.payload;
         },
+        setAccountId: (state, action: PayloadAction<string>) => {
+            state.accountId = action.payload;
+        },
         clearAuthData: (state) => {
             state.role = null;
             state.accessToken = null;
         },
     },
 });
-export const { setRole, setAccessToken, clearAuthData } = authSlice.actions;
+export const { setRole, setAccessToken, setAccountId, clearAuthData } = authSlice.actions;
 export default authSlice.reducer;
