@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, } from 'react';
 import { FlatList, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
@@ -7,7 +7,7 @@ import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getBlogsApi } from '../api/blogApi';
 import { Blog, GetBlogsRequest } from '../types/blog.types';
-import { debounce } from 'lodash';
+// import { debounce } from 'lodash';
 import SecondaryHeader from '../../../components/common/Header/SecondaryHeader';
 import CreatePostInput from '../components/CreatePostInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,7 +39,10 @@ const CommunityScreen = ({ navigation }: any) => {
       const response = await getBlogsApi(request);
       return response.data;
     },
-    getNextPageParam: (lastPage) => (lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined),
+    getNextPageParam: (lastPage) => {
+      console.log('getNextPageParam:', { page: lastPage.page, totalPages: lastPage.totalPages });
+      return lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined;
+    },
     initialPageParam: 1,
     refetchOnWindowFocus: true, // Tự động refetch khi màn hình được focus lại
   });
@@ -54,11 +57,16 @@ const CommunityScreen = ({ navigation }: any) => {
     navigation.navigate('CreateBlogScreen');
   }, [navigation]);
 
-  const debouncedFetchNextPage = useRef(debounce(() => {
-    if (hasNextPage && !isFetchingNextPage) {fetchNextPage();}
-  }, 300)).current;
+  // const debouncedFetchNextPage = useRef(debounce(() => {
+  //   if (hasNextPage && !isFetchingNextPage) {fetchNextPage();}
+  // }, 300)).current;
 
-  const handleLoadMore = useCallback(() => debouncedFetchNextPage(), [debouncedFetchNextPage]);
+  const handleLoadMore = useCallback(() => {
+    console.log('onEndReached triggered', { hasNextPage, isFetchingNextPage });
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const renderItem = useCallback(({ item }: { item: Blog }) => (
     <CardBlog blog={item} onPress={handleBlogPress} navigation={navigation} onLikeUpdate={() => {
@@ -69,15 +77,18 @@ const CommunityScreen = ({ navigation }: any) => {
 
   const renderHeader = useCallback(() => <CreatePostInput onPress={handleCreatePost} />, [handleCreatePost]);
 
-  const renderFooter = useCallback(() => {
-    if (isFetchingNextPage) {return (
-      <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={Colors.primary} />
-      </View>
-    );}
-    if (!hasNextPage && blogs.length > 0) {return (
-      <Text style={styles.noDataText}>Đã hết bài viết để xem</Text>
-    );}
+const renderFooter = useCallback(() => {
+    console.log('renderFooter:', { isFetchingNextPage, hasNextPage, blogsLength: blogs.length });
+    if (isFetchingNextPage) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+        </View>
+      );
+    }
+    if (!hasNextPage && blogs.length > 0) {
+      return <Text style={styles.noDataText}>Đã hết bài viết để xem</Text>;
+    }
     return null;
   }, [isFetchingNextPage, hasNextPage, blogs.length]);
 
@@ -94,7 +105,7 @@ const CommunityScreen = ({ navigation }: any) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.content}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.1}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}

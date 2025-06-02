@@ -11,8 +11,9 @@ interface CardBlogProps {
   blog: Blog;
   onPress: (blog: Blog) => void;
   navigation: any;
-  onLikeUpdate?: () => void; // Thêm prop để nhận callback
+  onLikeUpdate?: () => void; 
 }
+
 
 const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUpdate }) => {
   const [accountId, setAccountId] = React.useState<string | null>(null);
@@ -26,13 +27,13 @@ const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUp
   }, []);
 
   const initialLiked = useMemo(() => {
-    if (!accountId || !blog.likeBlogs) {return false;}
+    if (!accountId || !blog.likeBlogs) { return false; }
     return !!blog.likeBlogs.find((like: LikeBlog) => like.accountId === accountId)?.isLiked;
   }, [accountId, blog.likeBlogs]);
 
   const handleLike = () => {
     console.log('Like', blog.id);
-    if (onLikeUpdate) {onLikeUpdate();} // Gọi callback khi like
+    if (onLikeUpdate) { onLikeUpdate(); } 
   };
   const handleComment = () => {
     console.log('Comment', blog.id);
@@ -46,6 +47,14 @@ const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUp
     });
   };
 
+  const htmlContent = blog.content || '<p>Không có nội dung</p>';
+
+  const source = {
+    html: htmlContent,
+  };
+
+
+
   return (
     <TouchableOpacity
       style={styles.card}
@@ -54,7 +63,7 @@ const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUp
     >
       <Text style={styles.title}>{blog.title}</Text>
       <Text style={styles.date}>{formatDate(blog.createdDate)}</Text>
-      <RenderHTML contentWidth={300} source={{ html: blog.content || '<p>Không có nội dung</p>' }} />
+      <RenderHTML contentWidth={300} source={source} />
       <View style={styles.likeInfo}>
         <Icon name="favorite" size={16} color={Colors.textDarkGray} />
         <Text style={styles.totalLikeText}>{blog.totalLike} lượt thích</Text>
