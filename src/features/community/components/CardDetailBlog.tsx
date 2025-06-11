@@ -12,16 +12,15 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 interface CardDetailBlogProps {
   blog: BlogDetail;
   onLikeUpdate?: () => void;
+  onCommentUpdate?: () => void; 
 }
 
-const CardDetailBlog: React.FC<CardDetailBlogProps> = ({ blog, onLikeUpdate }) => {
+const CardDetailBlog: React.FC<CardDetailBlogProps> = ({ blog, onLikeUpdate, onCommentUpdate }) => {
   const [accountId, setAccountId] = React.useState<string | null>(null);
   console.log('blog in CardDetailBlog:', blog);
   console.log('accountId in CardDetailBlog:', accountId);
   console.log('totalLike in CardDetailBlog:', blog.totalLike);
-  
-  
-  
+
   useEffect(() => {
     const fetchAccountId = async () => {
       const id = await AsyncStorage.getItem('accountId');
@@ -31,7 +30,7 @@ const CardDetailBlog: React.FC<CardDetailBlogProps> = ({ blog, onLikeUpdate }) =
   }, []);
 
   const initialLiked = useMemo(() => {
-    if (!accountId || !blog.likeBlogs) {return false;}
+    if (!accountId || !blog.likeBlogs) { return false; }
     const liked = !!blog.likeBlogs.find((like: LikeBlog) => like.accountId === accountId)?.isLiked;
     console.log('initialLiked in CardDetailBlog:', liked, 'accountId:', accountId, 'likeBlogs:', blog.likeBlogs);
     return liked;
@@ -45,7 +44,7 @@ const CardDetailBlog: React.FC<CardDetailBlogProps> = ({ blog, onLikeUpdate }) =
   };
 
   const handleLikePress = () => {
-    if (onLikeUpdate) {onLikeUpdate();}
+    if (onLikeUpdate) { onLikeUpdate(); }
   };
 
   return (
@@ -58,9 +57,15 @@ const CardDetailBlog: React.FC<CardDetailBlogProps> = ({ blog, onLikeUpdate }) =
           {blog.updatedDate && <Text style={styles.updatedDate}>Cập nhật: {formatDate(blog.updatedDate)}</Text>}
           <Text style={styles.email}>Tác giả: {blog.email}</Text>
         </View>
-        <View style={styles.likeInfo}>
-          <Icon name="favorite" size={16} color={Colors.textDarkGray} />
-          <Text style={styles.totalLikeText}>{blog.totalLike} lượt thích</Text>
+        <View style={styles.infoContainer}>
+          <View style={styles.infoItem}>
+            <Icon name="favorite" size={16} color={Colors.textDarkGray} />
+            <Text style={styles.totalLikeText}>{blog.totalLike} lượt thích</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Icon name="comment" size={16} color={Colors.textDarkGray} />
+            <Text style={styles.totalLikeText}>{blog.totalComment} bình luận</Text>
+          </View>
         </View>
         <ActionBlogs
           blogId={blog.id}
@@ -70,7 +75,7 @@ const CardDetailBlog: React.FC<CardDetailBlogProps> = ({ blog, onLikeUpdate }) =
         />
       </View>
       <CommentList blogId={blog.id} />
-      <CommentInput blogId={blog.id} />
+      <CommentInput blogId={blog.id} onCommentUpdate={onCommentUpdate} />
     </View>
   );
 };
@@ -79,7 +84,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.textWhite,
     borderRadius: 10,
-    padding: 15,
+    padding: 30,
     marginVertical: 8,
     marginHorizontal: 15,
     borderWidth: 1,
@@ -95,7 +100,18 @@ const styles = StyleSheet.create({
   authorInfoContainer: { flexDirection: 'column', justifyContent: 'space-between', marginTop: 15 },
   updatedDate: { fontSize: 12, fontFamily: 'LeagueSpartan-Regular', color: Colors.textDarkGray, fontStyle: 'italic', alignSelf: 'flex-end' },
   email: { fontSize: 14, fontFamily: 'LeagueSpartan-Regular', color: Colors.primary, fontStyle: 'italic', alignSelf: 'flex-end' },
-  likeInfo: { flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 5 },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 15,
+  },
   totalLikeText: { fontSize: 14, color: Colors.textDarkGray, marginLeft: 5, fontFamily: 'LeagueSpartan-Regular' },
 });
 

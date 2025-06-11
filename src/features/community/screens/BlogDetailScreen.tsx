@@ -6,7 +6,7 @@ import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import CardDetailBlog from '../components/CardDetailBlog';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getBlogApi } from '../api/blogApi';
-import { useFocusEffect } from '@react-navigation/native'; 
+import { useFocusEffect } from '@react-navigation/native';
 
 const BlogDetailScreen = ({ route, navigation }: any) => {
   const { blogId } = route.params;
@@ -16,19 +16,23 @@ const BlogDetailScreen = ({ route, navigation }: any) => {
     queryKey: ['blog', blogId],
     queryFn: () => getBlogApi(blogId),
     enabled: !!blogId,
-    refetchOnWindowFocus: true, // Tự động refetch khi màn hình được focus lại
+    refetchOnWindowFocus: true,
   });
 
-  // Lắng nghe sự kiện focus để refetch dữ liệu
   useFocusEffect(
     React.useCallback(() => {
-      refetch(); // Refetch dữ liệu khi màn hình được focus
+      refetch();
     }, [refetch])
   );
 
   const handleLikeUpdate = () => {
     queryClient.invalidateQueries({ queryKey: ['blog', blogId] });
-    queryClient.invalidateQueries({ queryKey: ['blogs'] }); // Làm mới cả danh sách
+    queryClient.invalidateQueries({ queryKey: ['blogs'] });
+  };
+
+  const handleCommentUpdate = () => {
+    queryClient.invalidateQueries({ queryKey: ['blog', blogId] });
+    queryClient.invalidateQueries({ queryKey: ['blogs'] });
   };
 
   const renderHeader = () => {
@@ -53,7 +57,13 @@ const BlogDetailScreen = ({ route, navigation }: any) => {
         </View>
       );
     }
-    return <CardDetailBlog blog={blogData.data} onLikeUpdate={handleLikeUpdate} />;
+    return (
+      <CardDetailBlog
+        blog={blogData.data}
+        onLikeUpdate={handleLikeUpdate}
+        onCommentUpdate={handleCommentUpdate}
+      />
+    );
   };
 
   return (

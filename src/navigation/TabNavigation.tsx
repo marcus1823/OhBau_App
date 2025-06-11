@@ -16,6 +16,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import CartScreen from '../features/course/screens/CartScreen';
 import PaymentScreen from '../features/course/screens/PaymentScreen';
 import withAuth from '../components/hoc/withAuth';
+import ShopStack from './stacks/ShopStack';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -26,6 +27,8 @@ const doctorIcon = require('../assets/icons/doctorIcon.png');
 const courseIcon = require('../assets/icons/courseIcon.png');
 const communityIcon = require('../assets/icons/communityIcon.png');
 const chatIcon = require('../assets/icons/icons8-chat-48-field.png');
+const shopIcon = require('../assets/icons/icons8-shop3-48.png');
+
 
 const TabIcon: React.FC<{ focused: boolean; iconSource: any }> = ({ focused, iconSource }) => {
   const scale = focused ? 1.2 : 1;
@@ -97,6 +100,12 @@ const MainTabs = () => {
         name="Cộng đồng"
         component={CommunityStack}
         options={{ tabBarIcon: getTabBarIcon(communityIcon) }}
+      />
+
+      <Tab.Screen
+        name="Shop"
+        component={ShopStack}
+        options={{ tabBarIcon: getTabBarIcon(shopIcon) }}
       />
     </Tab.Navigator>
   );

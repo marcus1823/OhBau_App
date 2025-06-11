@@ -12,9 +12,10 @@ interface CommentInputProps {
   blogId: string;
   parentCommentId?: string;
   onSubmit?: (comment: any) => void;
+  onCommentUpdate?: () => void;
 }
 
-const CommentInput: React.FC<CommentInputProps> = ({ blogId, parentCommentId, onSubmit }) => {
+const CommentInput: React.FC<CommentInputProps> = ({ blogId, parentCommentId, onSubmit, onCommentUpdate }) => {
   const [comment, setComment] = useState('');
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const { mutate: createComment, isPending: isCreating } = useCreateCommentBlog();
@@ -32,13 +33,54 @@ const CommentInput: React.FC<CommentInputProps> = ({ blogId, parentCommentId, on
     }
 
     const request = { blogId, comment, accessToken };
-    const onSuccess = (data: any) => {
+    const onSuccess = async (data: any) => {
+      console.log('Bình luận gửi thành công:', data);
       setComment('');
-      if (onSubmit && data.data) {onSubmit(data.data);} // Chỉ gọi onSubmit nếu data tồn tại
-      queryClient.invalidateQueries({ queryKey: ['comments', blogId] });
+      if (onSubmit && data.data) { onSubmit(data.data); }
+
+      // Cập nhật lạc quan cho totalComment
+      queryClient.setQueryData(['blog', blogId], (oldData: any) => {
+        if (!oldData?.data) {return oldData;}
+        console.log('Cập nhật lạc quan totalComment:', oldData.data.totalComment);
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            totalComment: (oldData.data.totalComment || 0) + 1,
+          },
+        };
+      });
+      queryClient.setQueryData(['blogs'], (oldData: any) => {
+        if (!oldData?.pages) {return oldData;}
+        console.log('Cập nhật lạc quan danh sách blogs:', oldData);
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            items: page.items.map((item: any) =>
+              item.id === blogId ? { ...item, totalComment: (item.totalComment || 0) + 1 } : item
+            ),
+          })),
+        };
+      });
+
+      // Làm mới và tải lại dữ liệu
+      console.log('Đang làm mới các truy vấn cho blogId:', blogId);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['comments', blogId] }),
+        queryClient.invalidateQueries({ queryKey: ['blogs'] }),
+        queryClient.invalidateQueries({ queryKey: ['blog', blogId] }),
+        queryClient.refetchQueries({ queryKey: ['blogs'], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['blog', blogId], type: 'active' }),
+      ]);
+      console.log('Các truy vấn đã được làm mới và tải lại');
+      if (onCommentUpdate) { onCommentUpdate(); }
       // Alert.alert('Thành công', parentCommentId ? 'Trả lời thành công!' : 'Bình luận thành công!');
     };
-    const onError = (error: Error) => Alert.alert('Lỗi', error.message);
+    const onError = (error: Error) => {
+      console.error('Lỗi khi gửi bình luận:', error);
+      Alert.alert('Lỗi', error.message);
+    };
 
     parentCommentId
       ? replyComment({ ...request, parentId: parentCommentId }, { onSuccess, onError })

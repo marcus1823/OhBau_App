@@ -12,6 +12,7 @@ export type AuthStackParamList = {
 // Kiểu cho HomeStack
 export type HomeStackParamList = {
   'HomeScreen': undefined;
+  'ViewChartScreen': undefined;
 };
 
 // Kiểu cho DoctorStack
@@ -26,6 +27,7 @@ export type DoctorStackParamList = {
 // Kiểu cho ShopStack
 export type ShopStackParamList = {
   'ShopScreen': undefined;
+  'ProductDetailScreen': undefined;
 };
 
 // Kiểu cho CourseStack
@@ -49,6 +51,8 @@ export type ProfileStackParamList = {
   'PersonalScreen': undefined;
   'FavoriteScreen': undefined;
   'MyFamilyScreen': undefined;
+  'AddFamilyMemberScreen': undefined;
+  'EditFetusScreen': undefined;
   'MyAppointmentScreen': undefined;
   'PaymentAndDeliveryScreen': undefined;
   'LoginAndSecurityScreen': undefined;

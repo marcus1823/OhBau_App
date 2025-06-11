@@ -35,14 +35,14 @@ const SplashScreen = ({navigation}: any) => {
     }
     return (
         <View style={styles.container}>
-
             {/* animation for logo */}
             <Animated.View style={[styles.logoContainer, logoAnimatedStyle]} >
                 <Image style={styles.logoNoText} source={logoNoText} />
+                <Image style={styles.logoWithText} source={logoWithText} />
             </Animated.View>
 
             {/* animation for content */}
-            <Animated.View style={[styles.contentContainer, contentAnimatedStyle]} >
+            <Animated.View style={[styles.contentAnimatedStyle, contentAnimatedStyle]} >
                 <View style={styles.contentContainer}>
                     <Text style={styles.text}>Bạn Là?</Text>
                     <Button title="Bố" 
@@ -70,16 +70,24 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary,
     },
     logoContainer: {
-        alignContent: 'center',
+        alignItems: 'center', 
         justifyContent: 'center',
     },
     logoNoText: {
         width: 246,
         height: 248,
     },
+    logoWithText: {
+        width: 300, 
+        height: 60, 
+        marginTop: 50, 
+    },
     contentContainer: {
         gap: 20,
-        marginTop: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    contentAnimatedStyle: {
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -88,7 +96,5 @@ const styles = StyleSheet.create({
         color: Colors.textWhite,
         fontWeight: 'bold',
         textAlign: 'center',
-
     },
-
 })

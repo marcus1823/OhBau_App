@@ -11,11 +11,11 @@ interface CardBlogProps {
   blog: Blog;
   onPress: (blog: Blog) => void;
   navigation: any;
-  onLikeUpdate?: () => void; 
+  onLikeUpdate?: () => void;
+  onCommentUpdate?: () => void; 
 }
 
-
-const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUpdate }) => {
+const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUpdate, onCommentUpdate }) => {
   const [accountId, setAccountId] = React.useState<string | null>(null);
 
   useEffect(() => {
@@ -33,11 +33,13 @@ const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUp
 
   const handleLike = () => {
     console.log('Like', blog.id);
-    if (onLikeUpdate) { onLikeUpdate(); } 
+    if (onLikeUpdate) { onLikeUpdate(); }
   };
+
   const handleComment = () => {
     console.log('Comment', blog.id);
     navigation.navigate('BlogDetailScreen', { blogId: blog.id });
+    if (onCommentUpdate) { onCommentUpdate(); }
   };
 
   const formatDate = (dateString: string) => {
@@ -53,8 +55,6 @@ const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUp
     html: htmlContent,
   };
 
-
-
   return (
     <TouchableOpacity
       style={styles.card}
@@ -62,11 +62,20 @@ const CardBlog: React.FC<CardBlogProps> = ({ blog, onPress, navigation, onLikeUp
       activeOpacity={0.8}
     >
       <Text style={styles.title}>{blog.title}</Text>
+      <View style={styles.infoTopItem}>
+          <Text style={styles.authorText}>{blog.authorEmail}</Text>
       <Text style={styles.date}>{formatDate(blog.createdDate)}</Text>
+        </View>
       <RenderHTML contentWidth={300} source={source} />
-      <View style={styles.likeInfo}>
-        <Icon name="favorite" size={16} color={Colors.textDarkGray} />
-        <Text style={styles.totalLikeText}>{blog.totalLike} lượt thích</Text>
+      <View style={styles.infoContainer}>
+        <View style={styles.infoItem}>
+          <Icon name="favorite" size={16} color={Colors.textDarkGray} />
+          <Text style={styles.infoText}>{blog.totalLike} lượt thích</Text>
+        </View>
+        <View style={styles.infoItem}>
+          <Icon name="comment" size={16} color={Colors.textDarkGray} />
+          <Text style={styles.infoText}>{blog.totalComment} bình luận</Text>
+        </View>
       </View>
       <ActionBlogs
         blogId={blog.id}
@@ -82,7 +91,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.textWhite,
     borderRadius: 10,
-    padding: 15,
+    padding: 30,
     marginVertical: 8,
     marginHorizontal: 15,
     borderWidth: 1,
@@ -93,10 +102,46 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  title: { fontSize: 18, fontFamily: 'LeagueSpartan-SemiBold', color: Colors.textBlack, marginBottom: 5 },
-  date: { fontSize: 12, color: Colors.textDarkGray, marginBottom: 10 },
-  likeInfo: { flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 5 },
-  totalLikeText: { fontSize: 14, color: Colors.textDarkGray, marginLeft: 5, fontFamily: 'LeagueSpartan-Regular' },
+  title: {
+    fontSize: 18,
+    fontFamily: 'LeagueSpartan-SemiBold',
+    color: Colors.textBlack,
+    marginBottom: 5,
+  },
+  date: {
+    fontSize: 12,
+    color: Colors.textDarkGray,
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  infoTopItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent:'space-between',
+  },
+  authorText: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontFamily: 'LeagueSpartan-Regular',
+    fontStyle: 'italic',
+  },
+  infoText: {
+    fontSize: 14,
+    color: Colors.textDarkGray,
+    marginLeft: 5,
+    fontFamily: 'LeagueSpartan-Regular',
+  },
 });
 
 export default CardBlog;

@@ -16,6 +16,10 @@ import { useAuthSync } from './src/utils/asyncStorage/useAuthSync';
 import { useSyncQueriesExternal } from "react-query-external-sync"; // 
 import { Platform } from 'react-native';
 
+if (__DEV__) {
+  require("./ReactotronConfig");
+}
+
 /**
  * Khởi tạo stack navigator cho ứng dụng
  */

@@ -12,6 +12,8 @@ import MyFamilyScreen from '../../features/home/profile/screens/myFamily/screens
 import LoginAndSecurityScreen from '../../features/home/profile/screens/loginAndSecurity/screens/LoginAndSecurityScreen';
 import PaymentAndDeliveryScreen from '../../features/home/profile/screens/paymentAndDelivery/screens/PaymentAndDeliveryScreen';
 import ProfileScreen from '../../features/home/profile/screens/ProfileScreen';
+import AddFamilyMemberScreen from '../../features/home/profile/screens/myFamily/screens/AddFamilyMemberScreen';
+import EditFetusScreen from '../../features/home/profile/screens/myFamily/screens/EditFetusScreen';
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -22,6 +24,8 @@ const ProfileStack = () => {
      <Stack.Screen name="ProfileScreen" component={withAuth(ProfileScreen)} />
       <Stack.Screen name="PersonalScreen" component={PersonalScreen} />
       <Stack.Screen name="MyFamilyScreen" component={MyFamilyScreen} /> 
+      <Stack.Screen name="AddFamilyMemberScreen" component={AddFamilyMemberScreen} />
+      <Stack.Screen name="EditFetusScreen" component={EditFetusScreen} />
       <Stack.Screen name="FavoriteScreen" component={FavoriteScreen} />
       <Stack.Screen name="MyAppointmentScreen" component={MyAppointmentScreen} />
       <Stack.Screen name="HistoryAppointmentScreen" component={HistoryAppointmentScreen} />

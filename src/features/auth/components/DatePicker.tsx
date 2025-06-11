@@ -8,6 +8,7 @@ interface DatePickerProps {
     onDateChange: (date: Date) => void;
     title?: string;
     placeholder?: string;
+    allowFutureDates?: boolean; 
 }
 
 const DatePickerComponent: React.FC<DatePickerProps> = ({
@@ -15,10 +16,11 @@ const DatePickerComponent: React.FC<DatePickerProps> = ({
     onDateChange,
     title = 'Ngày sinh',
     placeholder = 'Chọn ngày sinh của bạn',
+    allowFutureDates = false, // Default to false to maintain current behavior
 }) => {
     const [open, setOpen] = useState(false);
 
-    // Format ngày sinh thành chuỗi định dạng DD/MM/YYYY
+    // Format date to DD/MM/YYYY string
     const formatDate = (date: Date) => {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -47,11 +49,11 @@ const DatePickerComponent: React.FC<DatePickerProps> = ({
                     onDateChange(date);
                 }}
                 onCancel={() => setOpen(false)}
-                title="Chọn ngày sinh"
+                title="Chọn ngày"
                 confirmText="Xác nhận"
                 cancelText="Hủy"
                 locale="vi"
-                maximumDate={new Date()}
+                maximumDate={allowFutureDates ? undefined : new Date()} 
             />
         </View>
     );
@@ -64,6 +66,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     touchableArea: {
-        width: '100%', // Đảm bảo toàn bộ khu vực input có thể nhấn
+        width: '100%', // Ensure the entire input area is pressable
     },
 });

@@ -9,7 +9,7 @@ const Stack = createNativeStackNavigator<ChatStackParamList>();
 const ChatStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="ChatScreen" component={withAuth(ChatScreen)} />
+      <Stack.Screen name="ChatScreen" component={withAuth(ChatScreen)}  /> 
     </Stack.Navigator>
   )
 }

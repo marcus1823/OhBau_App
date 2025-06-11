@@ -38,7 +38,9 @@ export interface Blog {
   title: string;
   content: string;
   createdDate: string;
+  authorEmail: string;
   totalLike: number;
+  totalComment: number;
   likeBlogs: LikeBlog[];
 }
 
@@ -53,6 +55,7 @@ export interface BlogDetail {
   email: string;
   isDelete: boolean;
   deletedDate: string | null;
+  totalComment: number;
   totalLike: number;
   likeBlogs: LikeBlog[];
 }

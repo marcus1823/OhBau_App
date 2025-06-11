@@ -3,6 +3,11 @@ export interface RegisterParentRequest {
     fullName: string; // nullable: true
     dob: string; // date
 }
+export interface RegisterParentResponseBaseResponse {
+    status: string;
+    message: string;
+    data: RegisterParentResponse;
+}
 
 export interface RegisterParentResponse {
     fullName: string; // nullable: true

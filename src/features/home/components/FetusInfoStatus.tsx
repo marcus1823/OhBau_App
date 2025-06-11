@@ -4,6 +4,10 @@ import { Colors } from '../../../assets/styles/colorStyle';
 import CardInfoStatus from './CardInfoStatus';
 import { FetusDetail } from '../types/family.type';
 
+
+
+type AllowedProperties = 'weight' | 'height' | 'bpm' | 'movement' | 'gsd' | 'crl' | 'bpd' | 'fl' | 'hc' | 'ac';
+
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
   { background: Colors.cardHome2, text: Colors.textCardHome2 },
@@ -13,9 +17,12 @@ const cardColors = [
 
 interface FetusInfoStatusProps {
   fetusDetails: FetusDetail[];
+  navigation?: any;
 }
 
-const FetusInfoStatus: React.FC<FetusInfoStatusProps> = ({ fetusDetails }) => {
+const FetusInfoStatus: React.FC<FetusInfoStatusProps> = ({ fetusDetails, navigation }) => {
+  console.log('FetusInfoStatus - Received fetusDetails:', fetusDetails);
+
   // Select the first fetusDetail
   const firstFetusDetail = fetusDetails[0] || null;
 
@@ -25,13 +32,20 @@ const FetusInfoStatus: React.FC<FetusInfoStatusProps> = ({ fetusDetails }) => {
     console.log('FetusInfoStatus - First Fetus Detail:', firstFetusDetail);
   }, [fetusDetails, firstFetusDetail]);
 
-  // Hardcoded data for UI (as requested, not using fetusDetails yet)
-const fetusInfo = [
-  { icon: 'scale', title: 'Cân nặng', value: `${firstFetusDetail?.weight || 0} kg` },
-  { icon: 'straighten', title: 'Chiều dài', value: `${firstFetusDetail?.height || 0} cm` },
-  { icon: 'graphic-eq', title: 'Nhịp tim', value: '120 - 160 lần/phút' },
-  { icon: 'query-stats', title: 'Số lần đạp', value: '16 - 45 lần/ngày' },
-];
+  // Hardcoded data for UI with typed property
+  const fetusInfo = [
+    { icon: 'scale', title: 'Cân nặng', value: `${firstFetusDetail?.weight || 0} kg`, property: 'weight' as AllowedProperties },
+    { icon: 'straighten', title: 'Chiều dài', value: `${firstFetusDetail?.height || 0} cm`, property: 'height' as AllowedProperties },
+    { icon: 'graphic-eq', title: 'Nhịp tim', value: `${firstFetusDetail?.bpm || '120 - 160'} lần/phút`, property: 'bpm' as AllowedProperties },
+    { icon: 'query-stats', title: 'Số lần đạp', value: `${firstFetusDetail?.movement || '16 - 45'} lần/ngày`, property: 'movement' as AllowedProperties },
+  ];
+
+  // Handle "Xem biểu đồ" click, log array of values for the specified property
+  const handleViewChart = (property: AllowedProperties) => {
+    const values = fetusDetails.map(detail => detail[property] || 0);
+    console.log(`Xem biểu đồ - ${property}:`, values);
+    navigation.navigate('ViewChartScreen', { property, values });
+  };
 
   return (
     <View>
@@ -48,7 +62,7 @@ const fetusInfo = [
                 value={info.value}
                 backgroundColor={background}
                 textColor={text}
-                onPressViewMore={() => console.log(`Xem thêm ${info.title}`)}
+                onPressViewMore={() => handleViewChart(info.property)}
               />
             );
           })}

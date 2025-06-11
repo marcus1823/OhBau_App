@@ -68,12 +68,21 @@ const CommunityScreen = ({ navigation }: any) => {
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const renderItem = useCallback(({ item }: { item: Blog }) => (
-    <CardBlog blog={item} onPress={handleBlogPress} navigation={navigation} onLikeUpdate={() => {
+const renderItem = useCallback(({ item }: { item: Blog }) => (
+  <CardBlog
+    blog={item}
+    onPress={handleBlogPress}
+    navigation={navigation}
+    onLikeUpdate={() => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] });
       queryClient.invalidateQueries({ queryKey: ['blog', item.id] });
-    }} />
-  ), [handleBlogPress, navigation, queryClient]);
+    }}
+    onCommentUpdate={() => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] });
+      queryClient.invalidateQueries({ queryKey: ['blog', item.id] });
+    }}
+  />
+), [handleBlogPress, navigation, queryClient]);
 
   const renderHeader = useCallback(() => <CreatePostInput onPress={handleCreatePost} />, [handleCreatePost]);
 
@@ -122,7 +131,7 @@ const renderFooter = useCallback(() => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { flexGrow: 1, paddingBottom: 100 },
+  content: { flexGrow: 1, paddingBottom: 100,  },
   emptyMessage: { fontSize: 18, color: Colors.textBlack, textAlign: 'center', marginTop: 20 },
   noDataText: { fontSize: 16, color: Colors.textBlack, textAlign: 'center', marginTop: 20 },
   footerLoader: { padding: 20, alignItems: 'center' },
