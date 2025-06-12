@@ -1,94 +1,159 @@
-import { addCourseToCartApi, deleteCartItemApi, createOrderApi } from '../api/courseApi';
-import { useSelector, useDispatch } from 'react-redux';
-import { setAddedCourses } from '../slices/cartSlice';
-import { CreateOrderResponse } from '../types/course.types';
-import { AppDispatch, RootState } from '../../../stores/store';
+import { addFavoriteCourseApi, addMyCourseApi, getfavoriteCoursesApi, getMyCoursesApi, checkCourseStatusApi } from '../api/courseApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../stores/store';
 import { useCreateMutation } from '../../../hooks/useCreateMutation';
 import { useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { FavoriteCourse } from '../types/course.types';
 
 /**
- * Custom hook để xử lý thêm khóa học vào giỏ hàng
+ * Custom hook for checking if a course is in user's favorites directly via API
  */
-export const useAddCourseToCart = () => {
+export const useIsCourseInFavorites = (courseId: string) => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
-  const dispatch = useDispatch<AppDispatch>();
-  const queryClient = useQueryClient();
-  const addedCourses = useSelector((state: RootState) => state.cart.addedCourses || []);
-
-  return useCreateMutation<void, Error, { courseId: string; isBuyNow?: boolean }>(
-    async (variables) => {
+  
+  return useQuery({
+    queryKey: ['isFavoriteCourse', courseId],
+    queryFn: async () => {
       if (!accessToken) {
         throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
       }
-      await addCourseToCartApi(variables.courseId, accessToken);
+      const response = await getfavoriteCoursesApi(1, 100, accessToken);
+      const favoriteIds = response.data.items.map((course: FavoriteCourse) => course.courseId);
+      return favoriteIds.includes(courseId);
     },
-    'addCourseToCart',
-    'Thêm vào giỏ hàng thành công!',
-    'Đã xảy ra lỗi khi thêm vào giỏ hàng',
+    enabled: !!accessToken && !!courseId,
+    staleTime: 30 * 1000, // 30 seconds cache for favorite status
+    refetchOnWindowFocus: false,
+  });
+};
+
+/**
+ * Custom hook for checking if a course is in user's "My Courses" directly via API
+ */
+export const useIsCourseInMyCourses = (courseId: string) => {
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  
+  return useQuery({
+    queryKey: ['isInMyCourse', courseId],
+    queryFn: async () => {
+      if (!accessToken) {
+        throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+      }
+      const response = await getMyCoursesApi({ pageSize: 100, pageNumber: 1 }, accessToken);
+      const myCourseIds = response.items.map(course => course.id);
+      return myCourseIds.includes(courseId);
+    },
+    enabled: !!accessToken && !!courseId,
+    staleTime: 30 * 1000, // 30 seconds cache for my course status
+    refetchOnWindowFocus: false,
+  });
+};
+
+/**
+ * Combined hook for checking both favorite and my course status in one API call
+ * This is more efficient when both statuses are needed
+ */
+export const useCourseStatus = (courseId: string) => {
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  
+  return useQuery({
+    queryKey: ['courseStatus', courseId],
+    queryFn: async () => {
+      if (!accessToken || !courseId) {
+        return { isInFavorites: false, isInMyCourses: false };
+      }
+      
+      const status = await checkCourseStatusApi(courseId, accessToken);
+      return {
+        isInFavorites: status.isInFavorites,
+        isInMyCourses: status.isInMyCourses
+      };
+    },
+    enabled: !!accessToken && !!courseId,
+    staleTime: 30 * 1000, // 30 seconds cache
+    refetchOnWindowFocus: false,
+  });
+};
+
+/**
+ * Custom hook để xử lý thêm khóa học vào khoá học của tôi
+ */
+export const useAddCourseToMyCourses = () => {
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const queryClient = useQueryClient();
+  
+  return useCreateMutation<void, Error, { courseId: string }>(
+    async (variables) => {
+      if (!accessToken) {
+        throw new Error('Vui lòng đăng nhập để thực hiện chức năng.');
+      }
+      await addMyCourseApi(variables.courseId, accessToken);
+    },
+    'addCourseToMyCourses',
+    'Thêm khóa học thành công!',
+    'Đã xảy ra lỗi khi thêm khóa học vào khoá học của tôi',
     {
-      onMutate: (variables) => {
-        // Optimistic update: Chỉ thêm courseId vào addedCourses nếu chưa có
-        if (!addedCourses.includes(variables.courseId)) {
-          dispatch(setAddedCourses([...addedCourses, variables.courseId]));
-        }
-      },
       onSuccess: (data, variables) => {
-        // Đảm bảo courseId được thêm vào addedCourses
-        if (!addedCourses.includes(variables.courseId)) {
-          dispatch(setAddedCourses([...addedCourses, variables.courseId]));
-        }
-        // Invalidate queries của CartScreen để làm mới giỏ hàng
-        queryClient.invalidateQueries({ queryKey: ['cartItemsByAccountInfinite'] });
-        queryClient.invalidateQueries({ queryKey: ['cartItemsDetailsInfinite'] });
-      },
-      onError: (error, variables) => {
-        // Rollback nếu lỗi không phải 208
-        if (error instanceof Error && !error.message.includes('208')) {
-          dispatch(setAddedCourses(addedCourses.filter((id) => id !== variables.courseId)));
-        }
-        // Không thêm courseId vào addedCourses nếu lỗi là 208
-        if (error instanceof Error && error.message.includes('208')) {
-          // Không cần dispatch vì courseId không nên được thêm
-        }
+        // Invalidate related queries to refresh status
+        queryClient.invalidateQueries({ queryKey: ['myCourses'] });
+        queryClient.invalidateQueries({ queryKey: ['isInMyCourse', variables.courseId] });
+        queryClient.invalidateQueries({ queryKey: ['courseStatus', variables.courseId] });
       },
     }
   );
 };
 
 /**
- * Custom hook để xử lý xóa khóa học khỏi giỏ hàng
+ * Custom hook để xử lý thêm/xóa khóa học vào danh sách yêu thích
  */
-export const useDeleteCartItem = () => {
+export const useToggleFavoriteCourse = () => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const queryClient = useQueryClient();
 
-  return useCreateMutation<void, Error, { itemId: string }>(
+  return useCreateMutation<void, Error, { courseId: string }>(
     async (variables) => {
       if (!accessToken) {
-        throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+        throw new Error('Vui lòng đăng nhập để thực hiện chức năng.');
       }
-      await deleteCartItemApi(variables.itemId, accessToken);
+      await addFavoriteCourseApi(variables.courseId, accessToken);
     },
-    'deleteCartItem',
-    'Xóa sản phẩm khỏi giỏ hàng thành công!',
-    'Đã xảy ra lỗi khi xóa sản phẩm khỏi giỏ hàng'
+    'toggleFavoriteCourse',
+    '', // Empty success message - we'll handle it manually
+    'Đã xảy ra lỗi khi cập nhật danh sách yêu thích',
+    {
+      onSuccess: (data, variables) => {
+        // Invalidate related queries to refresh status
+        queryClient.invalidateQueries({ queryKey: ['favoriteCourses'] });
+        queryClient.invalidateQueries({ queryKey: ['isFavoriteCourse', variables.courseId] });
+        queryClient.invalidateQueries({ queryKey: ['courseStatus', variables.courseId] });
+      },
+    }
   );
 };
 
 /**
- * Custom hook để xử lý tạo đơn hàng
+ * Custom hook để lấy danh sách khóa học yêu thích
  */
-export const useCreateOrder = () => {
+export const useFetchFavoriteCourses = () => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
-  return useCreateMutation<CreateOrderResponse, Error, { cartId: string }>(
-    async (variables) => {
+  return useQuery({
+    queryKey: ['favoriteCourses'],
+    queryFn: async () => {
       if (!accessToken) {
-        throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+        throw new Error('Vui lòng đăng nhập để thực hiện chức năng.');
       }
-      return await createOrderApi(variables.cartId, accessToken);
+      const response = await getfavoriteCoursesApi(1, 100, accessToken);
+      return response.data.items;
     },
-    'createOrder',
-    'Đặt hàng thành công!',
-    'Đã xảy ra lỗi khi đặt hàng'
-  );
+    enabled: !!accessToken,
+    refetchOnWindowFocus: false,
+    staleTime: 30 * 1000, // 30 seconds cache
+  });
 };
+
+// Comment out the cart-related hooks that are no longer needed
+/*
+// ...existing code...
+*/

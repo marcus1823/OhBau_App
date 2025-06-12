@@ -16,7 +16,7 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
   console.log('CourseDetailScreen courseName:', courseName);
   console.log('CourseDetailScreen isPurchased:', isPurchased);
 
-  const { showError, showInfo } = useToast();
+  const { showError } = useToast();
 
   const {
     data: topics,
@@ -52,11 +52,6 @@ const CourseDetailScreen = ({ navigation, route }: any) => {
   }
 
   const handleTopicPress = (item: Topic) => {
-    if (!isPurchased) {
-      showInfo('Vui lòng mua khoá học để xem nội dung chi tiết.');
-
-      return;
-    }
     navigation.navigate('CourseChapterScreen', { topic: item, course: { id: courseId, name: courseName }, isPurchased });
   };
 

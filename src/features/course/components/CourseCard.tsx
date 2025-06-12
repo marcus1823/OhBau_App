@@ -1,11 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useAddCourseToCart } from '../hooks/useCourse.hook';
-import { useSelector } from 'react-redux';
+import { useAddCourseToMyCourses, useToggleFavoriteCourse, useCourseStatus } from '../hooks/useCourse.hook';
 import { useToast } from '../../../utils/toasts/useToast';
-import { RootState } from '../../../stores/store';
 
 const cardColors = [
   { background: Colors.cardHome1, text: Colors.textCardHome1 },
@@ -19,8 +17,8 @@ interface CourseCardProps {
   name: string;
   rating: number;
   duration: number;
-  price: number;
-  isPurchased: boolean;
+  price?: number; // Giữ lại nhưng không hiển thị
+  isPurchased?: boolean;
   showBuyButton?: boolean;
   index: number;
   navigation: any;
@@ -31,95 +29,80 @@ const CourseCard: React.FC<CourseCardProps> = ({
   name,
   rating,
   duration,
-  price,
-  isPurchased,
+  isPurchased = false,
   showBuyButton = false,
   index,
   navigation,
 }) => {
-  const { mutate, isPending } = useAddCourseToCart();
-  const addedCourses = useSelector((state: RootState) => state.cart.addedCourses || []);
+  const { mutate: addToMyCourses, isPending: isAddingToCourse } = useAddCourseToMyCourses();
+  const { mutate: toggleFavorite, isPending: isTogglingFavorite } = useToggleFavoriteCourse();
+  
+  // Use API-based status checking instead of Redux
+  const { 
+    data: courseStatus, 
+    isLoading: isLoadingStatus  } = useCourseStatus(courseId);
+  
   const { showSuccess, showError } = useToast();
-  const isInCart = addedCourses.includes(courseId);
+  
+  // Use API data instead of Redux state
+  const isInMyCourse = (courseStatus?.isInMyCourses || isPurchased) ?? false;
+  const isInFavorites = courseStatus?.isInFavorites ?? false;
 
-  const handleAddToCart = () => {
-    if (isPurchased) {
-      showError('Bạn đã mua khóa học này rồi');
-      return;
-    }
-    if (isInCart) {
-      showError('Khóa học đã có trong giỏ hàng');
-      return;
-    }
-    if (!isPending) {
-      mutate(
+  // Xử lý thêm/xóa khỏi yêu thích
+  const handleToggleFavorite = () => {
+    if (!isTogglingFavorite) {
+      toggleFavorite(
         { courseId },
         {
           onSuccess: () => {
-            showSuccess('Thêm vào giỏ hàng thành công!');
+            const message = isInFavorites 
+              ? 'Đã xóa khỏi danh sách yêu thích!'
+              : 'Đã thêm vào danh sách yêu thích!';
+            showSuccess(message);
           },
           onError: (error) => {
-            if (error instanceof Error && error.message.includes('208')) {
-              const message = error.message.includes('already purchased')
-                ? 'Bạn đã mua khóa học này rồi'
-                : 'Khóa học đã có trong giỏ hàng';
-              showError(message);
-            } else {
-              showError('Đã xảy ra lỗi khi thêm vào giỏ hàng');
-            }
+            showError('Đã xảy ra lỗi khi cập nhật danh sách yêu thích');
+            console.log('Error toggling favorite:', error);
           },
         }
       );
     }
   };
 
-  const handleBuyNow = () => {
-    if (isPurchased) {
-      showError('Bạn đã mua khóa học này rồi');
+  // Xử lý thêm vào khóa học của tôi
+  const handleAddToMyCourses = () => {
+    if (isInMyCourse) {
+      showError('Khóa học đã có trong danh sách của bạn');
       navigation.navigate('TabNavigation', {
         screen: 'CourseScreen',
-        params: { screen: 'Khóa học', tab: 'myCourses' }, // Chuyển đến tab "Khóa học của tôi"
+        params: { screen: 'Khóa học', tab: 'myCourses' },
       });
       return;
     }
-    if (isInCart) {
-      showError('Khóa học đã có trong giỏ hàng');
-      navigation.navigate('TabNavigation', {
-        screen: 'CartScreen',
-        params: { previousTab: 'Khóa học' },
-      });
-      return;
-    }
-    if (!isPending) {
-      mutate(
-        { courseId, isBuyNow: true },
+    
+    if (!isAddingToCourse) {
+      addToMyCourses(
+        { courseId },
         {
           onSuccess: () => {
-            showSuccess('Thêm vào giỏ hàng thành công!');
+            showSuccess('Thêm khóa học vào danh sách của tôi thành công!');
             navigation.navigate('TabNavigation', {
-              screen: 'CartScreen',
-              params: { previousTab: 'Khóa học' },
+              screen: 'CourseScreen',
+              params: { screen: 'Khóa học', tab: 'myCourses' },
             });
           },
           onError: (error) => {
             if (error instanceof Error && error.message.includes('208')) {
-              const message = error.message.includes('already purchased')
-                ? 'Bạn đã mua khóa học này rồi'
-                : 'Khóa học đã có trong giỏ hàng';
+              const message = error.message.includes('You have already received this course')
+                ? 'Bạn đã thêm khóa học này rồi'
+                : 'Khóa học đã có trong danh sách của bạn';
               showError(message);
-              if (error.message.includes('already purchased')) {
-                navigation.navigate('TabNavigation', {
-                  screen: 'CourseScreen',
-                  params: { screen: 'Khóa học', tab: 'myCourses' },
-                });
-              } else {
-                navigation.navigate('TabNavigation', {
-                  screen: 'CartScreen',
-                  params: { previousTab: 'Khóa học' },
-                });
-              }
+              navigation.navigate('TabNavigation', {
+                screen: 'CourseScreen',
+                params: { screen: 'Khóa học', tab: 'myCourses' },
+              });
             } else {
-              showError('Đã xảy ra lỗi khi thêm vào giỏ hàng');
+              showError('Đã xảy ra lỗi khi thêm vào danh sách của tôi');
             }
           },
         }
@@ -127,9 +110,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
     }
   };
 
-  const iconName = isPurchased || isInCart || isPending ? 'check' : showBuyButton ? 'shopping-cart' : 'favorite-outline';
-  const isIconDisabled = isPurchased || isInCart || isPending;
-
+  // Icon cho nút yêu thích
+  const favoriteIconName = isInFavorites ? 'favorite' : 'favorite-outline';
+  
   return (
     <View style={[styles.card, { backgroundColor: cardColors[index % cardColors.length].background }]}>
       <View style={styles.headerRow}>
@@ -138,14 +121,18 @@ const CourseCard: React.FC<CourseCardProps> = ({
         </Text>
         <TouchableOpacity
           style={styles.iconContainer}
-          onPress={handleAddToCart}
-          disabled={isIconDisabled}
+          onPress={handleToggleFavorite}
+          disabled={isTogglingFavorite || isLoadingStatus}
         >
-          <Icon
-            name={iconName}
-            size={16}
-            color={isIconDisabled ? Colors.disabledBg : cardColors[index % cardColors.length].text}
-          />
+          {isLoadingStatus ? (
+            <ActivityIndicator size="small" color={cardColors[index % cardColors.length].text} />
+          ) : (
+            <Icon
+              name={favoriteIconName}
+              size={16}
+              color={cardColors[index % cardColors.length].text}
+            />
+          )}
         </TouchableOpacity>
       </View>
 
@@ -159,26 +146,32 @@ const CourseCard: React.FC<CourseCardProps> = ({
         <View style={styles.durationContainer}>
           <Icon name="access-time" size={16} color={cardColors[index % cardColors.length].text} />
           <Text style={[styles.durationText, { color: cardColors[index % cardColors.length].text }]}>
-            {duration} hours
+            {duration} giờ
           </Text>
         </View>
       </View>
 
-      {!isPurchased && showBuyButton && (
-        <View style={styles.priceRow}>
-          <View style={styles.priceContainer}>
-            <Text style={styles.price}>{price.toLocaleString()} VNĐ</Text>
-          </View>
-        </View>
-      )}
+      {/* Removed price display */}
 
-      {!isPurchased && showBuyButton && (
+      {!isInMyCourse && showBuyButton && !isLoadingStatus && (
         <View style={styles.buyButtonRow}>
-          <TouchableOpacity style={styles.buyButton} onPress={handleBuyNow} disabled={isPending}>
+          <TouchableOpacity 
+            style={styles.buyButton} 
+            onPress={handleAddToMyCourses} 
+            disabled={isAddingToCourse || isLoadingStatus}
+          >
             <Text style={[styles.buyButtonText, { color: cardColors[index % cardColors.length].text }]}>
-              MUA NGAY
+              THÊM KHOÁ HỌC
             </Text>
           </TouchableOpacity>
+        </View>
+      )}
+      
+      {isLoadingStatus && showBuyButton && (
+        <View style={styles.buyButtonRow}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={Colors.textWhite} />
+          </View>
         </View>
       )}
     </View>
@@ -252,6 +245,8 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 10,
   },
+  // Price styles are commented out as we no longer display prices
+  /* 
   priceRow: {
     marginBottom: 10,
   },
@@ -267,7 +262,10 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     fontWeight: 'bold',
   },
-  buyButtonRow: {},
+  */
+  buyButtonRow: {
+    marginTop: 'auto',
+  },
   buyButton: {
     backgroundColor: Colors.textWhite,
     borderRadius: 30,
@@ -279,6 +277,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 12,
   },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  }
 });
 
 export default CourseCard;

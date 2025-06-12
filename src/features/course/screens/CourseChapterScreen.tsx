@@ -81,11 +81,7 @@ const CourseChapterScreen = ({ navigation, route }: any) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.content}
         ListEmptyComponent={
-          !isPurchased ? (
-            <Text style={styles.lockedText}>
-              Vui lòng mua khóa học này để xem nội dung chi tiết.
-            </Text>
-          ) : chapters?.pages.flatMap(page => page.items).length === 0 ? (
+          chapters?.pages.flatMap(page => page.items).length === 0 ? (
             <Text style={styles.noChaptersText}>
               Hiện tại chưa có chương nào trong bài học này.
             </Text>

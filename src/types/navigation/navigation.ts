@@ -33,7 +33,12 @@ export type ShopStackParamList = {
 // Kiểu cho CourseStack
 export type CourseStackParamList = {
   'CourseScreen': undefined;
-  'CourseDetailScreen': undefined;
+  'CourseDetailScreen': {
+    courseId: string;
+    courseName: string;
+    isPurchased?: boolean;
+    description?: string;
+  };
   'CourseChapterScreen': undefined;
   'ChapterDetailScreen': undefined;
 };

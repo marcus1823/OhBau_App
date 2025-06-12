@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authSlice from '../features/auth/slices/auth.slices';
 import loadingSlice from '../utils/loading/loadingSlice';
 import cartSlice from '../features/course/slices/cartSlice';
+import myCourseSlice from '../features/course/slices/myCourseSlice';
 export const store = configureStore({
     reducer: {
         // Slice quản lý thông tin xác thực người dùng
@@ -10,7 +11,9 @@ export const store = configureStore({
         // Slice quản lý trạng thái loading (dùng để hiển thị loading toàn cục)
         loading: loadingSlice,
 
-        cart: cartSlice
+        cart: cartSlice,
+
+        addedMyCourses: myCourseSlice,
     },
 
     // Cấu hình middleware mặc định của Redux Toolkit

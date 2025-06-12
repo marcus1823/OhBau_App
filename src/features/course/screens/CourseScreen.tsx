@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../stores/store';
 import { getCoursesApi, getMyCoursesApi } from '../api/courseApi';
 import { GetCoursesRequest, GetCoursesResponse, GetMyCoursesRequest, GetMyCoursesResponse } from '../types/course.types';
+import { useFetchFavoriteCourses } from '../hooks/useCourse.hook';
 
 const CourseScreen = ({ navigation }: any) => {
 
@@ -24,6 +25,9 @@ const CourseScreen = ({ navigation }: any) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+
+  // Fetch favorite courses on component mount
+  const { isLoading: isLoadingFavorites } = useFetchFavoriteCourses();
 
   const {
     data: coursesData,
@@ -121,7 +125,6 @@ const CourseScreen = ({ navigation }: any) => {
           name: item.name,
           rating: item.rating,
           duration: item.duration,
-          price: item.price,
           isPurchased: item.isPurchased,
         };
 
@@ -132,7 +135,7 @@ const CourseScreen = ({ navigation }: any) => {
           acc.push({ title: category, courses: [course] });
         }
         return acc;
-      }, [] as { title: string; courses: { courseId: string; name: string; rating: number; duration: number; price: number; isPurchased: boolean }[] }[]),
+      }, [] as { title: string; courses: { courseId: string; name: string; rating: number; duration: number; isPurchased: boolean }[] }[]),
     [courses]
   );
 
@@ -145,7 +148,6 @@ const CourseScreen = ({ navigation }: any) => {
           name: item.name,
           rating: item.rating,
           duration: item.duration,
-          price: item.price,
           isPurchased: item.isPurchased,
         };
 
@@ -156,7 +158,7 @@ const CourseScreen = ({ navigation }: any) => {
           acc.push({ title: category, courses: [course] });
         }
         return acc;
-      }, [] as { title: string; courses: { courseId: string; name: string; rating: number; duration: number; price: number; isPurchased: boolean }[] }[]),
+      }, [] as { title: string; courses: { courseId: string; name: string; rating: number; duration: number; isPurchased: boolean }[] }[]),
     [myCoursesFromApi]
   );
 
@@ -196,6 +198,14 @@ const CourseScreen = ({ navigation }: any) => {
     fetchNextMyCoursesPage,
     isLoadingMore,
   ]);
+
+  // Synchronize with route params if provided
+  useEffect(() => {
+    const tab = navigation.route?.params?.tab;
+    if (tab === 'myCourses') {
+      setActiveTab('myCourses');
+    }
+  }, [navigation.route?.params]);
 
   const renderItem = useCallback(
     ({ item }: { item: { title: string; courses: any[] } }) => (
@@ -292,13 +302,13 @@ const CourseScreen = ({ navigation }: any) => {
             ) : myCoursesError instanceof Error ? (
               <Text style={styles.emptyMessage}>Lỗi: {myCoursesError.message}</Text>
             ) : (
-              <Text style={styles.emptyMessage}>Bạn chưa mua khóa học nào!</Text>
+              <Text style={styles.emptyMessage}>Bạn chưa thêm khóa học nào!</Text>
             )
           )
         }
       />
       <LoadingOverlay
-        visible={isLoadingCourses || isFetchingCourses || isLoadingMyCourses || isFetchingMyCourses}
+        visible={isLoadingCourses || isFetchingCourses || isLoadingMyCourses || isFetchingMyCourses || isLoadingFavorites}
         fullScreen={false}
       />
     </LinearGradient>

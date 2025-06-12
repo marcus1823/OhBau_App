@@ -9,10 +9,101 @@ import {
   GetChapterResponse,
   GetMyCoursesRequest,
   GetMyCoursesResponse,
-  CreateOrderResponse,
-  GetCartItemsDetailsResponse,
-  GetCartItemsByAccountResponse
+  GetFavoriteCoursesResponse,
+  FavoriteCourse,
 } from "../types/course.types";
+
+export const addMyCourseApi = async (courseId: string, accessToken: string): Promise<void> => {
+  console.log('addMyCourseApi courseId:', courseId);
+  if (!accessToken) {
+    throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+  }
+  try {
+    const response = await rootApi.post('/my-course/receive-course', { courseId }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        accept: 'application/json',
+      },
+    });
+    console.log('addMyCourseApi res:', response.data);
+    return response.data; 
+    
+  } catch (error) {
+    const errorDetails = {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
+      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
+    };
+    console.log('addMyCourseApi error:', errorDetails);
+    throw new Error(
+      error instanceof Error
+        ? `Failed to add course: ${error.message}`
+        : 'Failed to add course: Unknown error'
+    );
+    
+  }
+}
+
+export const addFavoriteCourseApi = async (courseId: string, accessToken: string): Promise<void> => {
+  console.log('addFavoriteCourseApi courseId:', courseId);
+  if (!accessToken) {
+    throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+  }
+  try {
+    const response = await rootApi.post('/favorite-course/add-favorite-course', { courseId }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        accept: 'application/json',
+      },
+    });
+    console.log('addFavoriteCourseApi res:', response.data);
+    return response.data; 
+    
+  }
+  catch (error) {
+    const errorDetails = {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
+      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
+    };
+    console.log('addFavoriteCourseApi error:', errorDetails);
+    throw new Error(
+      error instanceof Error
+        ? `Failed to add favorite course: ${error.message}`
+        : 'Failed to add favorite course: Unknown error'
+    );
+  }
+}
+
+export const getfavoriteCoursesApi = async (pageNumber: number, pageSize: number, accessToken: string): Promise<GetFavoriteCoursesResponse> => {
+  console.log('getfavoriteCoursesApi req:', { pageNumber, pageSize });
+  if (!accessToken) {
+    throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+  }
+  try {
+    const response = await rootApi.get('/favorite-course/get-favorite-courses', {
+      params: { pageNumber, pageSize },
+      headers: {  
+        Authorization: `Bearer ${accessToken}`,
+        accept: 'application/json',
+      },
+    });
+    console.log('getfavoriteCoursesApi res:', response.data);
+    return response.data; // Return the whole response including status, message and data
+  } catch (error) {
+    const errorDetails = {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
+      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
+    };
+    console.log('getfavoriteCoursesApi error:', errorDetails);
+    throw new Error(
+      error instanceof Error
+        ? `Failed to get favorite courses: ${error.message}`
+        : 'Failed to get favorite courses: Unknown error'
+    );
+  }
+}
 
 export const getCoursesApi = async (request: GetCoursesRequest): Promise<GetCoursesResponse> => {
   console.log('getCoursesApi req:', request);
@@ -180,8 +271,51 @@ export const getChapterApi = async (chapterId: string): Promise<GetChapterRespon
   }
 };
 
-// ... (other functions remain unchanged)
+/**
+ * API to check course status (if it's in favorites and my courses)
+ * This is a new function that combines both checks in one API call
+ */
+export const checkCourseStatusApi = async (courseId: string, accessToken: string): Promise<{isInFavorites: boolean, isInMyCourses: boolean}> => {
+  console.log('checkCourseStatusApi courseId:', courseId);
+  if (!accessToken) {
+    throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+  }
+  
+  try {
+    // Since we don't have a direct API for this, we'll make two requests in parallel
+    const [favoritesResponse, myCoursesResponse] = await Promise.all([
+      getfavoriteCoursesApi(1, 100, accessToken),
+      getMyCoursesApi({ pageSize: 100, pageNumber: 1 }, accessToken)
+    ]);
+    
+    // Check if course is in favorites
+    const favoriteIds = favoritesResponse.data.items.map((course: FavoriteCourse) => course.courseId);
+    const isInFavorites = favoriteIds.includes(courseId);
+    
+    // Check if course is in my courses
+    const myCourseIds = myCoursesResponse.items.map(course => course.id);
+    const isInMyCourses = myCourseIds.includes(courseId);
+    
+    console.log('checkCourseStatusApi result:', { isInFavorites, isInMyCourses });
+    
+    return { isInFavorites, isInMyCourses };
+  } catch (error) {
+    const errorDetails = {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
+      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
+    };
+    console.log('checkCourseStatusApi error:', errorDetails);
+    throw new Error(
+      error instanceof Error
+        ? `Failed to check course status: ${error.message}`
+        : 'Failed to check course status: Unknown error'
+    );
+  }
+};
 
+// Comment out cart-related APIs that are no longer needed
+/*
 export const addCourseToCartApi = async (courseId: string, accessToken: string): Promise<void> => {
   console.log('addCourseToCartApi courseId:', courseId);
 
@@ -327,112 +461,29 @@ export const deleteCartItemApi = async (itemId: string, accessToken: string): Pr
     );
   }
 };
-export const createOrderApi = async (cartId: string, accessToken: string): Promise<CreateOrderResponse> => {
-  console.log('createOrderApi req:', { cartId });
+*/
+// export const createOrderApi = async (cartId: string, accessToken: string): Promise<CreateOrderResponse> => {
+//   console.log('createOrderApi req:', { cartId });
 
-  if (!accessToken) {
-    throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
-  }
+//   if (!accessToken) {
+//     throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+//   }
 
-  try {
-    const response = await rootApi.post('/order/create-order', { cartId }, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        accept: 'application/json',
-      },
-    });
+//   try {
+//     const response = await rootApi.post('/order/create-order', { cartId }, {
+//       headers: {
+//         Authorization: `Bearer ${accessToken}`,
+//         accept: 'application/json',
+//       },
+//     });
 
-    console.log('createOrderApi res:', response);
+//     console.log('createOrderApi res:', response);
 
-    if (!response.data?.data) {
-      throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
-    }
+//     if (!response.data?.data) {
+//       throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+//     }
 
-    return response.data.data;
-  } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-    };
-    console.log('createOrderApi error:', errorDetails);
-    throw new Error(
-      error instanceof Error
-        ? `Failed to create order: ${error.message}`
-        : 'Failed to create order: Unknown error'
-    );
-  }
-};
-
-export const createPaymentApi = async (OrderCode: string, Des: string, accessToken: string): Promise<string> => {
-  console.log('createPaymentApi req:', { OrderCode, Des });
-
-  if (!accessToken) {
-    throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
-  }
-
-  try {
-    const response = await rootApi.get(`/payment/create-payment`, {
-      params: {
-        OrderCode: OrderCode,
-        Des: encodeURIComponent(Des),
-      },
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        accept: 'application/json',
-      },
-    });
-
-    console.log('createPaymentApi res:', response);
-
-    if (!response.data) {
-      throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
-    }
-
-    return response.data; // Returns the payment URL string
-  } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-    };
-    console.log('createPaymentApi error:', errorDetails);
-    throw new Error(
-      error instanceof Error
-        ? `Failed to create payment: ${error.message}`
-        : 'Failed to create payment: Unknown error'
-    );
-  }
-};
-
-export const getPaymentReturnApi = async (queryString: string, accessToken: string) => {
-  try {
-    console.log('Sending query string to API:', queryString); // Log query string
-    const response = await rootApi.get(`/payment/return-payment?${queryString}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        accept: 'application/json',
-      },
-      timeout: 10000,
-    });
-
-    console.log('getPaymentReturnApi res:', response);
-    if (!response.data) {
-      throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
-    }
-
-    return response.data;
-  } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-    };
-    console.log('getPaymentReturnApi error:', errorDetails);
-    throw new Error(
-      error instanceof Error
-        ? `Failed to get payment return: ${error.message}`
-        : 'Failed to get payment return: Unknown error'
-    );
-  }
-};
+//     return response.data.data;
+//   } catch (error) {
+//     const errorDetails = {
+//       message: error instanceof Error ? error.message : 'Unknown error',

@@ -20,13 +20,13 @@ interface CourseCardDetailProps {
 const CourseCardDetail: React.FC<CourseCardDetailProps> = ({
   title,
   duration,
-  isPurchased,
+  // isPurchased,
   index,
 }) => {
   const colorIndex = index % cardColors.length;
   const { background, text } = cardColors[colorIndex];
 
-  const iconName = isPurchased ? 'favorite' : 'favorite-outline';
+  // const iconName = isPurchased ? 'favorite' : 'favorite-outline';
 
   return (
     <View style={[styles.card, { backgroundColor: background }]}>
@@ -35,9 +35,9 @@ const CourseCardDetail: React.FC<CourseCardDetailProps> = ({
         <Text style={styles.title} numberOfLines={2}>
           {title}
         </Text>
-        <View style={styles.iconContainer}>
+        {/* <View style={styles.iconContainer}>
           <Icon name={iconName} size={16} color={text} />
-        </View>
+        </View> */}
       </View>
 
       {/* Thời lượng bài học */}

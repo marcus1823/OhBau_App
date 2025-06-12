@@ -11,7 +11,7 @@ import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { useToast } from '../../../utils/toasts/useToast';
 
 const ChapterDetailScreen = ({ navigation, route }: any) => {
-  const { chapters, isPurchased } = route.params;
+  const { chapters } = route.params;
   const chapterId = chapters.id;
 
   const { showError } = useToast();
@@ -44,29 +44,23 @@ const ChapterDetailScreen = ({ navigation, route }: any) => {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {isPurchased ? (
-          data && Object.keys(data).length > 0 ? (
-            <View style={styles.chapterContainer}>
-              {/* Card hiển thị media */}
-              <ChapterMediaDetailCard
-                imageUrl={data.imageUrl}
-                videoUrl={data.videoUrl}
-              />
-              <Text style={styles.chapterTitle}>{data.title || 'Không có tiêu đề'}</Text>
+        {data && Object.keys(data).length > 0 ? (
+          <View style={styles.chapterContainer}>
+            {/* Card hiển thị media */}
+            <ChapterMediaDetailCard
+              imageUrl={data.imageUrl}
+              videoUrl={data.videoUrl}
+            />
+            <Text style={styles.chapterTitle}>{data.title || 'Không có tiêu đề'}</Text>
 
-              {/* Card hiển thị nội dung HTML */}
-              <ChapterContentDetailCard
-                content={data.content || ''}
-              />
-            </View>
-          ) : (
-            <Text style={styles.noChapterText}>
-              Hiện tại chưa có bài học nào trong chương này.
-            </Text>
-          )
+            {/* Card hiển thị nội dung HTML */}
+            <ChapterContentDetailCard
+              content={data.content || ''}
+            />
+          </View>
         ) : (
-          <Text style={styles.lockedText}>
-            Vui lòng mua khóa học này để xem nội dung chi tiết.
+          <Text style={styles.noChapterText}>
+            Hiện tại chưa có bài học nào trong chương này.
           </Text>
         )}
       </ScrollView>
