@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { Colors } from '../../../assets/styles/colorStyle';
 
 interface ProductListProps {
   navigation: any;
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#000000',
+    color: Colors.textBlack,
     marginBottom: 4,
   },
   productBrand: {
@@ -108,8 +109,8 @@ const styles = StyleSheet.create({
   },
   productPrice: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#E91E63',
+    fontWeight: '600',
+    color: Colors.primaryDark,
   },
   footerLoading: {
     paddingVertical: 20,

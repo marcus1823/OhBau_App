@@ -35,3 +35,4 @@ export const getProfileApi = async (accessToken: string) => {
         );
     }
 }
+

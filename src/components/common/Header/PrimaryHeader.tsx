@@ -17,6 +17,7 @@ interface PrimaryHeaderProps {
   modalTitle?: string;
   modalButtons?: { text: string; onPress: () => void }[];
   onModalClose?: () => void;
+  rightComponent?: React.ReactNode; // Add this prop
 }
 
 const PrimaryHeader: React.FC<PrimaryHeaderProps> = ({
@@ -32,6 +33,7 @@ const PrimaryHeader: React.FC<PrimaryHeaderProps> = ({
   modalTitle,
   modalButtons,
   onModalClose,
+  rightComponent, // Add this prop
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -86,6 +88,7 @@ const PrimaryHeader: React.FC<PrimaryHeaderProps> = ({
             <Icon name="more-vert" size={20} color="#fff" />
           </TouchableOpacity>
         )}
+        {rightComponent}
       </View>
 
       {moreButton && modalTitle && modalButtons && (

@@ -76,3 +76,104 @@ export interface GetProductResponsePaginateBaseResponse {
     message: string;
     data: GetProductResponsePaginate[];
 }
+
+// Cart Types
+export interface CartItem {
+  itemId: string;
+  name: string;
+  imageUrl: string;
+  description: string;
+  color: string;
+  size: string;
+  unitPrice: number;
+}
+
+export interface CartItemDetailed extends CartItem {
+  brand: string;
+  ageRange: string;
+  price: number;
+  quantity: number;
+  totalPrice: number;
+}
+
+export interface Cart {
+  cartId: string;
+  cartItem: CartItem[];
+  totalPrice: number;
+  totalItem: number;
+}
+
+export interface CartItemsDetails {
+  cartItems: CartItemDetailed[];
+  totalPrice: number;
+}
+
+export interface GetCartItemsByAccountResponse {
+  size: number;
+  page: number;
+  total: number;
+  totalPages: number;
+  items: Cart[];
+}
+
+export interface GetCartItemsDetailsResponse {
+  size: number;
+  page: number;
+  total: number;
+  totalPages: number;
+  items: CartItemsDetails[];
+}
+
+export interface CartBaseResponse {
+  status: string;
+  message: string;
+  data: null;
+}
+
+export interface GetCartItemsByAccountBaseResponse {
+  status: string;
+  message: string;
+  data: GetCartItemsByAccountResponse;
+}
+
+export interface GetCartItemsDetailsBaseResponse {
+  status: string;
+  message: string;
+  data: GetCartItemsDetailsResponse;
+}
+
+export interface UpdateItemQuantityRequest {
+  quantity: number;
+}
+
+// Order types
+export interface CreateOrderResponse {
+  status: string;
+  message: string;
+  data: {
+    orderCode: string;
+    orderItems: {
+      name: string;
+      price: number;
+    }[];
+    totalPrice: number;
+  };
+}
+
+// Payment types
+export interface CreatePaymentResponse {
+  url: string;
+}
+
+export interface PaymentReturnResponse {
+  status: string;
+  message: string;
+  data: {
+    paymentId?: string;
+    orderCode?: string;
+    transactionId?: string;
+    amount?: number;
+    paymentDate?: string;
+    success: boolean;
+  };
+}

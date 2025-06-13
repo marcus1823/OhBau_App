@@ -13,7 +13,7 @@ import CreatePostInput from '../components/CreatePostInput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CommunityScreen = ({ navigation }: any) => {
-  const [accountId, setAccountId] = React.useState<string | null>(null);
+  const [_accountId, setAccountId] = React.useState<string | null>(null);
   const queryClient = useQueryClient();
 
   React.useEffect(() => {

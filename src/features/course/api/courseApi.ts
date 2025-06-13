@@ -278,7 +278,7 @@ export const getChapterApi = async (chapterId: string): Promise<GetChapterRespon
 export const checkCourseStatusApi = async (courseId: string, accessToken: string): Promise<{isInFavorites: boolean, isInMyCourses: boolean}> => {
   console.log('checkCourseStatusApi courseId:', courseId);
   if (!accessToken) {
-    throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+    throw new Error('Vui lòng đăng nhập lại để thực hiện chức năng.');
   }
   
   try {

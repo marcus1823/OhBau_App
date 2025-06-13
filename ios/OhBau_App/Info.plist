@@ -80,8 +80,6 @@
 			<array>
 				<string>ohbau</string>
 			</array>
-			<key>CFBundleURLName</key>
-			<string>PaymentResult</string>
 		</dict>
 	</array>
 </dict>
