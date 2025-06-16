@@ -181,6 +181,11 @@ const ProfileScreen = ({ navigation }: any) => {
             title="Yêu cầu hỗ trợ"
             onPress={() => menuOptionsPress('Yêu cầu hỗ trợ')}
           />
+          <MenuProfile
+            icon="policy"
+            title="Chính sách bảo mật"
+            onPress={() => navigation.navigate('PolicyScreen')}
+          />
         </View>
       </ScrollView>
     </LinearGradient>

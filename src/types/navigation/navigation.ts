@@ -65,6 +65,7 @@ export type ProfileStackParamList = {
   'HistoryAppointmentScreen': undefined;
   'HistoryPurchaseScreen': undefined;
   'RequestSupportScreen': undefined;
+  'PolicyScreen': undefined;
 };
 
 // Kiểu cho ChatStack
