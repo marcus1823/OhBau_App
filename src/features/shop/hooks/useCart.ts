@@ -13,7 +13,7 @@ import { useToast } from '../../../utils/toasts/useToast';
 /**
  * Hook to get cart items by account
  */
-export const useCartItemsByAccount = (pageNumber = 1, pageSize = 10) => {
+export const useCartItemsByAccount = (pageNumber = 1, pageSize = 100) => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
   return useQuery({
@@ -28,7 +28,7 @@ export const useCartItemsByAccount = (pageNumber = 1, pageSize = 10) => {
 /**
  * Hook to get cart items details
  */
-export const useCartItemsDetails = (pageNumber = 1, pageSize = 10) => {
+export const useCartItemsDetails = (pageNumber = 1, pageSize = 100) => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
   return useQuery({

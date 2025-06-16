@@ -17,6 +17,7 @@ import CartScreen from '../features/course/screens/CartScreen';
 import PaymentScreen from '../features/course/screens/PaymentScreen';
 import withAuth from '../components/hoc/withAuth';
 import ShopStack from './stacks/ShopStack';
+import ComingSoonScreen from '../features/home/screens/ComingSoonScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -121,6 +122,7 @@ const TabNavigation: React.FC = () => {
             <Stack.Screen name="ProfileStack" component={withAuth(ProfileStack)} />
             <Stack.Screen name="CartScreen" component={withAuth(CartScreen)} />
             <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+            <Stack.Screen name="ComingSoonScreen" component={ComingSoonScreen} />
           </Stack.Navigator>
         </SafeAreaView>
       </LinearGradient>

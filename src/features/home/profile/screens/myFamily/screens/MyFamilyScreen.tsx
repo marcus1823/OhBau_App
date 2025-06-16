@@ -106,7 +106,7 @@ const MyFamilyScreen = ({ navigation }: any) => {
             <View style={styles.infoContainer}>
               <Text style={styles.infoText}>Tên: {fetusData?.data?.name ?? 'Chưa đặt tên'}</Text>
               <Text style={styles.infoText}>Tuần thai: {fetusDetail.weekly ?? 0} tuần</Text>
-              <Text style={styles.infoText}>Cân nặng: {fetusDetail.weight ?? 0} g</Text>
+              <Text style={styles.infoText}>Cân nặng: {fetusDetail.weight ?? 0} kg</Text>
               <Text style={styles.infoText}>Chiều dài: {fetusDetail.height ?? 0} cm</Text>
               <Text style={styles.infoText}>Nhịp tim: {fetusDetail.bpm ?? 0} bpm</Text>
               <Text style={styles.infoText}>Chuyển động: {fetusDetail.movement ?? 0} lần</Text>

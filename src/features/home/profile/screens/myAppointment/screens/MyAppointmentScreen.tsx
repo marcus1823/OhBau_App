@@ -172,7 +172,7 @@ const MyAppointmentScreen = ({ navigation }: any) => {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Icon name="event-busy" size={30} color={Colors.textGray} />
+              <Icon name="event-busy" size={30} color={Colors.textBlack} />
               <Text style={styles.noDataText}>Không có lịch hẹn nào để hiển thị.</Text>
             </View>
           )
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     color: Colors.textCardHome1,
   },
   statusPast: {
-    backgroundColor: Colors.textLightGray,
+    backgroundColor: Colors.textBlack,
     color: Colors.textDarkGray,
   },
   infoRow: {
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     fontSize: 13,
-    color: Colors.textDarkGray,
+    color: Colors.textGray,
     fontStyle: 'italic',
   },
   emptyContainer: {
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     fontSize: 16,
-    color: Colors.textGray,
+    color: Colors.textBlack,
     textAlign: 'center',
     marginTop: 10,
   },

@@ -1,3 +1,4 @@
+import { role } from "../../auth/types/auth.types";
 
 export interface Fetus {
   id: string;
@@ -113,4 +114,11 @@ export interface CreateFetusResponseBaseResponse {
   status: string; // nullable: true
   message: string; // nullable: true
   data?: CreateFetusResponse; // nullable: true
+}
+
+export interface UpdateAccountRequest {
+  fullName?: string; // nullable: true
+  email?: string; // nullable: true
+  role?: role
+  dob?: string; // $date, nullable: true
 }

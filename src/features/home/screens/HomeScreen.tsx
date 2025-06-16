@@ -50,16 +50,11 @@ const HomeScreen = ({navigation}: any) => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   const weeks = Math.floor(diffDays / 7);
 
-  const handleOpenNotificationModal = () => {
-    console.log('Mở modal thông báo');
-  };
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
       <SecondaryHeader
         unreadMessages={5}
-        unreadNotifications={3}
-        onOpenNotificationModal={handleOpenNotificationModal}
       />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}

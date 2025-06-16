@@ -4,16 +4,23 @@ import { Colors } from '../../../assets/styles/colorStyle';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { RootStackNavigationProp } from '../../../types/navigation/navigation';
+import { useCartItemsByAccount } from '../../../features/shop/hooks/useCart';
 
 interface SecondaryHeaderProps {
   unreadMessages: number;
-  unreadNotifications: number;
-  onOpenNotificationModal: () => void;
+  // unreadNotifications: number;
+  // onOpenNotificationModal?: () => void;
 }
 
-const SecondaryHeader = ({ unreadNotifications, onOpenNotificationModal }: SecondaryHeaderProps) => {
+const SecondaryHeader = ({  }: SecondaryHeaderProps) => {
   const navigation = useNavigation<RootStackNavigationProp>();
 
+  const {
+    data: totalCartItems 
+  } = useCartItemsByAccount(1, 100); // Lấy tất cả các mặt hàng trong giỏ hàng
+  console.log('totalCartItems in SecondaryHeader:', totalCartItems?.data.total);
+  const totalItems = totalCartItems?.data.total || 0;
+  
   const getCurrentTab = () => {
     const state = navigation.getState();
     const currentRoute = state.routes[state.index];
@@ -41,15 +48,13 @@ const SecondaryHeader = ({ unreadNotifications, onOpenNotificationModal }: Secon
 
       <View style={styles.iconsContainer}>
         <TouchableOpacity
-          onPress={onOpenNotificationModal}
+          onPress={() => navigation.navigate('TabNavigation', { screen: 'ComingSoonScreen' })}
           style={styles.iconWrapper}
         >
           <Icon name="notifications" size={24} color={Colors.primaryDark} />
-          {unreadNotifications > 0 && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{unreadNotifications}</Text>
+              <Text style={styles.badgeText}>0</Text>
             </View>
-          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -63,7 +68,7 @@ const SecondaryHeader = ({ unreadNotifications, onOpenNotificationModal }: Secon
         >
           <Icon name="shopping-cart" size={24} color={Colors.primaryDark} />
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>0</Text>
+            <Text style={styles.badgeText}>{totalItems}</Text>
           </View>
         </TouchableOpacity>
       </View>

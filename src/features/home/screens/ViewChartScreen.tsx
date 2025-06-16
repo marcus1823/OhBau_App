@@ -6,7 +6,7 @@ import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import { LineChart } from 'react-native-gifted-charts';
 
 const ViewChartScreen = ({ navigation, route }: any) => {
-  const { property, values } = route.params;
+  const { property, values, valueStandard } = route.params;
   // Reverse the values array to place the latest data first
   const reversedValues = [...values].reverse();
   // Map to dataPoints with labels starting from "Lần 1" to "Lần n"
@@ -34,6 +34,7 @@ const ViewChartScreen = ({ navigation, route }: any) => {
           thickness={2}
         />
         <Text style={styles.title}>{`Biểu đồ ${property}`}</Text>
+        <Text style={styles.title}>Giá trị tiêu chuẩn: {valueStandard}</Text>
       </View>
     </LinearGradient>
   );

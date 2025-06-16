@@ -107,8 +107,6 @@ const ShopScreen = ({ navigation }: any) => {
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
       <SecondaryHeader
         unreadMessages={0}
-        unreadNotifications={10}
-        onOpenNotificationModal={() => navigation.navigate('NotificationScreen')}
       />
       <FlatList
         data={data}

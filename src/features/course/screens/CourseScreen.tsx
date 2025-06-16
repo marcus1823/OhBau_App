@@ -162,10 +162,6 @@ const CourseScreen = ({ navigation }: any) => {
     [myCoursesFromApi]
   );
 
-  const handleOpenNotificationModal = useCallback(() => {
-    console.log('Open notification modal');
-  }, []);
-
   const handleCardPress = useCallback(
     (course: any) => {
       navigation.navigate('CourseDetailScreen', {
@@ -254,8 +250,6 @@ const CourseScreen = ({ navigation }: any) => {
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
       <SecondaryHeader
         unreadMessages={5}
-        unreadNotifications={3}
-        onOpenNotificationModal={handleOpenNotificationModal}
       />
       <View style={styles.tabContainer}>
         <TouchableOpacity

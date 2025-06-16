@@ -15,6 +15,7 @@ import { setRole } from '../slices/auth.slices';
 import { role } from '../types/auth.types';
 import { validatePhone } from '../../../utils/validations/validations';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
+import { Alert } from 'react-native';
 
 const LoginScreen = ({ navigation }: any) => {
   const [phone, setPhone] = useState('');
@@ -75,11 +76,18 @@ const LoginScreen = ({ navigation }: any) => {
   };
 
   const handleForgotPassword = () => {
-    navigation.navigate('ForgotPasswordScreen');
+    // navigation.navigate('ForgotPasswordScreen');
+    Alert.alert(
+      'Thông báo',
+      `Tính năng quên mật khẩu đang được phát triển. Vui lòng thử lại sau.`,
+    );
   };
 
   const handleOptionLogin = (option: string) => {
-    console.log(`${option} login option selected`);
+    Alert.alert(
+      'Thông báo',
+      `Tính năng đăng nhập bằng ${option} đang được phát triển. Vui lòng thử lại sau.`,
+    );
   };
 
   return (

@@ -54,6 +54,7 @@ export type CommunityStackParamList = {
 export type ProfileStackParamList = {
   'ProfileScreen': undefined;
   'PersonalScreen': undefined;
+  'UpdateProfileScreen': undefined;
   'FavoriteScreen': undefined;
   'MyFamilyScreen': undefined;
   'AddFamilyMemberScreen': undefined;
@@ -90,6 +91,7 @@ export type TabStackParamList = {
   ProfileStack: { screen?: keyof ProfileStackParamList };
   CartScreen: CartScreenParams; // CartScreen với params tùy chọn
   PaymentScreen: undefined;
+  ComingSoonScreen: undefined; // Thêm ComingSoonScreen nếu cần
 
 };
 

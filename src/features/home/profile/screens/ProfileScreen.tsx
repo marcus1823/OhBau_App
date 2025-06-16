@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View, ActivityIndicator, Text } from 'react-native';
+import { ScrollView, StyleSheet, View, ActivityIndicator, Text, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Gradients } from '../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../components/common/Header/PrimaryHeader';
@@ -46,6 +46,24 @@ const ProfileScreen = ({ navigation }: any) => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Xác nhận xóa tài khoản',
+      'Bạn có chắc chắn muốn xóa tài khoản của mình không? Hành động này không thể hoàn tác.',
+      [
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: async () => {handleLogout();}
+        },
+      ]
+    );
+  }
+
   const menuOptionsPress = (option: string) => {
     switch (option) {
       case 'Hồ sơ cá nhân':
@@ -57,7 +75,7 @@ const ProfileScreen = ({ navigation }: any) => {
       case 'Khoá học của tôi':
         navigation.navigate('MyCourseScreen');
         break;
-      case 'Lịch hẹn tái khám':
+      case 'Lịch hẹn đi khám':
         navigation.navigate('MyAppointmentScreen');
         break;
       case 'Lịch sử đi khám':
@@ -111,7 +129,7 @@ const ProfileScreen = ({ navigation }: any) => {
         modalTitle="Tùy chọn"
         modalButtons={[
           { text: 'Đăng xuất', onPress: handleLogout },
-          { text: 'Xóa tài khoản', onPress: () => console.log('Xóa tài khoản được nhấn') },
+          { text: 'Xóa tài khoản', onPress: handleDeleteAccount },
         ]}
         onModalClose={() => console.log('Modal closed')}
       />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 import CardInfoStatus from './CardInfoStatus';
 
@@ -34,7 +34,7 @@ const MotherInfoStatus = () => {
                 value={info.value}
                 backgroundColor={background}
                 textColor={text}
-                onPressViewMore={() => console.log(`Xem thêm ${info.title}`)}
+                onPressViewMore={() => Alert.alert('Thông tin', 'Tính năng này đang được phát triển')}
               />
             );
           })}

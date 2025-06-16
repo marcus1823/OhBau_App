@@ -34,17 +34,19 @@ const FetusInfoStatus: React.FC<FetusInfoStatusProps> = ({ fetusDetails, navigat
 
   // Hardcoded data for UI with typed property
   const fetusInfo = [
-    { icon: 'scale', title: 'Cân nặng', value: `${firstFetusDetail?.weight || 0} kg`, property: 'weight' as AllowedProperties },
-    { icon: 'straighten', title: 'Chiều dài', value: `${firstFetusDetail?.height || 0} cm`, property: 'height' as AllowedProperties },
-    { icon: 'graphic-eq', title: 'Nhịp tim', value: `${firstFetusDetail?.bpm || '120 - 160'} lần/phút`, property: 'bpm' as AllowedProperties },
-    { icon: 'query-stats', title: 'Số lần đạp', value: `${firstFetusDetail?.movement || '16 - 45'} lần/ngày`, property: 'movement' as AllowedProperties },
+    { icon: 'scale', title: 'Cân nặng', value: `${firstFetusDetail?.weight || 0} kg`, property: 'weight' as AllowedProperties, valueStandard: 3.0 },
+    { icon: 'straighten', title: 'Chiều dài', value: `${firstFetusDetail?.height || 0} cm`, property: 'height' as AllowedProperties, valueStandard: 50.0 },
+    { icon: 'graphic-eq', title: 'Nhịp tim', value: `${firstFetusDetail?.bpm || '120 - 160'} lần/phút`, property: 'bpm' as AllowedProperties, valueStandard: 140.0 },
+    { icon: 'query-stats', title: 'Số lần đạp', value: `${firstFetusDetail?.movement || '16 - 45'} lần/ngày`, property: 'movement' as AllowedProperties, valueStandard: 30.0 },
   ];
 
   // Handle "Xem biểu đồ" click, log array of values for the specified property
   const handleViewChart = (property: AllowedProperties) => {
     const values = fetusDetails.map(detail => detail[property] || 0);
+    const valueStandard = fetusInfo.find(info => info.property === property)?.valueStandard || 0;
     console.log(`Xem biểu đồ - ${property}:`, values);
-    navigation.navigate('ViewChartScreen', { property, values });
+
+    navigation.navigate('ViewChartScreen', { property, values, valueStandard });
   };
 
   return (

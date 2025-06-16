@@ -168,7 +168,7 @@ const RegisterScreen = ({ navigation }: any) => {
                         />
 
                         <DatePickerComponent
-                            selectedDate={dob || new Date()} // Mặc định là ngày hiện tại nếu chưa chọn
+                            selectedDate={dob || new Date()} 
                             onDateChange={(date) => setDob(date)}
                             title="Ngày sinh"
                             placeholder={`Chọn ngày sinh của ${parentTitle}`}

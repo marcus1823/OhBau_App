@@ -140,7 +140,7 @@ const EditFetusScreen = ({ route, navigation }: any) => {
     />
   </View>
   <View style={styles.inputGroup}>
-    <Text style={styles.label}>Cân nặng (g):</Text>
+    <Text style={styles.label}>Cân nặng (kg):</Text>
     <TextInput
       style={styles.input}
       value={detailRequest.weight?.toString() || '0'}

@@ -18,7 +18,7 @@ const PersonalScreen = ({ navigation, route }: any) => {
         moreButton
         modalTitle="Tuỳ chọn"
         modalButtons={[
-          { text: 'Chỉnh sửa hồ sơ', onPress: () => console.log('Chỉnh sửa') },
+          { text: 'Chỉnh sửa hồ sơ', onPress: () => navigation.navigate('UpdateProfileScreen', { profileData, role }) },
         ]}
         onModalClose={() => console.log('Modal closed')}
       />
