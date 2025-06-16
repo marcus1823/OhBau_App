@@ -15,7 +15,8 @@ import { Colors, Gradients } from '../../../../../../assets/styles/colorStyle';
 import LinearGradient from 'react-native-linear-gradient';
 import PrimaryHeader from '../../../../../../components/common/Header/PrimaryHeader';
 import LoadingOverlay from '../../../../../../components/common/Loading/LoadingOverlay';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Thêm icon library
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useFocusEffect } from '@react-navigation/native';
 
 const MyAppointmentScreen = ({ navigation }: any) => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
@@ -28,6 +29,7 @@ const MyAppointmentScreen = ({ navigation }: any) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch
   } = useInfiniteQuery({
     queryKey: ['myBookings'],
     queryFn: async ({ pageParam = 1 }) => {
@@ -54,13 +56,32 @@ const MyAppointmentScreen = ({ navigation }: any) => {
     },
     initialPageParam: 1,
     enabled: !!accessToken,
+    refetchOnWindowFocus: true, 
   });
+
+  // Add a useFocusEffect to refetch data when the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      // Refresh the data when the screen is focused
+      if (refetch) {
+        console.log('MyAppointmentScreen focused - refetching data');
+        refetch();
+      }
+      return () => {
+        // Cleanup if needed
+      };
+    }, [refetch])
+  );
 
   console.log('Query States:', { isLoading, isFetching, isFetchingNextPage, hasNextPage });
 
-  // Tạo danh sách booking từ dữ liệu phân trang
+  // Lọc chỉ các lịch hẹn có trạng thái "Booked"
   const bookings = useMemo(
-    () => data?.pages.flatMap((page) => page.items || []) || [],
+    () => data?.pages.flatMap((page) => 
+      (page.items || []).filter(
+        (booking: GetBookingResponse) => booking.type === 'Booked'
+      )
+    ) || [],
     [data]
   );
 
@@ -74,7 +95,7 @@ const MyAppointmentScreen = ({ navigation }: any) => {
 
   // Hàm kiểm tra trạng thái lịch hẹn (Sắp tới hoặc Đã qua)
   const getAppointmentStatus = (date: string) => {
-    const currentDate = new Date('2025-05-26'); // Ngày hiện tại: 26/5/2025
+    const currentDate = new Date(); // Ngày hiện tại
     const appointmentDate = new Date(date);
     return appointmentDate >= currentDate ? 'Sắp tới' : 'Đã qua';
   };
@@ -112,6 +133,10 @@ const MyAppointmentScreen = ({ navigation }: any) => {
           <View style={styles.infoRow}>
             <Icon name="info" size={18} color={Colors.textCardHome1} style={styles.icon} />
             <Text style={styles.moduleText}>Mục đích: {item.bookingModule || 'Chưa có'}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="schedule" size={18} color={Colors.primary} style={styles.icon} />
+            <Text style={styles.bookingStatusText}>Trạng thái: Đã đặt lịch</Text>
           </View>
           <View style={styles.infoRow}>
             <Icon name="description" size={18} color={Colors.textGray} style={styles.icon} />
@@ -208,7 +233,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     borderLeftWidth: 4,
-    borderLeftColor: Colors.primary, 
+    borderLeftColor: Colors.primary,
   },
   headerRow: {
     flexDirection: 'row',
@@ -266,7 +291,7 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     fontSize: 13,
-    color: Colors.textGray,
+    color: Colors.border,
     fontStyle: 'italic',
   },
   emptyContainer: {
@@ -298,5 +323,10 @@ const styles = StyleSheet.create({
   },
   footerIcon: {
     marginRight: 8,
+  },
+  bookingStatusText: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '500',
   },
 });

@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Modal, FlatList } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Modal, FlatList, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Colors } from '../../../assets/styles/colorStyle';
 import LinearGradient from 'react-native-linear-gradient';
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
+
 
 interface DatePickerProps {
   onDateChange: (date: Date) => void;
@@ -258,9 +262,9 @@ const styles = StyleSheet.create({
   dayItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 40,
-    height: 60,
-    borderRadius: 12,
+    width: isTablet ? 80 : 40,
+    height: isTablet ? 100 : 60,
+    borderRadius: isTablet ? 20 : 12,
     backgroundColor: Colors.textWhite,
   },
   dayItemSelected: {
@@ -270,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
   dayText: {
-    fontSize: 24,
+    fontSize: isTablet ? 36 : 24,
     fontWeight: 'bold',
     color: Colors.primary,
   },

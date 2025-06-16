@@ -23,7 +23,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
-	<false/>
+	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -82,5 +82,9 @@
 			</array>
 		</dict>
 	</array>
+	<key>UIRequiresFullScreen</key>
+	<true/>
+	<key>UIUserInterfaceIdiom</key>
+	<string>universal</string>
 </dict>
 </plist>

@@ -162,7 +162,21 @@ export interface CreateOrderResponse {
 
 // Payment types
 export interface CreatePaymentResponse {
-  url: string;
+  status: string;
+  message: string;
+  data: {
+    bin: string;
+    accountNumber: string;
+    amount: number;
+    description: string;
+    orderCode: number;
+    currency: string;
+    paymentLinkId: string;
+    status: string;
+    expiredAt: number;
+    checkoutUrl: string;
+    qrCode: string;
+  };
 }
 
 export interface PaymentReturnResponse {
@@ -176,4 +190,12 @@ export interface PaymentReturnResponse {
     paymentDate?: string;
     success: boolean;
   };
+}
+
+
+export interface ReturnPaymentRequest {
+  code: string;
+  id: string;
+  cancel: boolean;
+  status: string;
 }

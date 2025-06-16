@@ -9,6 +9,7 @@ import {
   GetCartItemsByAccountBaseResponse,
   GetCartItemsDetailsBaseResponse,
   CartBaseResponse,
+  ReturnPaymentRequest,
 } from "../types/shops.types";
 
 
@@ -219,33 +220,25 @@ export const createOrderApi = async (itemIds: string[], accessToken: string): Pr
 
 /**
  * API to create payment for an order
- * Note: This returns a direct URL string from the API 
+ * Returns payment information including checkout URL and QR code 
  */
-export const createPaymentApi = async (orderCode: string, description: string, accessToken: string): Promise<{ url: string }> => {
-  console.log("[API] createPaymentApi - Starting with orderCode:", orderCode, "description:", description);
+export const createPaymentApi = async (orderCode: string, accessToken: string): Promise<any> => {
+  console.log("[API] createPaymentApi - Starting with orderCode:", orderCode);
   try {
-    const encodedDescription = encodeURIComponent(description);
-    console.log("[API] createPaymentApi - Encoded description:", encodedDescription);
-    console.log("[API] createPaymentApi - Using token:", accessToken ? `${accessToken.substring(0, 10)}...` : 'No token');
-    
-    const response = await rootApi.get(`/payment/create-payment`, {
-      params: { 
-        OrderCode: orderCode,
-        Des: encodedDescription 
-      },
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        accept: 'application/json',
+    const response = await rootApi.post(`/payment`, 
+      { orderCode },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'accept': 'text/plain',
+        }
       }
-    });
-    
-    // The API returns the payment URL directly as a string
-    const paymentUrl = response.data;
+    );
+
     console.log("[API] createPaymentApi - Response status:", response.status);
-    console.log("[API] createPaymentApi - Payment URL received:", paymentUrl);
-    
-    // Return in a format that's easier to work with in the components
-    return { url: paymentUrl };
+    console.log("[API] createPaymentApi - Response data:", JSON.stringify(response.data));
+    return response.data;
   } catch (error: any) {
     console.error("[API] createPaymentApi - Error:", error);
     if (error.response) {
@@ -303,46 +296,93 @@ export const createPaymentApi = async (orderCode: string, description: string, a
 //   }
 // };
 
-export const getPaymentReturnApi = async (queryString: string, accessToken: string) => {
-  try {
-    console.log('[API] getPaymentReturnApi - Starting with query string:', queryString);
-    console.log('[API] getPaymentReturnApi - URL being called:', `/payment/return-payment?${queryString}`);
-    console.log('[API] getPaymentReturnApi - Using token:', accessToken ? `${accessToken.substring(0, 10)}...` : 'No token');
+// export const getPaymentReturnApi = async (queryString: string, accessToken: string) => {
+//   try {
+//     console.log('[API] getPaymentReturnApi - Starting with query string:', queryString);
+//     console.log('[API] getPaymentReturnApi - URL being called:', `/payment/return-payment?${queryString}`);
+//     console.log('[API] getPaymentReturnApi - Using token:', accessToken ? `${accessToken.substring(0, 10)}...` : 'No token');
     
-    const response = await rootApi.get(`/payment/return-payment?${queryString}`, {
+//     const response = await rootApi.get(`/payment/return-payment?${queryString}`, {
+//       headers: {
+//         Authorization: `Bearer ${accessToken}`,
+//         accept: 'application/json',
+//       },
+//       timeout: 10000,
+//     });
+
+//     console.log('[API] getPaymentReturnApi - Response status:', response.status);
+//     console.log('[API] getPaymentReturnApi - Response data:', JSON.stringify(response.data));
+    
+//     if (!response.data) {
+//       console.error('[API] getPaymentReturnApi - Invalid response structure');
+//       throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+//     }
+
+//     return response.data;
+//   } catch (error) {
+//     const errorDetails = {
+//       message: error instanceof Error ? error.message : 'Unknown error',
+//       response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
+//       status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
+//     };
+//     console.error('[API] getPaymentReturnApi - Error details:', JSON.stringify(errorDetails));
+    
+//     if (error instanceof Error && 'response' in error) {
+//       console.error('[API] getPaymentReturnApi - Response headers:', (error as any).response?.headers);
+//       console.error('[API] getPaymentReturnApi - Response config:', (error as any).response?.config);
+//     }
+    
+//     throw new Error(
+//       error instanceof Error
+//         ? `Failed to get payment return: ${error.message}`
+//         : 'Failed to get payment return: Unknown error'
+//     );
+//   }
+// };
+
+export const paymentReturnApi = async (request: ReturnPaymentRequest, accessToken: string): Promise<any> => {
+  console.log('paymentReturnApi called with request:', request);
+  
+  try {
+    // Ensure accessToken is provided
+    if (!accessToken) {
+      throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+    }
+
+    // Convert the request object to query parameters for GET request
+    const params = {
+      code: request.code,
+      id: request.id,
+      cancel: request.cancel,
+      status: request.status
+    };
+
+    const response = await rootApi.get('/payment-return', {
+      params: params,
       headers: {
         Authorization: `Bearer ${accessToken}`,
         accept: 'application/json',
       },
-      timeout: 10000,
     });
 
-    console.log('[API] getPaymentReturnApi - Response status:', response.status);
-    console.log('[API] getPaymentReturnApi - Response data:', JSON.stringify(response.data));
-    
-    if (!response.data) {
-      console.error('[API] getPaymentReturnApi - Invalid response structure');
-      throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
-    }
+    // Log response for debugging
+    console.log('paymentReturnApi response:', response.data);
 
     return response.data;
-  } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-    };
-    console.error('[API] getPaymentReturnApi - Error details:', JSON.stringify(errorDetails));
+  } catch (error: any) {
+    console.error('paymentReturnApi error:', error);
     
-    if (error instanceof Error && 'response' in error) {
-      console.error('[API] getPaymentReturnApi - Response headers:', (error as any).response?.headers);
-      console.error('[API] getPaymentReturnApi - Response config:', (error as any).response?.config);
+    // Handle detailed error logging
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+      console.error('Response status:', error.response.status);
+      throw new Error(`Server error: ${error.response.data?.message || error.response.statusText}`);
+    } else if (error.request) {
+      console.error('No response received from server');
+      throw new Error('No response received from server');
+    } else {
+      console.error('Request setup error');
+      throw new Error(`Request error: ${error.message}`);
     }
-    
-    throw new Error(
-      error instanceof Error
-        ? `Failed to get payment return: ${error.message}`
-        : 'Failed to get payment return: Unknown error'
-    );
-  }
-};
+  } 
+}

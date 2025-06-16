@@ -1,7 +1,11 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Colors } from '../../../assets/styles/colorStyle';
+
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
 
 interface DoctorCardProps {
   id: string; // Thêm id vào props
@@ -84,20 +88,20 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: isTablet ? 240 : 120,
+    height: isTablet ? 240 : 120,
+    borderRadius: isTablet ? 120 : 60,
   },
   avatarPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: isTablet ? 240 : 120,
+    height: isTablet ? 240 : 120,
+    borderRadius: isTablet ? 120 : 60,
     backgroundColor: Colors.textGray,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    fontSize: 24,
+    fontSize: isTablet ? 48 : 24,
     color: Colors.textWhite,
     fontWeight: 'bold',
   },
@@ -109,18 +113,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   fullName: {
-    fontSize: 18,
+    fontSize: isTablet ? 36 : 18,
     fontWeight: 'bold',
     color: Colors.primary,
     marginBottom: 4,
   },
   major: {
-    fontSize: 12,
+    fontSize: isTablet ? 18 : 12,
     color: Colors.textBlack,
     marginBottom: 4,
   },
   address: {
-    fontSize: 12,
+    fontSize: isTablet ? 18 : 12,
     color: Colors.textBlack,
   },
   actionContainer: {

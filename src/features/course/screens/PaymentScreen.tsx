@@ -6,7 +6,7 @@ import { useToast } from '../../../utils/toasts/useToast';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../stores/store';
-import { createOrderApi, createPaymentApi, getPaymentReturnApi } from '../../shop/api/shopApi';
+import { createOrderApi, createPaymentApi, paymentReturnApi } from '../../shop/api/shopApi';
 
 const PaymentScreen = ({ route, navigation }: any) => {
   // Support both direct URL and itemIds approaches
@@ -28,7 +28,8 @@ const PaymentScreen = ({ route, navigation }: any) => {
   const webViewRef = useRef<WebView>(null);
   const { showSuccess, showError, showInfo } = useToast();
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
-
+  console.log('Access Token:', accessToken);
+  
   // Process VNPAY payment result with the query string
   const processPaymentResult = useCallback(async (queryString: string) => {
     console.log('Đang xử lý kết quả thanh toán với chuỗi truy vấn:', queryString);
@@ -56,17 +57,51 @@ const PaymentScreen = ({ route, navigation }: any) => {
       setIsProcessingReturn(true);
       setLoading(true);
       console.log('Đang gọi API trả về thanh toán với chuỗi truy vấn:', queryString);
+
+      // Parse query parameters directly
+      const queryParams = queryString.split('&').reduce((params: any, param) => {
+        const [key, value] = param.split('=');
+        params[key] = value || '';
+        return params;
+      }, {});
       
-      const response = await getPaymentReturnApi(queryString, accessToken);
-      console.log('API trả về thanh toán thành công:', response);
+      console.log('Tham số truy vấn:', queryParams);
       
-      showSuccess('Thanh toán thành công!');
+      // Extract needed parameters
+      const returnPaymentRequest = {
+        code: queryParams.code || '',
+        id: queryParams.orderCode || '', 
+        cancel: queryParams.cancel === 'true',
+        status: queryParams.status || '',
+      };
+      
+      console.log('Dữ liệu gửi đến paymentReturnApi:', returnPaymentRequest);
+      
+      const response = await paymentReturnApi(returnPaymentRequest, accessToken);
+      console.log("Đã gọi API trả về thanh toán:", response);
+
+      // Display the exact message from the response
+      if (response.status === "200") {
+        if (response.message === "Payment Canceled" || returnPaymentRequest.cancel) {
+          // Handle cancelled payment
+          showInfo(response.message || 'Thanh toán đã bị hủy');
+        } else {
+          // Handle successful payment
+          showSuccess(response.message || 'Thanh toán thành công!');
+        }
+      } else {
+        // Handle error responses
+        showError(response.message || 'Lỗi xử lý thanh toán');
+      }
+      
+      // Redirect after displaying message
       setTimeout(() => {
         navigation.reset({ index: 0, routes: [{ name: 'CartScreen' }] });
       }, 3000);
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error('API trả về thanh toán thất bại:', error);
-      showError('Thanh toán thất bại hoặc đã bị hủy');
+      showError(error?.message || 'Thanh toán thất bại hoặc đã bị hủy');
       setTimeout(() => {
         navigation.reset({ index: 0, routes: [{ name: 'CartScreen' }] });
       }, 3000);
@@ -74,7 +109,7 @@ const PaymentScreen = ({ route, navigation }: any) => {
       setIsProcessingReturn(false);
       setLoading(false);
     }
-  }, [navigation, showError, showSuccess, accessToken, hasProcessedReturn]);
+  }, [navigation, showError, showSuccess, showInfo, accessToken, hasProcessedReturn]);
 
   // Initialize order creation process
   const initiateOrderProcess = useCallback(async () => {
@@ -102,20 +137,17 @@ const PaymentScreen = ({ route, navigation }: any) => {
       setIsCreatingPayment(true);
       setProcessingStep('Đang khởi tạo thanh toán...');
 
-      const paymentData = await createPaymentApi(
-        orderCode, 
-        `Payment for ${orderCode}`, 
-        accessToken
-      );
+      const paymentData = await createPaymentApi(orderCode, accessToken);
       
-      if (!paymentData?.url) {
+      if (!paymentData?.data?.checkoutUrl) {
         showError("Không nhận được URL thanh toán");
         navigation.goBack();
         return;
       }
 
-      console.log('Đã nhận URL thanh toán:', paymentData.url);
-      setPaymentUrl(paymentData.url);
+      console.log('Đã nhận URL thanh toán:', paymentData.data.checkoutUrl);
+      setPaymentUrl(paymentData.data.checkoutUrl);
+      
       setProcessingStep('Đang chuyển đến cổng thanh toán...');
       setLoading(false);
     } catch (error) {
@@ -315,6 +347,7 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+    paddingTop: 60,
   },
   loadingOverlay: {
     position: 'absolute',

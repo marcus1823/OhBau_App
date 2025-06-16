@@ -3,10 +3,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Colors } from '../../../assets/styles/colorStyle';
 import ButtonAction from '../../auth/components/ButtonAction';
+import { useQueryClient } from '@tanstack/react-query';
 
 const BookingStatusScreen = ({ navigation }: any) => {
     //   const { status = 'success' } = route.params || {};
     const status = 'success'; // Giả sử trạng thái là 'success' cho ví dụ này
+    const queryClient = useQueryClient();
 
     // Dữ liệu trạng thái
     const statusMap: any = {
@@ -33,11 +35,17 @@ const BookingStatusScreen = ({ navigation }: any) => {
             routes: [{ name: 'TabNavigation' }],
         });
     }
+    
     const handleNavSchedule = () => {
-        navigation.navigate('Cá nhân', {
-            screen: 'MyAppointmentScreen',
+        // Invalidate the myBookings query to ensure fresh data is loaded
+        queryClient.invalidateQueries({ queryKey: ['myBookings'] });
+        
+        navigation.navigate('TabNavigation', {
+            screen: 'ProfileStack',
+            params: {
+                screen: 'MyAppointmentScreen'
+            }
         });
-
     }
 
     const currentStatus = statusMap[status] || statusMap.success;

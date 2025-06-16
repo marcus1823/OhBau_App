@@ -126,9 +126,11 @@ export interface GetBookingRequest {
 }
 
 export interface GetBookingResponse {
+  id: string; // Add this field
   parent: GetParentResponse;
   type? : string; 
   bookingModule?: string;
+  bookingCode?: string; // You might want to add this field as well from your JSON
   description?: string;
   date: string; //($date)
   doctor: GetDoctorResponse;
@@ -146,4 +148,19 @@ export interface GetParentResponse {
 export interface GetMotherHealthResponse {
   weith?: number;
   bloodPressure?: number;
+}
+
+export interface FeedBackBookingRequest {
+  bookingId: string;
+  doctorId: string;
+  rating: number; 
+  content: string;
+}
+
+export interface FeedBackBookingResponse {
+  id: string;
+  bookingId: string;
+  doctorId: string;
+  rating: number; 
+  content: string;
 }

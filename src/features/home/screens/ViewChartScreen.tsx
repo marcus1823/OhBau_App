@@ -1,9 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import { LineChart } from 'react-native-gifted-charts';
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
+
 
 const ViewChartScreen = ({ navigation, route }: any) => {
   const { property, values, valueStandard } = route.params;
@@ -24,10 +28,10 @@ const ViewChartScreen = ({ navigation, route }: any) => {
       <View style={styles.chartContainer}>
         <LineChart
           data={dataPoints}
-          height={300}
-          width={300}
+          height={isTablet ? 800 : 300}
+          width={isTablet ? 800 : 300}
           yAxisTextStyle={Colors.textBlack}
-          xAxisTextStyle={Colors.primaryDark}
+          // xAxisTextStyle={Colors.primaryDark}
           yAxisLabelTexts={['0', '1', '2', '3', '4']} // Adjust range based on max value
           xAxisLabelTexts={dataPoints.map(d => d.label)}
           color={Colors.primary}

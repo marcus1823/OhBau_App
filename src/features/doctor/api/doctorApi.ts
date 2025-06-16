@@ -3,6 +3,8 @@ import {
   CreateBookingRequest,
   CreateBookingResponse,
   CreateBookingResponseBaseResponse,
+  FeedBackBookingRequest,
+  FeedBackBookingResponse,
   GetDoctorByIdRequest,
   GetDoctorByIdResponse,
   GetDoctorByIdResponseBaseResponse,
@@ -203,3 +205,47 @@ export const getBookingsApi = async (
     );
   }
 };
+
+
+export const feedbackBookingApi = async (request: FeedBackBookingRequest, accessToken: string):Promise<FeedBackBookingResponse> => {
+  console.log('feedbackBookingApi req:', request);
+  try {
+    // Kiểm tra accessToken
+    if (!accessToken) {
+      throw new Error('Access token không tồn tại. Vui lòng đăng nhập lại.');
+    }
+
+    const response = await rootApi.post<FeedBackBookingResponse>(
+      '/feedback',
+      request,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          accept: 'text/plain', 
+          'Content-Type': 'application/json'
+        },
+      }
+    );
+
+    // Log phản hồi để debug
+    console.log('feedbackBookingApi res:', response);
+
+    return response.data;
+  } catch (error: any) {
+    console.log('feedbackBookingApi error:', error);
+    
+    // Get the exact error message from the API response if available
+    if (error.response && error.response.data) {
+      const errorData = error.response.data;
+      if (errorData.message) {
+        throw new Error(errorData.message);
+      }
+    }
+    
+    throw new Error(
+      error instanceof Error
+        ? `Failed to feedback booking: ${error.message}`
+        : 'Failed to feedback booking: Unknown error'
+    );
+  }
+}

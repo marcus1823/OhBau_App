@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, FlatList } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
-import { GetDoctorSlotResponse } from '../types/doctor.type'; // Import type từ doctor.type.ts
+import { GetDoctorSlotResponse } from '../types/doctor.type'; 
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
+
 
 interface TimePickerProps {
   selectedDate: Date;
@@ -132,7 +136,7 @@ const TimePicker: React.FC<TimePickerProps> = ({ selectedDate, onTimeChange, doc
         data={timeSlots}
         renderItem={renderTimeItem}
         keyExtractor={(item, index) => index.toString()}
-        numColumns={5}
+        numColumns={ isTablet ? 10 : 5}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.grid}
       />
@@ -163,9 +167,9 @@ const styles = StyleSheet.create({
   timeItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 65,
-    height: 30,
-    borderRadius: 15,
+    width: isTablet ? 80 : 65,
+    height: isTablet ? 80 : 30,
+    borderRadius: isTablet ? 20 : 15,
     backgroundColor: Colors.textWhite,
     marginHorizontal: 4,
   },

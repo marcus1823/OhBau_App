@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, Platform } from 'react-native';
+import { StyleSheet, Text, View, Image, Platform, Dimensions } from 'react-native';
 import Video from 'react-native-video';
 import YoutubePlayer from 'react-native-youtube-iframe'; 
 import { Colors } from '../../../assets/styles/colorStyle';
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
+
 
 interface ChapterMediaDetailCardProps {
   imageUrl: string | null;
@@ -39,7 +43,7 @@ const ChapterMediaDetailCard: React.FC<ChapterMediaDetailCardProps> = ({ imageUr
     return (
       <View style={styles.card}>
         <YoutubePlayer
-          height={200}
+          height={isTablet ? 600 : 200}
           videoId={videoId}
           play={false}
           onReady={() => setIsYouTubeReady(true)}
@@ -112,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textWhite,
   },
   mediaPlaceholder: {
-    height: 200,
+    height: isTablet ? 600 : 200,
     borderRadius: 30,
     backgroundColor: Colors.textWhite,
     justifyContent: 'center',

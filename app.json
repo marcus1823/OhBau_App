@@ -1,4 +1,13 @@
 {
   "name": "OhBau_App",
-  "displayName": "OhBau_App"
+  "displayName": "OhBau_App",
+  "expo": {
+    "name": "OhBau_App",
+    "slug": "OhBau_App",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "bundleIdentifier": "com.ohbau.app",
+      "supportsTablet": true
+    }
+  }
 }

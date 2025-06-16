@@ -1,7 +1,11 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { Colors } from '../../../assets/styles/colorStyle';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
+
 
 interface DoctorDetailCardProps {
     fullName?: string;
@@ -130,16 +134,16 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     avatarContainer: {
-        width: 150,
-        height: 150,
-        borderRadius: 75,
+        width: isTablet ? 300 : 150,
+        height: isTablet ? 300 : 150,
+        borderRadius: isTablet ? 150 : 75,
         overflow: 'hidden',
         backgroundColor: Colors.textWhite,
     },
     avatarImage: {
         width: '100%',
         height: '100%',
-        borderRadius: 75,
+        borderRadius: isTablet ? 150 : 75,
         resizeMode: 'contain',
     },
     headerInfo: {
@@ -147,14 +151,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         gap: 5,
-        maxWidth: 130,
+        maxWidth: isTablet ? 600 : 130,
     },
     experienceContainer: {
         flexDirection: 'row',
         paddingHorizontal: 8,
         paddingVertical: 5,
         // maxWidth: 130,
-        width: 130,
+        width: isTablet ? 600 : 130,
         borderRadius: 18,
         backgroundColor: Colors.primary,
         height: 60, 
@@ -185,9 +189,9 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary,
         borderRadius: 18,
         padding: 10,
-        maxWidth: 130,
-        width: 130,
-        height: 60,
+        maxWidth: isTablet ? 600 : 130,
+        width: isTablet ? 600 : 130,
+        height: isTablet ? 100 : 60,
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
     },
