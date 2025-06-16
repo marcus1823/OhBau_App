@@ -36,7 +36,7 @@ const ProductDetailScreen = ({ navigation, route }: any) => {
         title="Chi tiết sản phẩm"
         onBackButtonPress={() => navigation.goBack()}
       />
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {formattedProduct && <ProductDetailCard product={formattedProduct} />}
       </ScrollView>
     </LinearGradient>
