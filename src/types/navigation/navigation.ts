@@ -69,7 +69,7 @@ export type ProfileStackParamList = {
 
 // Kiểu cho ChatStack
 export type ChatStackParamList = {
-  'ChatScreen': undefined;
+  'ChatScreen': { conversationId?: string };
 };
 
 // Kiểu cho các tab trong Tab.Navigator

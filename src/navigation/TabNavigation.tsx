@@ -9,7 +9,6 @@ import HomeStack from './stacks/HomeStack';
 import DoctorStack from './stacks/DoctorStack';
 import CourseStack from './stacks/CourseStack';
 import CommunityStack from './stacks/CommunityStack';
-import ChatStack from './stacks/ChatStack';
 import ProfileStack from './stacks/ProfileStack';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,6 +17,7 @@ import PaymentScreen from '../features/course/screens/PaymentScreen';
 import withAuth from '../components/hoc/withAuth';
 import ShopStack from './stacks/ShopStack';
 import ComingSoonScreen from '../features/home/screens/ComingSoonScreen';
+import ChatStack from './stacks/ChatStack';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -54,7 +54,7 @@ const getTabBarIcon = (iconSource: any) => ({ focused }: { focused: boolean }) =
 const MainTabs = () => {
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
@@ -65,6 +65,8 @@ const MainTabs = () => {
           marginHorizontal: ifTablet(50, 30),
           marginBottom: ifTablet(20, 10),
           position: 'absolute',
+          // Hide tab bar on ChatScreen
+          display: route.name === "Tin nhắn" ? 'none' : 'flex',
         },
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textWhite,
@@ -75,7 +77,7 @@ const MainTabs = () => {
           alignItems: 'center',
           flex: 1,
         },
-      }}
+      })}
     >
       <Tab.Screen
         name="Trang Chủ"

@@ -1,47 +1,101 @@
-import { StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, Image } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, Image, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { sendMessage } from '../../../services/chatService';
+import { RouteProp } from '@react-navigation/native';
+import { ChatStackParamList } from '../../../types/Navigation/navigation';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// Dữ liệu mẫu
-const mockMessages = [
-  {
-    id: '1',
-    sender: 'Bác sĩ Minh',
-    message: 'Chào chị, tuần này em bé phát triển tốt chứ? Có cần tư vấn gì thêm không?',
-    time: '10:30',
-    isUser: false,
-  },
-  {
-    id: '2',
-    sender: 'Tôi',
-    message: 'Dạ bác sĩ, em bé ổn, nhưng em hay bị chuột rút, có cách nào cải thiện không ạ?',
-    time: '10:32',
-    isUser: true,
-  },
-  {
-    id: '3',
-    sender: 'Bác sĩ Minh',
-    message: 'Chuột rút là bình thường, chị thử bổ sung thực phẩm giàu kali như chuối, cam nhé. Nếu vẫn khó chịu, báo lại cho tôi.',
-    time: '10:35',
-    isUser: false,
-  },
-];
+type Message = {
+  id: string;
+  sender: string;
+  message: string;
+  time: string;
+  isUser: boolean;
+};
 
-const ChatScreen = ({navigation}: any) => {
-  const renderMessage = ({ item }:any) => (
+type ChatScreenProps = {
+  route: RouteProp<ChatStackParamList, 'ChatScreen'>;
+  navigation: NativeStackNavigationProp<ChatStackParamList>;
+};
+
+const ChatScreen: React.FC<ChatScreenProps> = ({ navigation }) => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      sender: 'OhBầu Assistant',
+      message: 'Xin chào! Tôi là trợ lý ảo của OhBầu. Tôi có thể giúp gì cho bạn hôm nay?',
+      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      isUser: false,
+    }
+  ]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const flatListRef = useRef<FlatList>(null);
+
+  const scrollToBottom = () => {
+    if (flatListRef.current && messages.length > 0) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) {return;}
+    
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'Tôi',
+      message: inputMessage.trim(),
+      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      isUser: true,
+    };
+    
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setInputMessage('');
+    setIsLoading(true);
+    
+    try {
+      const response = await sendMessage(inputMessage);
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'OhBầu Assistant',
+        message: response.message,
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        isUser: false,
+      };
+      setMessages(prevMessages => [...prevMessages, botMessage]);
+      setError(null);
+    } catch (err) {
+      setError('Không thể kết nối đến trợ lý. Vui lòng thử lại sau.');
+      console.error('Error sending message:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.messageContainer, item.isUser ? styles.userMessage : styles.otherMessage]}>
       {!item.isUser && (
         <Image
-          source={{ uri: 'https://i.pinimg.com/736x/6c/59/95/6c599523460f54ddeba81f3cd689ae04.jpg' }}
+          source={require('../../../assets/images/logo/logoNoText.png')}
           style={styles.avatar}
         />
       )}
       <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.otherBubble]}>
         {!item.isUser && <Text style={styles.senderName}>{item.sender}</Text>}
-        <Text style={styles.messageText}>{item.message}</Text>
+        <Text style={[styles.messageText, item.isUser ? styles.userMessageText : styles.botMessageText]}>
+          {item.message}
+        </Text>
         <Text style={styles.messageTime}>{item.time}</Text>
       </View>
     </View>
@@ -50,35 +104,60 @@ const ChatScreen = ({navigation}: any) => {
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
       <PrimaryHeader
-        title="Chat với bác sĩ"
+        title="Hỏi đáp với OhBầu"
         disableBackButton={false}
         onBackButtonPress={() => navigation.goBack()}
-        moreButton={true}
-        modalTitle="Tùy chọn"
-        modalButtons={[
-          { text: 'Xem hồ sơ bác sĩ', onPress: () => console.log('Xem hồ sơ') },
-          { text: 'Xóa cuộc trò chuyện', onPress: () => console.log('Xóa chat') },
-        ]}
-        onModalClose={() => console.log('Modal closed')}
       />
+      
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={() => setError(null)}>
+            <Icon name="close" size={20} color={Colors.textWhite} />
+          </TouchableOpacity>
+        </View>
+      )}
+      
       <FlatList
-        data={mockMessages}
+        ref={flatListRef}
+        data={messages}
         renderItem={renderMessage}
         keyExtractor={(item) => item.id}
         style={styles.chatList}
         contentContainerStyle={styles.chatListContent}
+        onContentSizeChange={scrollToBottom}
       />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Nhập tin nhắn..."
-          placeholderTextColor={Colors.primary}
-          multiline
-        />
-        <TouchableOpacity style={styles.sendButton}>
-          <Icon name="send" size={24} color={Colors.textWhite} />
-        </TouchableOpacity>
-      </View>
+      
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+          <Text style={styles.loadingText}>Đang nhận phản hồi...</Text>
+        </View>
+      )}
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nhập câu hỏi của bạn..."
+            placeholderTextColor={Colors.textGray}
+            multiline
+            maxLength={500}
+            value={inputMessage}
+            onChangeText={setInputMessage}
+          />
+          <TouchableOpacity 
+            style={[styles.sendButton, !inputMessage.trim() && styles.sendButtonDisabled]}
+            onPress={handleSendMessage}
+            disabled={!inputMessage.trim() || isLoading}
+          >
+            <Icon name="send" size={24} color={Colors.textWhite} />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 };
@@ -94,7 +173,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   chatListContent: {
-    paddingTop: 60,
+    paddingTop: 70,
     paddingBottom: 16,
   },
   messageContainer: {
@@ -113,11 +192,12 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginRight: 8,
+    backgroundColor: Colors.textWhite,
   },
   messageBubble: {
     maxWidth: '75%',
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 16,
     shadowColor: Colors.textBlack,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -126,11 +206,11 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     backgroundColor: Colors.primary,
-    borderBottomRightRadius: 0,
+    borderBottomRightRadius: 4,
   },
   otherBubble: {
     backgroundColor: Colors.textWhite,
-    borderBottomLeftRadius: 0,
+    borderBottomLeftRadius: 4,
   },
   senderName: {
     fontSize: 14,
@@ -140,6 +220,12 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+    lineHeight: 22,
+  },
+  userMessageText: {
+    color: Colors.textWhite,
+  },
+  botMessageText: {
     color: Colors.textBlack,
   },
   messageTime: {
@@ -149,7 +235,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   inputContainer: {
-    marginBottom: 70,
     flexDirection: 'row',
     padding: 16,
     backgroundColor: Colors.textWhite,
@@ -162,15 +247,54 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textGray,
     borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 12,
     fontSize: 16,
     color: Colors.textBlack,
     maxHeight: 100,
   },
   sendButton: {
     backgroundColor: Colors.primaryDark,
-    borderRadius: 20,
-    padding: 10,
+    borderRadius: 25,
+    padding: 12,
     marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: Colors.primary,
+    opacity: 0.7,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    backgroundColor: Colors.textGray,
+    borderRadius: 20,
+    marginHorizontal: 16,
+    marginBottom: 8,
+  },
+  loadingText: {
+    marginLeft: 8,
+    color: Colors.primary,
+    fontSize: 14,
+  },
+  errorContainer: {
+    backgroundColor: "#red",
+    padding: 12,
+    margin: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 70,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
+  errorText: {
+    color: Colors.textWhite,
+    flex: 1,
   },
 });
