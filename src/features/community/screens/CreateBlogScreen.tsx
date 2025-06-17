@@ -47,16 +47,18 @@ const CreateBlogScreen = ({ navigation }: any) => {
   const { mutate: createBlog, isPending: isCreating } = useCreateBlog();
 
   // Kiểm tra accessToken và điều hướng nếu không hợp lệ
+  // if (!accessToken) {
+  //   return (
+  //     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
+  //       <PrimaryHeader title="Tạo bài viết" onBackButtonPress={() => navigation.goBack()} />
+  //       <View style={styles.content}>
+  //         <Text style={styles.errorText}>Lỗi: Không có token xác thực. Vui lòng đăng nhập lại.</Text>
+  //       </View>
+  //     </LinearGradient>
+  //   );
+  // }
   if (!accessToken) {
-    console.error('Access token is missing or invalid');
-    return (
-      <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-        <PrimaryHeader title="Tạo bài viết" onBackButtonPress={() => navigation.goBack()} />
-        <View style={styles.content}>
-          <Text style={styles.errorText}>Lỗi: Không có token xác thực. Vui lòng đăng nhập lại.</Text>
-        </View>
-      </LinearGradient>
-    );
+    return null; // Trả về null nếu không có accessToken
   }
 
   // Xử lý chọn và upload ảnh
