@@ -80,6 +80,7 @@ export type TabParamList = {
   'Cộng Đồng': undefined;
   'Khoá học': undefined;
   'Tin nhắn': undefined;
+  'Cửa hàng': undefined;
 };
 // Kiểu cho params của CartScreen
 export type CartScreenParams = {
@@ -88,12 +89,11 @@ export type CartScreenParams = {
 
 // Kiểu cho Stack.Navigator bên trong TabNavigation
 export type TabStackParamList = {
-  MainTabs: { screen?: keyof TabParamList }; // Các tab chính
+  MainTabs: { screen?: keyof TabParamList }; 
   ProfileStack: { screen?: keyof ProfileStackParamList };
-  CartScreen: CartScreenParams; // CartScreen với params tùy chọn
+  CartScreen: CartScreenParams;
   PaymentScreen: undefined;
-  ComingSoonScreen: undefined; // Thêm ComingSoonScreen nếu cần
-
+  ComingSoonScreen: undefined;
 };
 
 // Kiểu cho RootStack

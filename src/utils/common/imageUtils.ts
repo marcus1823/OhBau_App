@@ -20,6 +20,6 @@ export const getAvatarSource = (avatarUrl?: string) => {
  * @returns First letter of the name or default
  */
 export const getInitials = (name?: string): string => {
-  if (!name) return '?';
+  if (!name) {return '?';}
   return name.charAt(0).toUpperCase();
 };

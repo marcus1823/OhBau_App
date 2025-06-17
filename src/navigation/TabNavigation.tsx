@@ -65,7 +65,6 @@ const MainTabs = () => {
           marginHorizontal: ifTablet(50, 30),
           marginBottom: ifTablet(20, 10),
           position: 'absolute',
-          // Hide tab bar on ChatScreen
           display: route.name === "Tin nhắn" ? 'none' : 'flex',
         },
         tabBarActiveTintColor: Colors.primary,
@@ -106,7 +105,7 @@ const MainTabs = () => {
       />
 
       <Tab.Screen
-        name="Shop"
+        name="Cửa hàng"
         component={ShopStack}
         options={{ tabBarIcon: getTabBarIcon(shopIcon) }}
       />

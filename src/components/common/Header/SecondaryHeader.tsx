@@ -21,17 +21,17 @@ const SecondaryHeader = ({  }: SecondaryHeaderProps) => {
   console.log('totalCartItems in SecondaryHeader:', totalCartItems?.data.total);
   const totalItems = totalCartItems?.data.total || 0;
   
-  const getCurrentTab = () => {
-    const state = navigation.getState();
-    const currentRoute = state.routes[state.index];
-    if (currentRoute.name === 'TabNavigation') {
-      const tabState = currentRoute.state;
-      if (tabState && tabState.routes && tabState.index !== undefined) {
-        return tabState.routes[tabState.index].name;
-      }
-    }
-    return 'Khóa học'; // Mặc định là Khóa học nếu không xác định được
-  };
+  // const getCurrentTab = () => {
+  //   const state = navigation.getState();
+  //   const currentRoute = state.routes[state.index];
+  //   if (currentRoute.name === 'TabNavigation') {
+  //     const tabState = currentRoute.state;
+  //     if (tabState && tabState.routes && tabState.index !== undefined) {
+  //       return tabState.routes[tabState.index].name;
+  //     }
+  //   }
+  //   return 'Khóa học'; // Mặc định là Khóa học nếu không xác định được
+  // };
 
   return (
     <View style={styles.contentContainer}>
@@ -61,7 +61,7 @@ const SecondaryHeader = ({  }: SecondaryHeaderProps) => {
           onPress={() =>
             navigation.navigate('TabNavigation', {
               screen: 'CartScreen',
-              params: { previousTab: getCurrentTab() },
+              // params: { previousTab: getCurrentTab() },
             })
           }
           style={styles.iconWrapper}
