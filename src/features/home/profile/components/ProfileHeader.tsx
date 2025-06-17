@@ -3,7 +3,7 @@ import React from 'react';
 import { Colors } from '../../../../assets/styles/colorStyle';
 
 interface ProfileHeaderProps {
-  avatarUrl?: string;
+  avatarUrl?: string | number; // Allow required() images (number type)
   name?: string;
   email?: string;
 }
@@ -13,7 +13,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ avatarUrl, name, email })
     <View style={styles.headerContainer}>
       <View style={styles.avatarContainer}>
         {avatarUrl ? (
-          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+          typeof avatarUrl === 'string' ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+          ) : (
+            <Image source={avatarUrl} style={styles.avatar} />
+          )
         ) : (
           <Text style={styles.initials}>{name?.charAt(0).toUpperCase()}</Text>
         )}

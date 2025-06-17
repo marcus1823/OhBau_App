@@ -26,6 +26,12 @@ export const loginApi = async (request: AuthenticationRequest): Promise<Authenti
 export const registerApi = async (request: RegisterRequest): Promise<RegisterResponseBaseResponse> => {
     console.log('registerApi request:', request);
     try {
+        // Handle the case where dob is undefined
+        if (request.registerParentRequest && request.registerParentRequest.dob === undefined) {
+            // Either remove the dob property or provide a default value
+            delete request.registerParentRequest.dob;
+        }
+        
         const response = await rootApi.post('/account', request);
         if (!response.data) {
             throw new Error('Invalid response structure');
@@ -36,4 +42,4 @@ export const registerApi = async (request: RegisterRequest): Promise<RegisterRes
         const errorData = error.response?.data || {};
         throw new Error(errorData.message || error.response?.data || 'Đã xảy ra lỗi khi kết nối đến server');
     }
-} 
+}

@@ -87,7 +87,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation }) => {
     <View style={[styles.messageContainer, item.isUser ? styles.userMessage : styles.otherMessage]}>
       {!item.isUser && (
         <Image
-          source={require('../../../assets/images/logo/logoNoText.png')}
+          source={require('../../../assets/images/skelector/doctorSkelector.jpg')}
           style={styles.avatar}
         />
       )}

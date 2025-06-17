@@ -1,14 +1,35 @@
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../../../components/common/Header/PrimaryHeader';
 import PersonalInfoItem from '../components/PersonalInfoItem';
+import { useFocusEffect } from '@react-navigation/native';
 
 const PersonalScreen = ({ navigation, route }: any) => {
-  const { profileData, role } = route.params;
-  console.log('PersonalScreen profileData:', profileData);
-  console.log('PersonalScreen role:', role);
+  const [userData, setUserData] = useState(route.params?.profileData || {});
+  const [userRole, setUserRole] = useState(route.params?.role || '');
+  
+  // Handle updates when screen receives focus or route params change
+  useFocusEffect(
+    React.useCallback(() => {
+      // Update local state if new data is passed via route params
+      if (route.params?.profileData) {
+        setUserData(route.params.profileData);
+      }
+      if (route.params?.role) {
+        setUserRole(route.params.role);
+      }
+      
+      // Optional: You could also fetch fresh data from API here
+      // if (route.params?.refresh) {
+      //   fetchUserProfileData();
+      // }
+    }, [route.params])
+  );
+
+  console.log('PersonalScreen profileData:', userData);
+  console.log('PersonalScreen role:', userRole);
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
@@ -18,7 +39,7 @@ const PersonalScreen = ({ navigation, route }: any) => {
         moreButton
         modalTitle="Tuỳ chọn"
         modalButtons={[
-          { text: 'Chỉnh sửa hồ sơ', onPress: () => navigation.navigate('UpdateProfileScreen', { profileData, role }) },
+          { text: 'Chỉnh sửa hồ sơ', onPress: () => navigation.navigate('UpdateProfileScreen', { profileData: userData, role: userRole }) },
         ]}
         onModalClose={() => console.log('Modal closed')}
       />
@@ -26,18 +47,18 @@ const PersonalScreen = ({ navigation, route }: any) => {
         {/* Avatar lớn ở giữa */}
         <View style={styles.avatarContainer}>
           <Image
-            source={{ uri: 'https://i.pinimg.com/736x/fa/d2/ea/fad2ea48c9b071f3f785395458aebce0.jpg' }} // Thay bằng URL ảnh avatar thực tế
+            source={userData?.avatar ? { uri: userData.avatar } : require('../../../../../../assets/images/skelector/doctorSkelector.jpg')}
             style={styles.avatar}
           />
         </View>
 
         {/* Nội dung chính */}
         <View style={styles.mainContent}>
-          <PersonalInfoItem title="Họ và Tên" value={profileData?.fullName || 'chưa cập nhật'}/>
-          <PersonalInfoItem title="Vai trò" value={role || 'chưa cập nhật'} />
-          <PersonalInfoItem title="Ngày sinh" value={profileData?.dob || 'chưa cập nhật'} />
-          <PersonalInfoItem title="Số điện thoại" value={profileData?.phone || 'chưa cập nhật'} />
-          <PersonalInfoItem title="Email" value={profileData?.email || 'chưa cập nhật'} />
+          <PersonalInfoItem title="Họ và Tên" value={userData?.fullName || 'chưa cập nhật'}/>
+          <PersonalInfoItem title="Vai trò" value={userRole || 'chưa cập nhật'} />
+          <PersonalInfoItem title="Ngày sinh" value={userData?.dob || 'chưa cập nhật'} />
+          <PersonalInfoItem title="Số điện thoại" value={userData?.phone || 'chưa cập nhật'} />
+          <PersonalInfoItem title="Email" value={userData?.email || 'chưa cập nhật'} />
         </View>
       </ScrollView>
     </LinearGradient>

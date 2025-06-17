@@ -26,6 +26,14 @@ export const validateDateRequired = (date: Date | null, fieldName: string): stri
     return null;
 };
 
+// Kiểm tra ngày sinh không bắt buộc (chỉ kiểm tra tính hợp lệ nếu có)
+export const validateDateOptional = (date: Date | null, fieldName: string): string | null => {
+    if (date && isNaN(date.getTime())) {
+        return `${fieldName} không hợp lệ`;
+    }
+    return null;
+};
+
 // Kiểm tra mật khẩu khớp
 export const validatePasswordMatch = (password: string, confirmPassword: string): string | null => {
     if (password !== confirmPassword) {

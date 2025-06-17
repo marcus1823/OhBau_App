@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../stores/store';
 import FormInput from '../components/FormInput';
 import ButtonAction from '../components/ButtonAction';
-import DatePickerComponent from '../components/DatePicker';
+// import DatePickerComponent from '../components/DatePicker';
 import { useToast } from '../../../utils/toasts/useToast';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { useRegister } from '../hooks/useRegister.hook';
@@ -15,10 +15,10 @@ import {
     validatePhone,
     validateEmail,
     validateRequired,
-    validateDateRequired,
+    // validateDateOptional, 
     validatePasswordMatch,
     validateRole,
-    formatDateToString,
+    // formatDateToString,
 } from '../../../utils/validations/validations'
 import { useAuthSync } from '../../../utils/asyncStorage/useAuthSync';
 import { setRole } from '../slices/auth.slices';
@@ -29,7 +29,7 @@ const RegisterScreen = ({ navigation }: any) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     // const [role, setRole] = useState('');
-    const [dob, setDob] = useState<Date | null>(null);
+    // const [dob, setDob] = useState<Date | null>(null);
 
     const { showError, showSuccess } = useToast();
     const { mutate: registerUser, isPending } = useRegister();
@@ -84,11 +84,12 @@ const RegisterScreen = ({ navigation }: any) => {
             showError(errorMessage);
             return;
         }
-        errorMessage = validateDateRequired(dob, 'ngày sinh');
-        if (errorMessage) {
-            showError(errorMessage);
-            return;
-        }
+        // Make DOB optional - only validate if it's provided
+        // errorMessage = validateDateOptional(dob, 'ngày sinh');
+        // if (errorMessage) {
+        //     showError(errorMessage);
+        //     return;
+        // }
         errorMessage = validateRole(selectedRole, 'vai trò');
         if (errorMessage) {
             showError(errorMessage);
@@ -105,10 +106,10 @@ const RegisterScreen = ({ navigation }: any) => {
             phone,
             email,
             password,
-            role: selectedRole, // Sử dụng role từ Redux (đã được kiểm tra không null)
+            role: selectedRole,
             registerParentRequest: {
                 fullName,
-                dob: formatDateToString(dob!), // Sử dụng formatDateToString từ validation.ts
+                // dob: dob ? formatDateToString(dob) : undefined, // Make DOB optional
             },
         };
 
@@ -167,13 +168,13 @@ const RegisterScreen = ({ navigation }: any) => {
                             value={email}
                         />
 
-                        <DatePickerComponent
+                        {/* <DatePickerComponent
                             selectedDate={dob || new Date()} 
                             onDateChange={(date) => setDob(date)}
-                            title="Ngày sinh"
-                            placeholder={`Chọn ngày sinh của ${parentTitle}`}
+                            title="Ngày sinh (không bắt buộc)"
+                            placeholder={`Chọn ngày sinh của ${parentTitle} (không bắt buộc)`}
 
-                        />
+                        /> */}
 
                         <FormInput
                             title="Mật khẩu"

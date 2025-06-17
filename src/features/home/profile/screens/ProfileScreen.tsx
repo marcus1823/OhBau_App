@@ -113,7 +113,7 @@ const ProfileScreen = ({ navigation }: any) => {
     }
     return (
       <ProfileHeader
-        avatarUrl={profileData?.avatar || 'https://i.pinimg.com/736x/fa/d2/ea/fad2ea48c9b071f3f785395458aebce0.jpg'}
+        avatarUrl={profileData?.avatar || require('../../../../assets/images/skelector/doctorSkelector.jpg')}
         name={profileData?.fullName || 'Chưa cập nhật'}
         email={profileData?.email || 'marcuschill1823@gmail.com'}
       />

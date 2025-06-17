@@ -29,7 +29,10 @@ const DoctorDetailCard = ({ fullName, avatar, address, major, experence, focus, 
                 {/* Avatar && experience + focus (row + column) */}
                 <View style={styles.headerSection}>
                     <View style={styles.avatarContainer}>
-                        <Image source={{ uri: avatar }} style={styles.avatarImage} />
+                        <Image 
+                            source={avatar ? { uri: avatar } : require('../../../assets/images/skelector/doctorSkelector.jpg')} 
+                            style={styles.avatarImage} 
+                        />
                     </View>
 
                     <View style={styles.headerInfo}>
@@ -191,7 +194,7 @@ const styles = StyleSheet.create({
         padding: 10,
         maxWidth: isTablet ? 600 : 130,
         width: isTablet ? 600 : 130,
-        height: isTablet ? 100 : 60,
+        height: isTablet ? 100 : 80,
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
     },

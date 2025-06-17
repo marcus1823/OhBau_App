@@ -40,7 +40,7 @@ const SecondaryHeader = ({  }: SecondaryHeaderProps) => {
         style={styles.avatarContainer}
       >
         <Image
-          source={require('../../../assets/images/Home/momAvatar.jpg')}
+          source={require('../../../assets/images/skelector/doctorSkelector.jpg')}
           style={styles.avatar}
           resizeMode="contain"
         />

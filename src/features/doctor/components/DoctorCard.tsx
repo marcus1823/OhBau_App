@@ -8,12 +8,12 @@ const { width } = Dimensions.get('window');
 const isTablet = width > 768;
 
 interface DoctorCardProps {
-  id: string; // Thêm id vào props
+  id: string;
   fullName?: string;
   avatar?: string;
   address?: string;
   major?: string;
-  onInfoPress?: (id: string) => void; // Thêm callback để xử lý sự kiện nhấn "Thông tin"
+  onInfoPress?: (id: string) => void;
 }
 
 const DoctorCard: React.FC<DoctorCardProps> = ({ id, fullName = 'N/A', avatar, address, major, onInfoPress }) => {
@@ -21,7 +21,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ id, fullName = 'N/A', avatar, a
 
   const handleInfoPress = () => {
     if (onInfoPress) {
-      onInfoPress(id); // Gọi callback với id khi nhấn "Thông tin"
+      onInfoPress(id);
     }
   };
 
@@ -36,9 +36,10 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ id, fullName = 'N/A', avatar, a
         {avatar ? (
           <Image source={{ uri: avatar }} style={styles.avatar} />
         ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>{fullName?.charAt(0)?.toUpperCase()}</Text>
-          </View>
+          <Image 
+            source={require('../../../assets/images/skelector/doctorSkelector.jpg')} 
+            style={styles.avatar}
+          />
         )}
       </View>
 

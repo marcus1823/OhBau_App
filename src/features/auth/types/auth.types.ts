@@ -1,7 +1,7 @@
 // Account
 export interface RegisterParentRequest {
     fullName: string; // nullable: true
-    dob: string; // date
+    dob?: string; // date
 }
 export interface RegisterParentResponseBaseResponse {
     status: string;
@@ -11,7 +11,7 @@ export interface RegisterParentResponseBaseResponse {
 
 export interface RegisterParentResponse {
     fullName: string; // nullable: true
-    dob: string; // $date
+    dob?: string; // $date
 }
 
 export enum role {
@@ -26,7 +26,7 @@ export interface RegisterRequest {
     password: string; // nullable: true
     email: string; // nullable: true
     role: role; 
-    registerParentRequest: RegisterParentRequest; // nullable: true
+    registerParentRequest?: RegisterParentRequest; // nullable: true
 }
 
 export interface RegisterResponse {
