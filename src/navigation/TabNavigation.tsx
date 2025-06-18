@@ -8,7 +8,7 @@ import { ifTablet } from '../utils/responsives/responsive';
 import HomeStack from './stacks/HomeStack';
 import DoctorStack from './stacks/DoctorStack';
 import CourseStack from './stacks/CourseStack';
-import CommunityStack from './stacks/CommunityStack';
+// import CommunityStack from './stacks/CommunityStack';
 import ProfileStack from './stacks/ProfileStack';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -26,9 +26,10 @@ const Stack = createNativeStackNavigator();
 const homeIcon = require('../assets/icons/homeIcon.png');
 const doctorIcon = require('../assets/icons/doctorIcon.png');
 const courseIcon = require('../assets/icons/courseIcon.png');
-const communityIcon = require('../assets/icons/communityIcon.png');
+// const communityIcon = require('../assets/icons/communityIcon.png');
 const chatIcon = require('../assets/icons/icons8-chat-48-field.png');
 const shopIcon = require('../assets/icons/icons8-shop3-48.png');
+const profileIcon = require('../assets/icons/icons8-person-48.png');
 
 
 const TabIcon: React.FC<{ focused: boolean; iconSource: any }> = ({ focused, iconSource }) => {
@@ -98,16 +99,22 @@ const MainTabs = () => {
         component={ChatStack}
         options={{ tabBarIcon: getTabBarIcon(chatIcon) }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Cộng đồng"
         component={CommunityStack}
         options={{ tabBarIcon: getTabBarIcon(communityIcon) }}
-      />
+      /> */}
+
 
       <Tab.Screen
         name="Cửa hàng"
         component={ShopStack}
         options={{ tabBarIcon: getTabBarIcon(shopIcon) }}
+      />
+      <Tab.Screen
+        name="Cá nhân"
+        component={ProfileStack}
+        options={{ tabBarIcon: getTabBarIcon(profileIcon) }}
       />
     </Tab.Navigator>
   );
@@ -120,7 +127,7 @@ const TabNavigation: React.FC = () => {
         <SafeAreaView style={styles.safeArea}>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="MainTabs" component={MainTabs} />
-            <Stack.Screen name="ProfileStack" component={withAuth(ProfileStack)} />
+            <Stack.Screen name="ProfileStack" component={ProfileStack} />
             <Stack.Screen name="CartScreen" component={withAuth(CartScreen)} />
             <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
             <Stack.Screen name="ComingSoonScreen" component={ComingSoonScreen} />

@@ -77,10 +77,11 @@ export type ChatStackParamList = {
 export type TabParamList = {
   'Trang Chủ': undefined;
   'Bác sĩ': undefined;
-  'Cộng Đồng': undefined;
+  // 'Cộng Đồng': undefined;
   'Khoá học': undefined;
   'Tin nhắn': undefined;
   'Cửa hàng': undefined;
+  'Cá nhân': undefined;
 };
 // Kiểu cho params của CartScreen
 export type CartScreenParams = {
