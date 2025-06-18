@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View, ActivityIndicator, Text, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, ActivityIndicator, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Gradients } from '../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../components/common/Header/PrimaryHeader';
@@ -10,24 +10,24 @@ import { clearData } from '../../../../utils/asyncStorage/authStorage';
 import ProfileHeader from '../components/ProfileHeader';
 import MenuProfile from '../components/MenuProfile';
 import { useQuery } from '@tanstack/react-query';
-import { getProfileApi } from '../api/profileApi'; 
+import { getProfileApi } from '../api/profileApi';
 import { RootState } from '../../../../stores/store';
 
 const ProfileScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
   const { showSuccess } = useToast();
-  const accessToken = useSelector((state: any) => state.auth.accessToken); 
- const role = useSelector((state: RootState) => state.auth.role);
-  
+  const accessToken = useSelector((state: any) => state.auth.accessToken);
+  const role = useSelector((state: RootState) => state.auth.role);
+
   const {
     data: profileData,
     isLoading,
-    error,
+    // error,
   } = useQuery({
     queryKey: ['profile', accessToken],
     queryFn: () => getProfileApi(accessToken),
-    enabled: !!accessToken, 
-    retry: 1, 
+    enabled: !!accessToken,
+    retry: 1,
   });
 
   const handleLogout = async () => {
@@ -58,7 +58,7 @@ const ProfileScreen = ({ navigation }: any) => {
         {
           text: 'Xóa',
           style: 'destructive',
-          onPress: async () => {handleLogout();}
+          onPress: async () => { handleLogout(); }
         },
       ]
     );
@@ -102,20 +102,20 @@ const ProfileScreen = ({ navigation }: any) => {
         </View>
       );
     }
-    if (error) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            {error instanceof Error ? error.message : 'Không thể tải thông tin hồ sơ'}
-          </Text>
-        </View>
-      );
-    }
+    // if (error) {
+    //   return (
+    //     <View style={styles.errorContainer}>
+    //       <Text style={styles.errorText}>
+    //         {error instanceof Error ? error.message : 'Không thể tải thông tin hồ sơ'}
+    //       </Text>
+    //     </View>
+    //   );
+    // }
     return (
       <ProfileHeader
-        avatarUrl={profileData?.avatar || require('../../../../assets/images/skelector/doctorSkelector.jpg')}
+        // avatarUrl={profileAvatar}
         name={profileData?.fullName || 'Chưa cập nhật'}
-        email={profileData?.email || 'marcuschill1823@gmail.com'}
+        email={profileData?.email || 'Chưa cập nhật'}
       />
     );
   };
