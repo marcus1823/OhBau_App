@@ -7,7 +7,7 @@ import { RootState } from '../../../stores/store';
 import { useDispatch, useSelector } from 'react-redux';
 import FormInput from '../components/FormInput';
 import ButtonAction from '../components/ButtonAction';
-import OptionLogin from '../components/OptionLogin';
+// import OptionLogin from '../components/OptionLogin';
 import { useAuthSync } from '../../../utils/asyncStorage/useAuthSync';
 import { useToast } from '../../../utils/toasts/useToast';
 import { useLogin } from '../hooks/useLogin.hook';
@@ -83,12 +83,12 @@ const LoginScreen = ({ navigation }: any) => {
     );
   };
 
-  const handleOptionLogin = (option: string) => {
-    Alert.alert(
-      'Thông báo',
-      `Tính năng đăng nhập bằng ${option} đang được phát triển. Vui lòng thử lại sau.`,
-    );
-  };
+  // const handleOptionLogin = (option: string) => {
+  //   Alert.alert(
+  //     'Thông báo',
+  //     `Tính năng đăng nhập bằng ${option} đang được phát triển. Vui lòng thử lại sau.`,
+  //   );
+  // };
 
   return (
     <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
@@ -132,8 +132,8 @@ const LoginScreen = ({ navigation }: any) => {
               color={Colors.textWhite}
               disabled={isPending}
             />
-            <Text style={styles.optionText}>Hoặc {parentTitle} có thể đăng nhập bằng</Text>
-            <OptionLogin onPress={handleOptionLogin} />
+            {/* <Text style={styles.optionText}>Hoặc {parentTitle} có thể đăng nhập bằng</Text> */}
+            {/* <OptionLogin onPress={handleOptionLogin} /> */}
             <TouchableOpacity
               style={styles.registerOptionContainer}
               onPress={() => navigation.navigate('RegisterScreen')}

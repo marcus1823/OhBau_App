@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Colors } from '../../../assets/styles/colorStyle';
 import { useAddToCart } from '../hooks/useCart';
@@ -8,7 +8,8 @@ import { RootState } from '../../../stores/store';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../types/Navigation/navigation';
-
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
 interface ProductDetailCardProps {
   product: {
     id: string;
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
   },
   productImage: {
     width: '100%',
-    height: 250,
+    height: isTablet ? 500 : 250,
     backgroundColor: Colors.textGray,
   },
   cardContent: {

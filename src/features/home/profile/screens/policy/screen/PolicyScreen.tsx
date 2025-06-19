@@ -3,11 +3,12 @@ import { StyleSheet, View, ActivityIndicator, Text } from 'react-native'
 import { WebView } from 'react-native-webview'
 import PrimaryHeader from '../../../../../../components/common/Header/PrimaryHeader'
 import { Colors } from '../../../../../../assets/styles/colorStyle'
-import { privacyPolicyHtml } from '../utils/htmlContent'
+// import { privacyPolicyHtml } from '../utils/htmlContent'
 
 const PolicyScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const urlPolicy = 'https://ohbau-policy.web.app'
 
   return (
     <View style={styles.container}>
@@ -16,6 +17,19 @@ const PolicyScreen = ({ navigation }: any) => {
         onBackButtonPress={() => navigation.goBack()} 
       />
       <WebView
+        source={{ uri: urlPolicy }}
+        style={styles.webView}
+        onLoadStart={() => setLoading(true)}
+        onLoadEnd={() => setLoading(false)}
+        onError={() => {
+          setError(true)
+          setLoading(false)
+        }}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        scalesPageToFit={true}
+      />
+      {/* <WebView
         originWhitelist={['*']}
         source={{ html: privacyPolicyHtml }}
         style={styles.webView}
@@ -28,7 +42,7 @@ const PolicyScreen = ({ navigation }: any) => {
         javaScriptEnabled={true}
         domStorageEnabled={true}
         scalesPageToFit={true}
-      />
+      /> */}
       {loading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
@@ -55,6 +69,7 @@ const styles = StyleSheet.create({
   },
   webView: {
     flex: 1,
+    paddingTop: 20,
   },
   loadingContainer: {
     position: 'absolute',

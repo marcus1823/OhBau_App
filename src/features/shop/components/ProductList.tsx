@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import { Colors } from '../../../assets/styles/colorStyle';
 
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
 interface ProductListProps {
   navigation: any;
   products: any[];
@@ -24,7 +26,7 @@ const ProductList = ({ navigation, products, fetchNextPage, hasNextPage, isFetch
       <Image
         source={{ uri: item.image }}
         style={styles.productImage}
-        resizeMode="cover"
+        resizeMode="contain"
       />
       <View style={styles.cardContent}>
         <Text style={styles.productName} numberOfLines={1}>
@@ -59,7 +61,7 @@ const ProductList = ({ navigation, products, fetchNextPage, hasNextPage, isFetch
     <FlatList
       data={products}
       renderItem={renderProduct}
-      keyExtractor={(item, index) => `${item.id}-${index}`} // Thêm index để đảm bảo tính duy nhất
+      keyExtractor={(item, index) => `${item.id}-${index}`} 
       numColumns={2}
       contentContainerStyle={styles.listContainer}
       showsVerticalScrollIndicator={false}
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
   },
   productImage: {
     width: '100%',
-    height: 120,
+    height: isTablet ? 250 : 120,
   },
   cardContent: {
     padding: 12,
