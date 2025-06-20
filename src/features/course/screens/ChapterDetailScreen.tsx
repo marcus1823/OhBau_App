@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
@@ -9,6 +9,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getChapterApi } from '../api/courseApi';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
 import { useToast } from '../../../utils/toasts/useToast';
+
+const { width } = Dimensions.get('window');
+const isTablet = width > 768;
 
 const ChapterDetailScreen = ({ navigation, route }: any) => {
   const { chapters } = route.params;
@@ -63,6 +66,21 @@ const ChapterDetailScreen = ({ navigation, route }: any) => {
             Hiện tại chưa có bài học nào trong chương này.
           </Text>
         )}
+
+
+        <View >
+          <Text>Trích dẫn:</Text>
+          <TouchableOpacity
+            onPress={() => {
+              if (data.quote) {
+                Linking.openURL(data.quote).catch(err => console.error('Failed to open URL:', err));
+              }
+            }}
+            style={styles.chapterQuote}
+          >
+            <Text style={styles.chapterNoQuote}>{data.quote || 'Không có trích dẫn'}</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </LinearGradient>
   );
@@ -86,6 +104,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Colors.textBlack,
     marginBottom: 10,
+  },
+  chapterQuote: {
+    fontSize: isTablet ? 16 : 10,
+    color: "blue",
+    marginBottom: 20,
+    fontStyle: 'italic',
+  },
+  chapterNoQuote: {
+    fontSize: isTablet ? 16 : 10,
+    color: "blue",
+    marginBottom: 20,
+    fontStyle: 'italic',
   },
   noChapterText: {
     fontSize: 16,

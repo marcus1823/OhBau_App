@@ -101,6 +101,7 @@ export interface ChapterDetails {
   videoUrl: string;
   imageUrl: string;
   course: string;
+  quote: string;
   active: boolean;
   createAt: string;
   updateAt: string | null;
@@ -117,6 +118,7 @@ export interface GetChapterResponse {
   content: string;
   videoUrl: string;
   imageUrl: string;
+  quote: string;
   course: string;
   active: boolean;
   createAt: string;

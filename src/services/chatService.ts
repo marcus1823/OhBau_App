@@ -4,7 +4,7 @@ interface ChatResponse {
 
 export const sendMessage = async (prompt: string): Promise<ChatResponse> => {
   try {
-    const response = await fetch('https://ohbauchatbot.onrender.com/chat', {
+    const response = await fetch('https://chatbot.ohbau.cloud:8443/chat', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
