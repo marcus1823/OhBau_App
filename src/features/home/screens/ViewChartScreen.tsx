@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
@@ -39,6 +39,13 @@ const ViewChartScreen = ({ navigation, route }: any) => {
         />
         <Text style={styles.title}>{`Biểu đồ ${property}`}</Text>
         <Text style={styles.title}>Giá trị tiêu chuẩn: {valueStandard}</Text>
+        {/* https://www.texasheart.org/heart-health/heart-information-center/topics/may-tinh-chi-so-khoi-co-the-bmi/ */}
+        <Text>Tham khảo:</Text>
+        <TouchableOpacity onPress={() => Linking.openURL('https://www.texasheart.org/heart-health/heart-information-center/topics/may-tinh-chi-so-khoi-co-the-bmi/')}>
+          <Text style={styles.link}>
+            https://www.texasheart.org/heart-health/heart-information-center/topics/may-tinh-chi-so-khoi-co-the-bmi/
+          </Text>
+        </TouchableOpacity>
       </View>
     </LinearGradient>
   );
@@ -59,5 +66,18 @@ const styles = StyleSheet.create({
     color: Colors.primaryDark,
     fontSize: 18,
     marginTop: 10,
+    marginBottom: 10,
   },
+  chapterQuote: {
+    fontSize: isTablet ? 16 : 10,
+    color: "blue",
+    marginBottom: 20,
+    fontStyle: 'italic',
+  },
+  link: {
+    color: Colors.primaryDark,
+    textDecorationLine: 'underline',
+    fontSize: isTablet ? 16 : 10,
+    marginBottom: 20,
+  }
 });

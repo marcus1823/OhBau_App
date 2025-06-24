@@ -5,7 +5,7 @@ import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import LinearGradient from 'react-native-linear-gradient';
 import SecondaryHeader from '../../../components/common/Header/SecondaryHeader';
 import FetusTrackerCard from '../components/FetusTrackerCard';
-import FetusInfoStatus from '../components/FetusInfoStatus';
+// import FetusInfoStatus from '../components/FetusInfoStatus';
 import MotherInfoStatus from '../components/MotherInfoStatus';
 import { RootState } from '../../../stores/store';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
@@ -14,7 +14,7 @@ import { Fetus } from '../types/family.type';
 import { useParentRelationQuery } from '../profile/hooks/useParentRelationQuery';
 import { useFetusByCodeQuery } from '../profile/hooks/useFetusByCodeQuery';
 
-const HomeScreen = ({navigation}: any) => {
+const HomeScreen = ({_navigation}: any) => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken || '');
   
   const { data: parentRelationData, isLoading: isRelationLoading } = useParentRelationQuery(accessToken);
@@ -69,8 +69,8 @@ const HomeScreen = ({navigation}: any) => {
           />
         </View>
         <View style={styles.content}>
-          <Text style={styles.title}>Thông tin của con đây ạ</Text>
-          <FetusInfoStatus fetusDetails={fetus.fetusDetails} navigation={navigation} />
+          {/* <Text style={styles.title}>Thông tin của con đây ạ</Text> */}
+          {/* <FetusInfoStatus fetusDetails={fetus.fetusDetails} navigation={navigation} /> */}
           <Text style={styles.title}>Thông tin của mẹ đây ạ</Text>
           <MotherInfoStatus />
         </View>
