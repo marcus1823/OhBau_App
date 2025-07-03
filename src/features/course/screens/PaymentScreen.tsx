@@ -10,7 +10,7 @@ import { createOrderApi, createPaymentApi, paymentReturnApi } from '../../shop/a
 
 const PaymentScreen = ({ route, navigation }: any) => {
   // Support both direct URL and itemIds approaches
-  const { url: directUrl, itemIds } = route.params || {};
+  const { url: directUrl, itemIds, address } = route.params || {};
   const [paymentUrl, setPaymentUrl] = useState<string | null>(directUrl || null);
   const [loading, setLoading] = useState(true);
   const [orderInitiated, setOrderInitiated] = useState(false);
@@ -119,10 +119,16 @@ const PaymentScreen = ({ route, navigation }: any) => {
       return;
     }
 
+    if (!address) {
+      showError("Vui lòng cung cấp địa chỉ giao hàng");
+      navigation.goBack();
+      return;
+    }
+
     try {
       setIsCreatingOrder(true);
       setProcessingStep('Đang khởi tạo đơn hàng...');
-      const orderData = await createOrderApi(itemIds, accessToken);
+      const orderData = await createOrderApi(address, itemIds, accessToken);
       
       if (!orderData?.data?.orderCode) {
         showError("Không nhận được mã đơn hàng");
@@ -158,7 +164,7 @@ const PaymentScreen = ({ route, navigation }: any) => {
       setIsCreatingOrder(false);
       setIsCreatingPayment(false);
     }
-  }, [itemIds, accessToken, showError, navigation]);
+  }, [itemIds, address, accessToken, showError, navigation]);
 
   // Start the order-payment process when component mounts
   useEffect(() => {

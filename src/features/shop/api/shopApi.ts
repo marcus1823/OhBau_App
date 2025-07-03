@@ -182,11 +182,12 @@ export const deleteCartItemApi = async (itemId: string, accessToken: string): Pr
 /**
  * API to create a new order from cart items
  */
-export const createOrderApi = async (itemIds: string[], accessToken: string): Promise<any> => {
+export const createOrderApi = async (address: string, itemIds: string[], accessToken: string): Promise<any> => {
   console.log("[API] createOrderApi - Starting with itemIds:", itemIds);
   try {
     // Format the request body according to the API requirements
     const requestBody = {
+      address,
       items: itemIds.map(itemId => ({ itemId }))
     };
     

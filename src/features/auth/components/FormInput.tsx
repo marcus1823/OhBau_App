@@ -13,7 +13,9 @@ interface FormInputProps {
     numberOfLines?: number;
     disabled?: boolean;
     editable?: boolean;
-    titleFontSize?: number; // Thêm prop mới
+    titleFontSize?: number;
+    multiline?: boolean; // Add multiline support
+    textAlignVertical?: 'auto' | 'top' | 'bottom' | 'center'; // Add text alignment
 }
 
 const FormInput: React.FC<FormInputProps> = ({
@@ -26,7 +28,9 @@ const FormInput: React.FC<FormInputProps> = ({
     numberOfLines = 1,
     disabled = false,
     editable = true,
-    titleFontSize = 18, // Giá trị mặc định là 18
+    titleFontSize = 18,
+    multiline = false,
+    textAlignVertical = 'center',
 }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(secureTextEntry || false);
 
@@ -37,9 +41,15 @@ const FormInput: React.FC<FormInputProps> = ({
     return (
         <View style={styles.container}>
             {title && <Text style={[styles.title, { fontSize: titleFontSize }]}>{title}</Text>}
-            <View style={styles.inputContainer}>
+            <View style={[
+                styles.inputContainer, 
+                multiline && styles.inputContainerMultiline
+            ]}>
                 <TextInput
-                    style={styles.input}
+                    style={[
+                        styles.input,
+                        multiline && styles.inputMultiline
+                    ]}
                     placeholder={placeholder}
                     secureTextEntry={secureTextEntry && !isPasswordVisible}
                     onChangeText={onChangeText}
@@ -48,6 +58,8 @@ const FormInput: React.FC<FormInputProps> = ({
                     numberOfLines={numberOfLines}
                     editable={editable && !disabled}
                     placeholderTextColor={Colors.primary}
+                    multiline={multiline}
+                    textAlignVertical={textAlignVertical}
                 />
                 {secureTextEntry && (
                     <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconContainer}>
@@ -85,12 +97,20 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 2,
     },
+    inputContainerMultiline: {
+        alignItems: 'flex-start',
+        minHeight: 80,
+    },
     input: {
         height: 50,
         flex: 1,
         paddingHorizontal: 15,
         fontSize: 12,
         fontWeight: '400',
+    },
+    inputMultiline: {
+        minHeight: 80,
+        paddingVertical: 15,
     },
     iconContainer: {
         padding: 10,

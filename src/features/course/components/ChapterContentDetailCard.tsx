@@ -10,48 +10,47 @@ interface ChapterContentDetailCardProps {
 
 const ChapterContentDetailCard: React.FC<ChapterContentDetailCardProps> = ({ content }) => {
 
-const htmlContent = content || '<p>Không có nội dung</p>';
+  // Xử lý nội dung để chuyển \n thành <br>
+  const processContent = (rawContent: string) => {
+    if (!rawContent) {return '<p>Không có nội dung</p>';}
+    
+    const processedContent = rawContent
+      .replace(/\n/g, '<br>')
+      .trim();
+    
+    return `<div>${processedContent}</div>`;
+  };
 
-const source = {
+  const htmlContent = processContent(content);
+
+  const source = {
     html: htmlContent,
   };
 
-  // const customStyles = {
-  //   p: {
-  //     color: Colors.textBlack,
-  //     fontSize: 16,
-  //     lineHeight: 24,
-  //     marginBottom: 10,
-  //   },
-  //   h1: {
-  //     color: Colors.primary,
-  //     fontSize: 24,
-  //     fontWeight: 'bold' as const,
-  //     marginBottom: 10,
-  //   },
-  //   h2: {
-  //     color: Colors.textBlack,
-  //     fontSize: 20,
-  //     fontWeight: '600' as const,
-  //     marginBottom: 8,
-  //   },
-  //   ul: {
-  //     marginLeft: 20,
-  //     marginBottom: 10,
-  //   },
-  //   li: {
-  //     color: Colors.textBlack,
-  //     fontSize: 16,
-  //     lineHeight: 24,
-  //   },
-  // };
+  const customStyles = {
+    div: {
+      color: Colors.textBlack,
+      fontSize: 16,
+      lineHeight: 24,
+    },
+    p: {
+      color: Colors.textBlack,
+      fontSize: 16,
+      lineHeight: 24,
+      marginBottom: 10,
+    },
+    br: {
+      height: 10,
+    },
+  };
+
   return (
     <View style={styles.card}>
       {/* Nội dung bài học */}
       <RenderHtml
         contentWidth={300} // Độ rộng tối đa, có thể điều chỉnh theo thiết bị
         source={source}
-        // tagsStyles={customStyles}
+        tagsStyles={customStyles}
       />
     </View>
   );

@@ -151,16 +151,16 @@ const ProfileScreen = ({ navigation }: any) => {
             title="Danh mục yêu thích"
             onPress={() => menuOptionsPress('Danh mục yêu thích')}
           />
-          <MenuProfile
+          {/* <MenuProfile
             icon="calendar-today"
             title="Lịch hẹn đi khám"
             onPress={() => menuOptionsPress('Lịch hẹn đi khám')}
-          />
-          <MenuProfile
+          /> */}
+          {/* <MenuProfile
             icon="history"
             title="Lịch sử đi khám"
             onPress={() => menuOptionsPress('Lịch sử đi khám')}
-          />
+          /> */}
           <MenuProfile
             icon="shopping-bag"
             title="Thanh toán và giao hàng"

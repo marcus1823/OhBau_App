@@ -6,7 +6,7 @@ import Animated from 'react-native-reanimated';
 import { Colors, Gradients } from '../assets/styles/colorStyle';
 import { ifTablet } from '../utils/responsives/responsive';
 import HomeStack from './stacks/HomeStack';
-import DoctorStack from './stacks/DoctorStack';
+// import DoctorStack from './stacks/DoctorStack';
 import CourseStack from './stacks/CourseStack';
 // import CommunityStack from './stacks/CommunityStack';
 import ProfileStack from './stacks/ProfileStack';
@@ -24,7 +24,7 @@ const Stack = createNativeStackNavigator();
 
 // Import PNG icons
 const homeIcon = require('../assets/icons/homeIcon.png');
-const doctorIcon = require('../assets/icons/doctorIcon.png');
+// const doctorIcon = require('../assets/icons/doctorIcon.png');
 const courseIcon = require('../assets/icons/courseIcon.png');
 // const communityIcon = require('../assets/icons/communityIcon.png');
 const chatIcon = require('../assets/icons/icons8-chat-48-field.png');
@@ -84,11 +84,11 @@ const MainTabs = () => {
         component={HomeStack}
         options={{ tabBarIcon: getTabBarIcon(homeIcon) }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Bác sĩ"
         component={DoctorStack}
         options={{ tabBarIcon: getTabBarIcon(doctorIcon) }}
-      />
+      /> */}
       <Tab.Screen
         name="Khóa học"
         component={CourseStack}

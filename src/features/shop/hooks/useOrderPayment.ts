@@ -14,12 +14,12 @@ export const useCreateOrder = () => {
   console.log('[HOOK] useCreateOrder - Initialized, access token exists:', !!accessToken);
 
   return useMutation({
-    mutationFn: (itemIds: string[]) => {
-      console.log('[HOOK] useCreateOrder - Executing mutation with itemIds:', itemIds);
-      return createOrderApi(itemIds, accessToken || '');
+    mutationFn: ({ address, itemIds }: { address: string; itemIds: string[] }) => {
+      console.log('[HOOK] useCreateOrder - Executing mutation with address:', address, 'itemIds:', itemIds);
+      return createOrderApi(address, itemIds, accessToken || '');
     },
-    onMutate: (itemIds) => {
-      console.log('[HOOK] useCreateOrder - Starting mutation with itemIds:', itemIds);
+    onMutate: (variables) => {
+      console.log('[HOOK] useCreateOrder - Starting mutation with address:', variables.address, 'itemIds:', variables.itemIds);
     },
     onSuccess: (data) => {
       console.log('[HOOK] useCreateOrder - Success:', JSON.stringify(data));

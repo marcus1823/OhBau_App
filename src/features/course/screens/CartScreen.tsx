@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
-import { StyleSheet, Text, FlatList, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, FlatList, View, TouchableOpacity, Modal } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../components/common/Header/PrimaryHeader';
@@ -19,6 +19,7 @@ import {
   useExtractCartItemsDetails 
 } from '../../shop/hooks/useInfiniteCart';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import FormInput from '../../auth/components/FormInput';
 
 
 const CartScreen = ({ navigation, route }: any) => {
@@ -28,6 +29,8 @@ const CartScreen = ({ navigation, route }: any) => {
   const [refreshKey, setRefreshKey] = useState(0); 
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
 
   // Lấy previousTab từ route params, không đặt mặc định
   const previousTab = route.params?.previousTab || 'Trang Chủ';
@@ -220,18 +223,33 @@ const CartScreen = ({ navigation, route }: any) => {
       return;
     }
 
+    // Show address input modal
+    setShowAddressModal(true);
+  }, [accessToken, navigation, selectionMode, selectedItems, combinedItems, showError]);
+
+  const handleConfirmOrder = useCallback(() => {
+    if (!deliveryAddress.trim()) {
+      showError('Vui lòng nhập địa chỉ giao hàng');
+      return;
+    }
+
+    const itemsToOrder = selectionMode ? selectedItems : combinedItems.map((item: { itemId: any; }) => item.itemId);
+    
     // Navigate to payment screen with required parameters
     navigation.navigate('PaymentScreen', { 
       itemIds: itemsToOrder,
-      totalPrice: selectionMode ? selectedItemsTotal : totalPrice
+      totalPrice: selectionMode ? selectedItemsTotal : totalPrice,
+      address: deliveryAddress.trim()
     });
     
-    // Exit selection mode after order is placed
+    // Close modal and exit selection mode
+    setShowAddressModal(false);
+    setDeliveryAddress('');
     if (selectionMode) {
       setSelectionMode(false);
       setSelectedItems([]);
     }
-  }, [accessToken, navigation, selectionMode, selectedItems, combinedItems, selectedItemsTotal, totalPrice, showError]);
+  }, [deliveryAddress, selectionMode, selectedItems, combinedItems, selectedItemsTotal, totalPrice, navigation, showError]);
 
   const renderItem = useCallback(({ item }: { item: any }) => (
     <CartItemCard 
@@ -324,6 +342,43 @@ const CartScreen = ({ navigation, route }: any) => {
           />
         </View>
       )}
+      
+      {/* Address Input Modal */}
+      <Modal
+        visible={showAddressModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowAddressModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Địa chỉ giao hàng</Text>
+            <FormInput
+              title="Địa chỉ"
+              placeholder="Nhập địa chỉ giao hàng của bạn"
+              value={deliveryAddress}
+              onChangeText={setDeliveryAddress}
+              multiline={true}
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]} 
+                onPress={() => setShowAddressModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.confirmButton]} 
+                onPress={handleConfirmOrder}
+              >
+                <Text style={styles.confirmButtonText}>Xác nhận</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       
       <LoadingOverlay visible={isLoading} fullScreen={false} />
     </LinearGradient>
@@ -440,6 +495,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontStyle: 'italic',
     color: Colors.textGray,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: Colors.textWhite,
+    borderRadius: 15,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.textBlack,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginHorizontal: 5,
+  },
+  cancelButton: {
+    backgroundColor: Colors.textGray,
+  },
+  confirmButton: {
+    backgroundColor: Colors.primary,
+  },
+  cancelButtonText: {
+    color: Colors.textBlack,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  confirmButtonText: {
+    color: Colors.textWhite,
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
 
