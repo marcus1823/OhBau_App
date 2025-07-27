@@ -4,6 +4,7 @@
   "expo": {
     "name": "OhBau_App",
     "slug": "OhBau_App",
+    "icon": "./src/assets/images/logo/logoApp.jpg",
     "platforms": ["ios", "android"],
     "ios": {
       "bundleIdentifier": "com.ohbau.app",

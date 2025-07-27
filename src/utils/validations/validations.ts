@@ -1,4 +1,4 @@
-// Kiểm tra định dạng số điện thoại (giả định định dạng Việt Nam: bắt đầu bằng 0, 10 chữ số)
+  // Kiểm tra định dạng số điện thoại (giả định định dạng Việt Nam: bắt đầu bằng 0, 10 chữ số)
 export const validatePhone = (phone: string): boolean => {
     const phoneRegex = /^0\d{9}$/;
     return phoneRegex.test(phone);
