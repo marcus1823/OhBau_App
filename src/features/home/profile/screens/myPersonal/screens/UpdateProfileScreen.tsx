@@ -1,190 +1,207 @@
-import { ScrollView, StyleSheet, View, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../../../components/common/Header/PrimaryHeader';
-import { useUpdateProfileHook } from '../hooks/useUpdateProfileHook';
-import FormInput from '../../../../../auth/components/FormInput';
-import DatePickerComponent from '../../../../../auth/components/DatePicker';
-import ButtonAction from '../../../../../auth/components/ButtonAction';
 import LoadingOverlay from '../../../../../../components/common/Loading/LoadingOverlay';
 import { useToast } from '../../../../../../utils/toasts/useToast';
-import {
-  validateEmail,
-  formatDateToString
+import
+{
+  formatDateToString,
+  validateEmail
 } from '../../../../../../utils/validations/validations';
+import ButtonAction from '../../../../../auth/components/ButtonAction';
+import DatePickerComponent from '../../../../../auth/components/DatePicker';
+import FormInput from '../../../../../auth/components/FormInput';
+import { useUpdateProfileHook } from '../hooks/useUpdateProfileHook';
 
-const UpdateProfileScreen = ({navigation, route}: any) => {
+const UpdateProfileScreen = ( { navigation, route }: any ) =>
+{
   // Get user data from Redux store
+  const queryClient = useQueryClient();
   const { profileData, role } = route.params;
-  console.log('UpdateProfileScreen profileData:', profileData);
-  
+  console.log( 'UpdateProfileScreen profileData:', profileData );
+
   // Form state initialized with existing profileData
-  const [fullName, setFullName] = useState(profileData?.fullName || '');
-  const [email, setEmail] = useState(profileData?.email || '');
-  const [dob, setDob] = useState<Date | null>(
-    profileData?.dob ? new Date(profileData.dob) : null
+  const [ fullName, setFullName ] = useState( profileData?.fullName || '' );
+  const [ email, setEmail ] = useState( profileData?.email || '' );
+  const [ dob, setDob ] = useState<Date | null>(
+    profileData?.dob ? new Date( profileData.dob ) : null
   );
 
   // Keep track of original values to detect changes
   const originalValues = {
     fullName: profileData?.fullName || '',
     email: profileData?.email || '',
-    dob: profileData?.dob ? new Date(profileData.dob) : null
+    dob: profileData?.dob ? new Date( profileData.dob ) : null
   };
 
   // Helper hooks
   const { showError, showSuccess } = useToast();
-  const { mutate: updateProfile, isPending, isSuccess } = useUpdateProfileHook();
-  
+  const { mutateAsync: updateProfile, isPending, isSuccess } = useUpdateProfileHook();
+
   // Handle navigation after successful update
-  useEffect(() => {
-    if (isSuccess) {
-      setTimeout(() => {
+  useEffect( () =>
+  {
+    if ( isSuccess )
+    {
+      setTimeout( () =>
+      {
         // Create an updated profile object with the new values
         const updatedProfile = {
           ...profileData,
           fullName: fullName.trim() || profileData?.fullName,
           email: email.trim() || profileData?.email,
-          dob: dob ? formatDateToString(dob) : profileData?.dob,
+          dob: dob ? formatDateToString( dob ) : profileData?.dob,
         };
         // Use replace instead of navigate to remove UpdateProfileScreen from the stack
-        navigation.replace('PersonalScreen', { 
-          profileData: updatedProfile, 
-          role, 
-          refresh: true 
-        });
-      }, 1500); // Wait for success toast to be visible
+        navigation.popTo( 'PersonalScreen', {
+          profileData: updatedProfile,
+          role,
+          refresh: true
+        } );
+      }, 1500 ); // Wait for success toast to be visible
     }
-  }, [dob, email, fullName, isSuccess, navigation, profileData, role]);
-  
+  }, [ dob, email, fullName, isSuccess, navigation, profileData, role ] );
+
   // Format role for display
   const roleDisplay = role === 'MOTHER' ? 'Mẹ' : role === 'FATHER' ? 'Bố' : 'Chưa xác định';
 
   // Check if a value has changed from its original
-  const hasValueChanged = (field: string, value: any, originalValue: any): boolean => {
-    if (field === 'dob') {
+  const hasValueChanged = ( field: string, value: any, originalValue: any ): boolean =>
+  {
+    if ( field === 'dob' )
+    {
       // For dates, compare the formatted string values
-      if (!value && !originalValue) {return false;}
-      if (!value || !originalValue) {return true;}
-      return formatDateToString(value) !== formatDateToString(originalValue);
+      if ( !value && !originalValue ) { return false; }
+      if ( !value || !originalValue ) { return true; }
+      return formatDateToString( value ) !== formatDateToString( originalValue );
     }
     return value !== originalValue;
   };
 
   // Handle form submission
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () =>
+  {
     // Email validation only if changed
-    if (email && email !== originalValues.email) {
-      if (!validateEmail(email)) {
-        showError('Email không hợp lệ');
+    if ( email && email !== originalValues.email )
+    {
+      if ( !validateEmail( email ) )
+      {
+        showError( 'Email không hợp lệ' );
         return;
       }
     }
-    
+
     // Check if anything has changed
-    const hasChanges = 
-      hasValueChanged('fullName', fullName, originalValues.fullName) ||
-      hasValueChanged('email', email, originalValues.email) ||
-      hasValueChanged('dob', dob, originalValues.dob);
-      
-    if (!hasChanges) {
-      Alert.alert('Thông báo', 'Bạn chưa thay đổi thông tin nào.');
+    const hasChanges =
+      hasValueChanged( 'fullName', fullName, originalValues.fullName ) ||
+      hasValueChanged( 'email', email, originalValues.email ) ||
+      hasValueChanged( 'dob', dob, originalValues.dob );
+
+    if ( !hasChanges )
+    {
+      Alert.alert( 'Thông báo', 'Bạn chưa thay đổi thông tin nào.' );
       return;
     }
 
     // Create update request with only changed fields
     const updateRequest: any = { role };
-    
-    if (hasValueChanged('fullName', fullName, originalValues.fullName)) {
+
+    if ( hasValueChanged( 'fullName', fullName, originalValues.fullName ) )
+    {
       updateRequest.fullName = fullName.trim();
     }
-    
-    if (hasValueChanged('email', email, originalValues.email)) {
+
+    if ( hasValueChanged( 'email', email, originalValues.email ) )
+    {
       updateRequest.email = email.trim();
     }
-    
-    if (hasValueChanged('dob', dob, originalValues.dob)) {
-      updateRequest.dob = dob ? formatDateToString(dob) : null;
+
+    if ( hasValueChanged( 'dob', dob, originalValues.dob ) )
+    {
+      updateRequest.dob = dob ? formatDateToString( dob ) : null;
     }
-    
+
     // Call API to update profile
-    updateProfile(updateRequest);
-    showSuccess('Đang cập nhật thông tin...');
+    await updateProfile( updateRequest );
+    queryClient.invalidateQueries( { queryKey: [ 'profile' ] } );
+    showSuccess( 'Đang cập nhật thông tin...' );
   };
 
   return (
-    <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
-      <PrimaryHeader 
-        title="Cập nhật thông tin" 
-        onBackButtonPress={() => navigation.goBack()}
+    <LinearGradient colors={ Gradients.backgroundPrimary } style={ styles.container }>
+      <PrimaryHeader
+        title="Cập nhật thông tin"
+        onBackButtonPress={ () => navigation.goBack() }
       />
-      
-      <ScrollView 
-        contentContainerStyle={styles.content} 
-        showsVerticalScrollIndicator={false}
+
+      <ScrollView
+        contentContainerStyle={ styles.content }
+        showsVerticalScrollIndicator={ false }
       >
-        <View style={styles.formContainer}>
+        <View style={ styles.formContainer }>
           <FormInput
             title="Họ và tên"
             placeholder="Nhập họ và tên của bạn"
-            value={fullName}
-            onChangeText={setFullName}
-            titleFontSize={16}
+            value={ fullName }
+            onChangeText={ setFullName }
+            titleFontSize={ 16 }
           />
-          
+
           <FormInput
             title="Email"
             placeholder="Nhập email của bạn"
-            value={email}
-            onChangeText={setEmail}
+            value={ email }
+            onChangeText={ setEmail }
             keyboardType="email-address"
-            titleFontSize={16}
+            titleFontSize={ 16 }
           />
-          
+
           <DatePickerComponent
             title="Ngày sinh"
             placeholder="Chọn ngày sinh của bạn"
-            selectedDate={dob || new Date()}
-            onDateChange={(date) => setDob(date)}
+            selectedDate={ dob || new Date() }
+            onDateChange={ ( date ) => setDob( date ) }
           />
-          
+
           <FormInput
             title="Vai trò"
-            value={roleDisplay}
-            disabled={true}
-            titleFontSize={16}
+            value={ roleDisplay }
+            disabled={ true }
+            titleFontSize={ 16 }
           />
-          
-          <View style={styles.noteContainer}>
+
+          <View style={ styles.noteContainer }>
             <FormInput
               title="Lưu ý"
               value="Tất cả thông tin đều không bắt buộc. Bạn không thể thay đổi vai trò sau khi đã đăng ký."
-              disabled={true}
-              titleFontSize={14}
+              disabled={ true }
+              titleFontSize={ 14 }
             />
           </View>
-          
-          <View style={styles.buttonContainer}>
+
+          <View style={ styles.buttonContainer }>
             <ButtonAction
               title="Lưu thông tin"
-              backgroundColor={Colors.primary}
-              color={Colors.textWhite}
-              onPress={handleSaveProfile}
-              disabled={isPending}
+              backgroundColor={ Colors.primary }
+              color={ Colors.textWhite }
+              onPress={ handleSaveProfile }
+              disabled={ isPending }
             />
           </View>
         </View>
       </ScrollView>
-      
-      <LoadingOverlay visible={isPending} fullScreen={false} />
+
+      <LoadingOverlay visible={ isPending } fullScreen={ false } />
     </LinearGradient>
   );
 }
 
 export default UpdateProfileScreen;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create( {
   container: {
     flex: 1,
   },
@@ -214,4 +231,4 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: 20,
   }
-});
+} );

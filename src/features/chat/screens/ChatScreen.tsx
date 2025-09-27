@@ -22,139 +22,170 @@ type ChatScreenProps = {
   navigation: NativeStackNavigationProp<ChatStackParamList>;
 };
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ navigation }) => {
-  const [messages, setMessages] = useState<Message[]>([
+const ChatScreen: React.FC<ChatScreenProps> = ( { navigation } ) =>
+{
+  const [ messages, setMessages ] = useState<Message[]>( [
     {
       id: '1',
       sender: 'OhBầu Assistant',
       message: 'Xin chào! Tôi là trợ lý ảo của OhBầu. Tôi có thể giúp gì cho bạn hôm nay?',
-      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleTimeString( 'vi-VN', { hour: '2-digit', minute: '2-digit' } ),
       isUser: false,
     }
-  ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  ] );
+  const [ inputMessage, setInputMessage ] = useState( '' );
+  const [ isLoading, setIsLoading ] = useState( false );
+  const [ error, setError ] = useState<string | null>( null );
 
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList>( null );
 
-  const scrollToBottom = () => {
-    if (flatListRef.current && messages.length > 0) {
-      flatListRef.current.scrollToEnd({ animated: true });
+  const scrollToBottom = () =>
+  {
+    if ( flatListRef.current && messages.length > 0 )
+    {
+      flatListRef.current.scrollToEnd( { animated: true } );
     }
   };
 
-  useEffect(() => {
+  useEffect( () =>
+  {
     scrollToBottom();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ messages ] );
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) {return;}
-    
+  const handleSendMessage = async () =>
+  {
+    if ( !inputMessage.trim() ) { return; }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       sender: 'Tôi',
       message: inputMessage.trim(),
-      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleTimeString( 'vi-VN', { hour: '2-digit', minute: '2-digit' } ),
       isUser: true,
     };
-    
-    setMessages(prevMessages => [...prevMessages, userMessage]);
-    setInputMessage('');
-    setIsLoading(true);
-    
-    try {
-      const response = await sendMessage(inputMessage);
+
+    setMessages( prevMessages => [ ...prevMessages, userMessage ] );
+    setInputMessage( '' );
+    setIsLoading( true );
+
+    try
+    {
+      const response = await sendMessage( inputMessage );
       const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: ( Date.now() + 1 ).toString(),
         sender: 'OhBầu Assistant',
         message: response.message,
-        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        time: new Date().toLocaleTimeString( 'vi-VN', { hour: '2-digit', minute: '2-digit' } ),
         isUser: false,
       };
-      setMessages(prevMessages => [...prevMessages, botMessage]);
-      setError(null);
-    } catch (err) {
-      setError('Không thể kết nối đến trợ lý. Vui lòng thử lại sau.');
-      console.error('Error sending message:', err);
-    } finally {
-      setIsLoading(false);
+      setMessages( prevMessages => [ ...prevMessages, botMessage ] );
+      setError( null );
+    } catch ( err )
+    {
+      setError( 'Không thể kết nối đến trợ lý. Vui lòng thử lại sau.' );
+      console.error( 'Error sending message:', err );
+    } finally
+    {
+      setIsLoading( false );
     }
   };
 
-  const renderMessage = ({ item }: { item: Message }) => (
-    <View style={[styles.messageContainer, item.isUser ? styles.userMessage : styles.otherMessage]}>
-      {!item.isUser && (
-        <Image
-          source={require('../../../assets/images/skelector/doctorSkelector.jpg')}
-          style={styles.avatar}
-        />
-      )}
-      <View style={[styles.messageBubble, item.isUser ? styles.userBubble : styles.otherBubble]}>
-        {!item.isUser && <Text style={styles.senderName}>{item.sender}</Text>}
-        <Text style={[styles.messageText, item.isUser ? styles.userMessageText : styles.botMessageText]}>
-          {item.message}
+  const renderFormattedMessage = ( message: string, isUser: boolean ) =>
+  {
+    const parts = message.split( /(\*\*.*?\*\*)/g );
+
+    return parts.map( ( part, index ) =>
+    {
+      if ( part.startsWith( '**' ) && part.endsWith( '**' ) )
+      {
+        const boldText = part.slice( 2, -2 );
+        return (
+          <Text key={ index } style={ [ styles.messageText, isUser ? styles.userMessageText : styles.botMessageText, styles.boldText ] }>
+            { boldText }
+          </Text>
+        );
+      }
+      return (
+        <Text key={ index } style={ [ styles.messageText, isUser ? styles.userMessageText : styles.botMessageText ] }>
+          { part }
         </Text>
-        <Text style={styles.messageTime}>{item.time}</Text>
+      );
+    } );
+  };
+
+  const renderMessage = ( { item }: { item: Message } ) => (
+    <View style={ [ styles.messageContainer, item.isUser ? styles.userMessage : styles.otherMessage ] }>
+      { !item.isUser && (
+        <Image
+          source={ require( '../../../assets/images/skelector/doctorSkelector.jpg' ) }
+          style={ styles.avatar }
+        />
+      ) }
+      <View style={ [ styles.messageBubble, item.isUser ? styles.userBubble : styles.otherBubble ] }>
+        { !item.isUser && <Text style={ styles.senderName }>{ item.sender }</Text> }
+        <Text>
+          { renderFormattedMessage( item.message, item.isUser ) }
+        </Text>
+        <Text style={ styles.messageTime }>{ item.time }</Text>
       </View>
     </View>
   );
 
   return (
-    <LinearGradient colors={Gradients.backgroundPrimary} style={styles.container}>
+    <LinearGradient colors={ Gradients.backgroundPrimary } style={ styles.container }>
       <PrimaryHeader
         title="Hỏi đáp với OhBầu"
-        disableBackButton={false}
-        onBackButtonPress={() => navigation.goBack()}
+        disableBackButton={ false }
+        onBackButtonPress={ () => navigation.goBack() }
       />
-      
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity onPress={() => setError(null)}>
-            <Icon name="close" size={20} color={Colors.textWhite} />
+
+      { error && (
+        <View style={ styles.errorContainer }>
+          <Text style={ styles.errorText }>{ error }</Text>
+          <TouchableOpacity onPress={ () => setError( null ) }>
+            <Icon name="close" size={ 20 } color={ Colors.textWhite } />
           </TouchableOpacity>
         </View>
-      )}
-      
+      ) }
+
       <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
-        style={styles.chatList}
-        contentContainerStyle={styles.chatListContent}
-        onContentSizeChange={scrollToBottom}
+        ref={ flatListRef }
+        data={ messages }
+        renderItem={ renderMessage }
+        keyExtractor={ ( item ) => item.id }
+        style={ styles.chatList }
+        contentContainerStyle={ styles.chatListContent }
+        onContentSizeChange={ scrollToBottom }
       />
-      
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={Colors.primary} />
-          <Text style={styles.loadingText}>Đang nhận phản hồi...</Text>
+
+      { isLoading && (
+        <View style={ styles.loadingContainer }>
+          <ActivityIndicator size="small" color={ Colors.primary } />
+          <Text style={ styles.loadingText }>Đang nhận phản hồi...</Text>
         </View>
-      )}
-      
+      ) }
+
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        behavior={ Platform.OS === 'ios' ? 'padding' : 'height' }
+        keyboardVerticalOffset={ Platform.OS === 'ios' ? 90 : 0 }
       >
-        <View style={styles.inputContainer}>
+        <View style={ styles.inputContainer }>
           <TextInput
-            style={styles.input}
+            style={ styles.input }
             placeholder="Nhập câu hỏi của bạn..."
-            placeholderTextColor={Colors.textGray}
+            placeholderTextColor={ Colors.textGray }
             multiline
-            maxLength={500}
-            value={inputMessage}
-            onChangeText={setInputMessage}
+            maxLength={ 500 }
+            value={ inputMessage }
+            onChangeText={ setInputMessage }
           />
-          <TouchableOpacity 
-            style={[styles.sendButton, !inputMessage.trim() && styles.sendButtonDisabled]}
-            onPress={handleSendMessage}
-            disabled={!inputMessage.trim() || isLoading}
+          <TouchableOpacity
+            style={ [ styles.sendButton, !inputMessage.trim() && styles.sendButtonDisabled ] }
+            onPress={ handleSendMessage }
+            disabled={ !inputMessage.trim() || isLoading }
           >
-            <Icon name="send" size={24} color={Colors.textWhite} />
+            <Icon name="send" size={ 24 } color={ Colors.textWhite } />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -164,7 +195,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation }) => {
 
 export default ChatScreen;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create( {
   container: {
     flex: 1,
   },
@@ -227,6 +258,9 @@ const styles = StyleSheet.create({
   },
   botMessageText: {
     color: Colors.textBlack,
+  },
+  boldText: {
+    fontWeight: 'bold',
   },
   messageTime: {
     fontSize: 12,
@@ -297,4 +331,4 @@ const styles = StyleSheet.create({
     color: Colors.textWhite,
     flex: 1,
   },
-});
+} );
