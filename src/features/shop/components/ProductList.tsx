@@ -13,22 +13,42 @@ interface ProductListProps {
 }
 
 const ProductList = ({ navigation, products, fetchNextPage, hasNextPage, isFetchingNextPage }: ProductListProps) => {
+  // Format image URL with base URL prefix if needed
+  const getFormattedImageUrl = (url: string) => {
+    if (!url) {
+      // Return null for the fallback image - we'll handle this separately
+      return null;
+    }
+    return url.startsWith('http') ? url : `https://ohbau.cloud/${url}`;
+  };
+  
   const handleProductPress = (id: string) => {
     console.log('Product ID:', id);
     navigation.navigate('ProductDetailScreen', { productId: id });
   };
 
-  const renderProduct = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => handleProductPress(item.id)}
-    >
-      <Image
-        source={{ uri: item.image }}
-        style={styles.productImage}
-        resizeMode="contain"
-      />
-      <View style={styles.cardContent}>
+  const renderProduct = ({ item }: { item: any }) => {
+    // Get image URL from either images array or single image property
+    let imageUrl = null;
+    if (item.images && item.images.length > 0) {
+      // Use the first image from the images array
+      imageUrl = getFormattedImageUrl(item.images[0].url);
+    } else if (item.image) {
+      // Use the single image property
+      imageUrl = getFormattedImageUrl(item.image);
+    }
+    
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => handleProductPress(item.id)}
+      >
+        <Image
+          source={imageUrl ? { uri: imageUrl } : require('../../../assets/images/skelector/noProduct.jpg')}
+          style={styles.productImage}
+          resizeMode="contain"
+        />
+        <View style={styles.cardContent}>
         <Text style={styles.productName} numberOfLines={1}>
           {item.name}
         </Text>
@@ -41,6 +61,7 @@ const ProductList = ({ navigation, products, fetchNextPage, hasNextPage, isFetch
       </View>
     </TouchableOpacity>
   );
+  };
 
   const renderFooter = () => {
     if (!isFetchingNextPage) {return null;}

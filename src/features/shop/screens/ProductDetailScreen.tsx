@@ -28,6 +28,8 @@ const ProductDetailScreen = ({ navigation, route }: any) => {
     ageRange: productData.data.ageRange || '',
     image: productData.data.image || '',
     status: productData.data.status || '',
+    productCategoryId: productData.data.productCategoryId || '',
+    images: productData.data.images || [{ id: 'default', url: productData.data.image || '' }]
   } : null;
 
   return (

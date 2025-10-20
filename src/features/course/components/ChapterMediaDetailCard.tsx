@@ -17,6 +17,14 @@ const ChapterMediaDetailCard: React.FC<ChapterMediaDetailCardProps> = ({ imageUr
   const [isMuted, setIsMuted] = useState(false);
   const [isYouTubeReady, setIsYouTubeReady] = useState(false);
 
+  // Format image/video URL with base URL prefix if needed
+  const getFormattedUrl = (url: string | null): string | null => {
+    if (!url) {
+      return null;
+    }
+    return url.startsWith('http') ? url : `https://ohbau.cloud/${url}`;
+  };
+
   const isYouTubeUrl = (url: string | null): boolean => {
     if (!url) {return false;}
     return url.includes('youtube.com') || url.includes('youtu.be');
@@ -62,10 +70,23 @@ const ChapterMediaDetailCard: React.FC<ChapterMediaDetailCardProps> = ({ imageUr
       </View>
     );
   } else if (videoUrl) {
+    const formattedVideoUrl = getFormattedUrl(videoUrl);
+    const formattedPosterUrl = getFormattedUrl(imageUrl);
+    
+    if (!formattedVideoUrl) {
+      return (
+        <View style={styles.card}>
+          <View style={styles.mediaPlaceholder}>
+            <Text style={styles.mediaText}>Không có video</Text>
+          </View>
+        </View>
+      );
+    }
+    
     return (
       <View style={styles.card}>
         <Video
-          source={{ uri: videoUrl }}
+          source={{ uri: formattedVideoUrl }}
           style={styles.mediaPlaceholder}
           controls={true}
           resizeMode="cover"
@@ -73,7 +94,7 @@ const ChapterMediaDetailCard: React.FC<ChapterMediaDetailCardProps> = ({ imageUr
           repeat={false}
           muted={isMuted}
           volume={isMuted ? 0 : 1}
-          poster={imageUrl || ''}
+          poster={formattedPosterUrl || ''}
           enterPictureInPictureOnLeave={Platform.OS === 'ios'}
           playInBackground={false}
           onVolumeChange={(event) => {
@@ -89,10 +110,11 @@ const ChapterMediaDetailCard: React.FC<ChapterMediaDetailCardProps> = ({ imageUr
       </View>
     );
   } else if (imageUrl) {
+    const formattedImageUrl = getFormattedUrl(imageUrl);
     return (
       <View style={styles.card}>
         <Image
-          source={{ uri: imageUrl }}
+          source={formattedImageUrl ? { uri: formattedImageUrl } : require('../../../assets/images/skelector/noProduct.jpg')}
           style={styles.mediaPlaceholder}
           resizeMode="cover"
         />

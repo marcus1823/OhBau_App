@@ -170,21 +170,21 @@ const ProfileScreen = ( { navigation }: any ) =>
             title="Lịch sử đi khám"
             onPress={() => menuOptionsPress('Lịch sử đi khám')}
           /> */}
-          <MenuProfile
+          {/* <MenuProfile
             icon="shopping-bag"
             title="Thanh toán và giao hàng"
             onPress={ () => navigation.navigate( 'PaymentAndDeliveryScreen' ) }
-          />
+          /> */}
           <MenuProfile
             icon="shopping-cart"
             title="Lịch sử mua hàng"
             onPress={ () => menuOptionsPress( 'Lịch sử mua hàng' ) }
           />
-          <MenuProfile
+          {/* <MenuProfile
             icon="lock"
             title="Đăng nhập và bảo mật"
             onPress={ () => navigation.navigate( 'LoginAndSecurityScreen' ) }
-          />
+          /> */}
           <MenuProfile
             icon="help"
             title="Yêu cầu hỗ trợ"

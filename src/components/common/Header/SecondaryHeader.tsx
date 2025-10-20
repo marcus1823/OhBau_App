@@ -47,7 +47,7 @@ const SecondaryHeader = ({  }: SecondaryHeaderProps) => {
       </TouchableOpacity>
 
       <View style={styles.iconsContainer}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => navigation.navigate('TabNavigation', { screen: 'ComingSoonScreen' })}
           style={styles.iconWrapper}
         >
@@ -55,7 +55,7 @@ const SecondaryHeader = ({  }: SecondaryHeaderProps) => {
             <View style={styles.badge}>
               <Text style={styles.badgeText}>0</Text>
             </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           onPress={() =>

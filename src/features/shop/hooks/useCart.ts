@@ -49,7 +49,7 @@ export const useAddToCart = () => {
   const { showSuccess, showError } = useToast();
 
   return useMutation({
-    mutationFn: ({ productId, quantity }: { productId: string; quantity: number }) => 
+    mutationFn: ({ productId, quantity }: { productId: string; quantity: number }) =>
       addProductToCartApi(productId, quantity, accessToken || ''),
     onSuccess: () => {
       // Invalidate cart queries to update cart data
@@ -72,7 +72,7 @@ export const useUpdateCartItemQuantity = () => {
   const { showSuccess, showError } = useToast();
 
   return useMutation({
-    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) => 
+    mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
       updateItemQuantityApi(itemId, quantity, accessToken || ''),
     onSuccess: () => {
       // Completely invalidate and refetch cart queries to ensure fresh data
@@ -80,11 +80,11 @@ export const useUpdateCartItemQuantity = () => {
       queryClient.invalidateQueries({ queryKey: ['cartItemsDetails'] });
       queryClient.invalidateQueries({ queryKey: ['cartItemsByAccountInfinite'] });
       queryClient.invalidateQueries({ queryKey: ['cartItemsDetailsInfinite'] });
-      
+
       // Force refetch to update UI immediately
       queryClient.refetchQueries({ queryKey: ['cartItemsByAccountInfinite'] });
       queryClient.refetchQueries({ queryKey: ['cartItemsDetailsInfinite'] });
-      
+
       showSuccess('Cập nhật số lượng thành công');
     },
     onError: (error) => {
@@ -104,29 +104,34 @@ export const useDeleteCartItem = () => {
   return useMutation({
     mutationFn: (itemId: string) => deleteCartItemApi(itemId, accessToken || ''),
     onMutate: async (_itemId) => {
-      // Cancel outgoing refetches to avoid overwriting our optimistic update
+      queryClient.invalidateQueries({ queryKey: ['cartItemsByAccount'] });
+
       await queryClient.cancelQueries({ queryKey: ['cartItemsByAccountInfinite'] });
       await queryClient.cancelQueries({ queryKey: ['cartItemsDetailsInfinite'] });
-      
+
       // Snapshot the current state for rollback on error
       const previousCartItems = queryClient.getQueryData(['cartItemsByAccountInfinite']);
+      queryClient.invalidateQueries({ queryKey: ['cartItemsByAccount'] });
       const previousCartDetails = queryClient.getQueryData(['cartItemsDetailsInfinite']);
-      
+      queryClient.invalidateQueries({ queryKey: ['cartItemsByAccount'] });
+
       return { previousCartItems, previousCartDetails };
     },
     onSuccess: () => {
       // Instead of immediately invalidating and refetching, schedule them with a small delay
       // This gives Redux and React Query time to settle
       setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['cartItemsByAccount'] });
         queryClient.invalidateQueries({ queryKey: ['cartItemsByAccountInfinite'] });
         queryClient.invalidateQueries({ queryKey: ['cartItemsDetailsInfinite'] });
-        
+
         // Schedule refetches with a slight delay to prevent UI jank
         setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['cartItemsByAccount'] });
           queryClient.refetchQueries({ queryKey: ['cartItemsByAccountInfinite'] });
           queryClient.refetchQueries({ queryKey: ['cartItemsDetailsInfinite'] });
         }, 300);
-        
+
         showSuccess('Xóa sản phẩm thành công');
       }, 100);
     },
@@ -138,9 +143,9 @@ export const useDeleteCartItem = () => {
       if (context?.previousCartDetails) {
         queryClient.setQueryData(['cartItemsDetailsInfinite'], context.previousCartDetails);
       }
-      
+
       showError(`Lỗi khi xóa sản phẩm: ${error instanceof Error ? error.message : 'Lỗi không xác định'}`);
-      
+
       // Try to recover by refetching
       queryClient.refetchQueries({ queryKey: ['cartItemsByAccountInfinite'] });
       queryClient.refetchQueries({ queryKey: ['cartItemsDetailsInfinite'] });

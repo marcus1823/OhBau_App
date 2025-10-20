@@ -46,6 +46,14 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
       setQuantity(initialQuantity);
     }
   }, [initialQuantity, quantity]);
+  
+  // Format image URL with base URL prefix if needed
+  const getFormattedImageUrl = (url?: string) => {
+    if (!url) {
+      return null;
+    }
+    return url.startsWith('http') ? url : `https://ohbau.cloud/${url}`;
+  };
 
   const DefaultImage = require('../../../assets/images/skelector/noProduct.jpg'); // Default image if none provided
   
@@ -152,7 +160,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
       
       <View style={[styles.imageContainer, selectionMode && styles.imageContainerWithSelection]}>
         <Image 
-          source={imageUrl ? { uri: imageUrl } : DefaultImage} 
+          source={imageUrl ? { uri: getFormattedImageUrl(imageUrl) || imageUrl } : DefaultImage} 
           style={styles.image} 
           resizeMode="cover"
         />

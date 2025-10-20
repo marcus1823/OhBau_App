@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { StyleSheet, View, Text, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Colors } from '../../../assets/styles/colorStyle';
 import { useToast } from '../../../utils/toasts/useToast';
@@ -292,16 +292,16 @@ const PaymentScreen = ({ route, navigation }: any) => {
     <View style={styles.container}>
       <PrimaryHeader
         title="Thanh Toán"
-        onBackButtonPress={() => {
-          Alert.alert(
-            'Hủy thanh toán',
-            'Bạn có chắc muốn hủy quá trình thanh toán này?',
-            [
-              { text: 'Không', style: 'cancel' },
-              { text: 'Có', onPress: () => navigation.goBack() }
-            ]
-          );
-        }}
+        // onBackButtonPress={() => {
+        //   Alert.alert(
+        //     'Hủy thanh toán',
+        //     'Bạn có chắc muốn hủy quá trình thanh toán này?',
+        //     [
+        //       { text: 'Không', style: 'cancel' },
+        //       { text: 'Có', onPress: () => navigation.goBack() }
+        //     ]
+        //   );
+        // }}
       />
       {(loading || isProcessingReturn) && (
         <View style={styles.loadingOverlay}>

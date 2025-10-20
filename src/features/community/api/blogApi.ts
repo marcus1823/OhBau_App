@@ -59,11 +59,11 @@ export const uploadImageApi = async (image: FormData, accessToken: string): Prom
       },
     });
     console.log('Backend response:', response.data);
-    if (!response.data?.data) {
-      throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
-    }
+    // if (!response.data?.data) {
+    //   throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+    // }
   
-    return response.data.data; 
+    return response.data; 
   } catch (error) {
     const errorDetails = {
       message: error instanceof Error ? error.message : 'Unknown error',

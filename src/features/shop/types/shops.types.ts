@@ -55,6 +55,10 @@ export interface GetProductResponse {
     image?: string;
     status?: string;
     productCategoryId: string;
+    images?: {
+        id: string;
+        url: string;
+    }[] | null;
 }
 
 export interface GetProductBaseResponse {

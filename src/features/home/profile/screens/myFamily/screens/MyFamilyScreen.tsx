@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, StyleProp, TextStyle } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors, Gradients } from '../../../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../../../components/common/Header/PrimaryHeader';
@@ -31,8 +31,19 @@ const MyFamilyScreen = ({ navigation }: any) => {
   const accessToken = useSelector((state: RootState) => state.auth.accessToken || '');
   const role = useSelector((state: RootState) => state.auth.role || '');
   
+  // Get parent relation data (contains list of fetuses)
   const { data: parentRelationData, isLoading: isParentLoading } = useParentRelationQuery(accessToken);
-  const code = parentRelationData?.data?.fetuses?.[0]?.code || '';
+  
+  // Get all fetuses from the data
+  const fetuses = parentRelationData?.data?.fetuses || [];
+  
+  // State to track the currently selected fetus index
+  const [selectedFetusIndex, setSelectedFetusIndex] = useState(0);
+  
+  // Get the code of the currently selected fetus
+  const code = fetuses.length > 0 ? fetuses[selectedFetusIndex]?.code || '' : '';
+  
+  // Get detailed data for the selected fetus
   const { data: fetusData, isLoading: isFetusLoading } = useFetusByCodeQuery(code, accessToken);
 
   const motherData = parentRelationData?.data?.mother as Parent | null;
@@ -43,6 +54,7 @@ const MyFamilyScreen = ({ navigation }: any) => {
   console.log('Mother Data:', motherData);
   console.log('Father Data:', fatherData);
   console.log('Fetus Detail:', fetusDetail);
+  console.log('All Fetuses:', fetuses);
 
   if (isParentLoading || isFetusLoading) {
     return <LoadingOverlay visible={isParentLoading || isFetusLoading} />;
@@ -135,6 +147,38 @@ const MyFamilyScreen = ({ navigation }: any) => {
             <Text style={styles.fetusName}>{fetusName}</Text>
           </View>
           <View style={styles.divider} />
+          
+          {/* Fetus Selection */}
+          {fetuses.length > 0 && (
+            <View style={styles.fetusSelectionContainer}>
+              <Text style={styles.selectionLabel}>Chọn thai nhi:</Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.fetusSelectionScroll}
+              >
+                {fetuses.map((fetus, index) => (
+                  <TouchableOpacity 
+                    key={fetus.id}
+                    style={[
+                      styles.fetusOption, 
+                      selectedFetusIndex === index && styles.selectedFetusOption
+                    ]}
+                    onPress={() => setSelectedFetusIndex(index)}
+                  >
+                    <Text 
+                      style={[
+                        styles.fetusOptionText,
+                        selectedFetusIndex === index && styles.selectedFetusOptionText
+                      ]}
+                    >
+                      {fetus.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
           
           {fetusDetail ? (
             <View style={styles.infoContainer}>
@@ -229,6 +273,41 @@ const styles = StyleSheet.create({
     elevation: 4,
     borderLeftWidth: 4,
     borderLeftColor: Colors.primary,
+  },
+  // Fetus Selection Styles
+  fetusSelectionContainer: {
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  selectionLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textBlack,
+    marginBottom: 8,
+  },
+  fetusSelectionScroll: {
+    paddingVertical: 4,
+  },
+  fetusOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: Colors.textGray,
+    borderRadius: 20,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  selectedFetusOption: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primaryDark,
+  },
+  fetusOptionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textBlack,
+  },
+  selectedFetusOptionText: {
+    color: Colors.textWhite,
   },
   fatherContainer: {
     borderLeftColor: Colors.primaryDark,

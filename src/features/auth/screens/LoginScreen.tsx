@@ -15,7 +15,7 @@ import { setRole } from '../slices/auth.slices';
 import { role } from '../types/auth.types';
 import { validatePhone } from '../../../utils/validations/validations';
 import LoadingOverlay from '../../../components/common/Loading/LoadingOverlay';
-import { Alert } from 'react-native';
+// import { Alert } from 'react-native';
 
 const LoginScreen = ({ navigation }: any) => {
   const [phone, setPhone] = useState('');
@@ -75,13 +75,13 @@ const LoginScreen = ({ navigation }: any) => {
     );
   };
 
-  const handleForgotPassword = () => {
-    // navigation.navigate('ForgotPasswordScreen');
-    Alert.alert(
-      'Thông báo',
-      `Tính năng quên mật khẩu đang được phát triển. Vui lòng thử lại sau.`,
-    );
-  };
+  // const handleForgotPassword = () => {
+  //   // navigation.navigate('ForgotPasswordScreen');
+  //   Alert.alert(
+  //     'Thông báo',
+  //     `Tính năng quên mật khẩu đang được phát triển. Vui lòng thử lại sau.`,
+  //   );
+  // };
 
   // const handleOptionLogin = (option: string) => {
   //   Alert.alert(
@@ -120,9 +120,9 @@ const LoginScreen = ({ navigation }: any) => {
               onChangeText={setPassword}
               value={password}
             />
-            <TouchableOpacity onPress={handleForgotPassword} activeOpacity={0.8}>
+            {/* <TouchableOpacity onPress={handleForgotPassword} activeOpacity={0.8}>
               <Text style={styles.forgotPasswordText}>{parentTitle} quên mật khẩu ạ?</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           <View style={styles.actionContainer}>
             <ButtonAction

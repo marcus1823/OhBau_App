@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Dimensions, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Colors } from '../../../assets/styles/colorStyle';
 import { useAddToCart } from '../hooks/useCart';
@@ -23,6 +23,11 @@ interface ProductDetailCardProps {
     ageRange?: string;
     image?: string;
     status?: string;
+    productCategoryId?: string;
+    images?: {
+      id: string;
+      url: string;
+    }[];
   };
 }
 
@@ -31,9 +36,40 @@ type ProductScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>
 
 const ProductDetailCard = ({ product }: ProductDetailCardProps) => {
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const flatListRef = useRef<FlatList>(null);
   const { mutate: addToCart, isPending } = useAddToCart();
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const navigation = useNavigation<ProductScreenNavigationProp>();
+  
+  // Format image URL with base URL prefix if needed
+  const getFormattedImageUrl = (url: string) => {
+    if (!url) {
+      // Return null for the fallback image - we'll handle this separately in the renderItem
+      return null;
+    }
+    return url.startsWith('http') ? url : `https://ohbau.cloud/${url}`;
+  };
+  
+  // Prepare product images array for gallery
+  const productImages = React.useMemo(() => {
+    // If product has images array, use those
+    // console.log("Product Array:", product);
+    
+    if (product.images && product.images.length > 0) {
+      return product.images.map(img => ({
+        id: img.id,
+        url: getFormattedImageUrl(img.url)
+      }));
+    }
+    
+    // Otherwise fallback to single image
+    return [{
+      id: 'main',
+      url: getFormattedImageUrl(product.image || '')
+    }];
+  }, [product.images, product.image]);
+  
 
   const handleIncreaseQuantity = () => {
     if (quantity < product.quantity) {
@@ -86,13 +122,79 @@ const ProductDetailCard = ({ product }: ProductDetailCardProps) => {
     });
   };
 
+  // Handle image scroll events
+  const handleScroll = (event: any) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = Math.floor(event.nativeEvent.contentOffset.x / slideSize);
+    if (index !== currentImageIndex) {
+      setCurrentImageIndex(index);
+    }
+  };
+
+  // Navigate to a specific image
+  const scrollToImage = (index: number) => {
+    if (flatListRef.current && index >= 0 && index < productImages.length) {
+      flatListRef.current.scrollToIndex({ index, animated: true });
+    }
+  };
+
   return (
     <View style={styles.card}>
-      <Image
-        source={{ uri: product.image || 'https://i.pinimg.com/736x/5a/61/94/5a61948bd8ca718255b2115800a9c1a9.jpg' }}
-        style={styles.productImage}
-        resizeMode="contain"
-      />
+      <View style={styles.imageGalleryContainer}>
+        <FlatList
+          ref={flatListRef}
+          data={productImages}
+          keyExtractor={(item) => item.id}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          renderItem={({ item }) => (
+            <Image
+              source={item.url ? { uri: item.url } : require('../../../assets/images/skelector/noProduct.jpg')}
+              style={styles.productImage}
+              resizeMode="contain"
+            />
+          )}
+        />
+        
+        {/* Navigation arrows */}
+        {productImages.length > 1 && (
+          <>
+            {currentImageIndex > 0 && (
+              <TouchableOpacity 
+                style={[styles.navArrow, styles.navArrowLeft]} 
+                onPress={() => scrollToImage(currentImageIndex - 1)}
+              >
+                <Icon name="chevron-left" size={30} color={Colors.primary} />
+              </TouchableOpacity>
+            )}
+            
+            {currentImageIndex < productImages.length - 1 && (
+              <TouchableOpacity 
+                style={[styles.navArrow, styles.navArrowRight]} 
+                onPress={() => scrollToImage(currentImageIndex + 1)}
+              >
+                <Icon name="chevron-right" size={30} color={Colors.primary} />
+              </TouchableOpacity>
+            )}
+            
+            {/* Image indicators */}
+            <View style={styles.paginationContainer}>
+              {productImages.map((_, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.paginationDot,
+                    index === currentImageIndex && styles.paginationDotActive
+                  ]}
+                  onPress={() => scrollToImage(index)}
+                />
+              ))}
+            </View>
+          </>
+        )}
+      </View>
       <View style={styles.cardContent}>
         <Text style={styles.productName}>{product.name || 'Không có tên'}</Text>
         <View style={styles.priceRow}>
@@ -193,10 +295,62 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
   },
-  productImage: {
+  imageGalleryContainer: {
+    position: 'relative',
     width: '100%',
     height: isTablet ? 500 : 250,
     backgroundColor: Colors.textGray,
+  },
+  productImage: {
+    width: width - 32, // Account for card margins
+    height: isTablet ? 500 : 250,
+    backgroundColor: Colors.textGray,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+    backgroundColor: Colors.textGray,
+    opacity: 0.8,
+  },
+  paginationDotActive: {
+    backgroundColor: Colors.primary,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    opacity: 1,
+  },
+  navArrow: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.textBlack,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  navArrowLeft: {
+    left: 10,
+  },
+  navArrowRight: {
+    right: 10,
   },
   cardContent: {
     padding: 20,

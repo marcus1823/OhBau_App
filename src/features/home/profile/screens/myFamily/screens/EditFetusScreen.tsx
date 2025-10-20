@@ -6,9 +6,11 @@ import { useEditFetusDetailMutation } from '../../../hooks/useEditFetusMutation'
 import { EditFetusDetailRequest, EditFetusRequest } from '../../../../types/family.type';
 import { Colors, Gradients } from '../../../../../../assets/styles/colorStyle';
 import PrimaryHeader from '../../../../../../components/common/Header/PrimaryHeader';
+import { useQueryClient } from '@tanstack/react-query';
 
 const EditFetusScreen = ({ route, navigation }: any) => {
   const { fetusData, fetusDetail, accessToken } = route.params;
+  const queryClient = useQueryClient();
 
   const [fetusRequest, setFetusRequest] = useState<EditFetusRequest>({
     startDate: fetusData.startDate,
@@ -37,7 +39,7 @@ const EditFetusScreen = ({ route, navigation }: any) => {
   const handleNumericInput = (text: string, field: keyof EditFetusDetailRequest) => {
     // Replace commas with periods to standardize decimal separator
     const sanitizedText = text.replace(',', '.');
-    
+
     // Allow empty string to clear the field
     if (sanitizedText === '') {
       setDetailRequest({ ...detailRequest, [field]: 0 });
@@ -47,7 +49,7 @@ const EditFetusScreen = ({ route, navigation }: any) => {
     // Check if the input is a valid number (integer or float)
     if (/^-?\d*\.?\d*$/.test(sanitizedText)) {
       const value = parseFloat(sanitizedText);
-      
+
       // Only update if it's a valid number or empty
       if (!isNaN(value) || sanitizedText === '' || sanitizedText === '.') {
         setDetailRequest({ ...detailRequest, [field]: sanitizedText === '.' ? 0 : value });
@@ -66,6 +68,9 @@ const EditFetusScreen = ({ route, navigation }: any) => {
       {
         onSuccess: () => {
           Alert.alert('Thành công', 'Cập nhật thông tin cơ bản thai nhi thành công.');
+          queryClient.invalidateQueries({ queryKey: ['parentRelation'] });
+          queryClient.invalidateQueries({ queryKey: ['fetusByCode', fetusData.code] });
+          
           console.log('Fetus info updated successfully');
         },
         onError: (error) => {
@@ -87,6 +92,9 @@ const EditFetusScreen = ({ route, navigation }: any) => {
         onSuccess: () => {
           Alert.alert('Thành công', 'Cập nhật chi tiết thai nhi thành công.');
           console.log('Fetus detail updated successfully');
+          queryClient.invalidateQueries({ queryKey: ['parentRelation'] });
+          queryClient.invalidateQueries({ queryKey: ['fetusByCode', fetusData.code] });
+
           navigation.goBack();
         },
         onError: (error) => {

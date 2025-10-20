@@ -10,6 +10,7 @@ import { RootState } from '../../../stores/store';
 import { useUploadImage } from '../hooks/useUploadImage.hook';
 import { useCreateBlog } from '../hooks/useCreateBlog.hook';
 import { useSelector } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Định nghĩa iconMap tĩnh bên ngoài component
 const iconMap = {
@@ -37,6 +38,7 @@ const iconMap = {
 };
 
 const CreateBlogScreen = ({ navigation }: any) => {
+  const queryClient = useQueryClient();
   const richText = useRef<RichEditor>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -81,15 +83,22 @@ const CreateBlogScreen = ({ navigation }: any) => {
           {
             onSuccess: (imageUrl) => {
               if (richText.current) {
-                if (imageUrl) {
-                  richText.current.insertImage(imageUrl);
-                  console.log('Image inserted:', imageUrl);
+                if (typeof imageUrl === 'string') {
+                  const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `https://ohbau.cloud/${imageUrl}`;
+                  richText.current.insertImage(fullImageUrl);
+                  console.log('Image inserted:', fullImageUrl);
+                } else if (imageUrl && (imageUrl as any).path) {
+                  const fullImageUrl = `https://ohbau.cloud/${(imageUrl as any).path}`;
+                  richText.current.insertImage(fullImageUrl);
+                  console.log('Image inserted:', fullImageUrl);
                 } else {
                   console.log('Image URL is undefined, cannot insert');
                 }
               } else {
                 console.log('RichEditor ref is null');
               }
+              queryClient.invalidateQueries({ queryKey: ['blogs'] });
+              queryClient.invalidateQueries({ queryKey: ['blog'] });
             },
             onError: (error) => Alert.alert('Lỗi', error.message),
           }
@@ -97,6 +106,7 @@ const CreateBlogScreen = ({ navigation }: any) => {
       }
     });
   };
+  
 
   const handleCreateBlog = () => {
     if (!title.trim() || !content.trim()) {
